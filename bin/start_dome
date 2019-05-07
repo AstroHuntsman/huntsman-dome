@@ -1,0 +1,36 @@
+#!/usr/bin/env python3
+"""Starts the main dome control daemon."""
+
+from domehunter import create_dome
+
+
+def main(**kwargs):
+    """Example of moving the dome west.
+
+    See argparse help string below for details about parameters.
+    """
+    dome = create_dome()
+    dome.start_daemon()
+    try:
+        print('Dome control daemon started. Ctrl+C to halt.')
+        while True:
+            pass
+    except KeyboardInterrupt:
+        dome.halt_daemon()
+
+    return True
+
+
+if __name__ == '__main__':
+
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Start up the dome control daemon")
+    parser.add_argument('--verbose', action='store_true', default=False, help='Verbose.')
+
+    args = parser.parse_args()
+
+    success = main(**vars(args))
+    if args.verbose:
+        if success:
+            print("Dome successfully created daemon")
