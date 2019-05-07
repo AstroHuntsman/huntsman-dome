@@ -21,7 +21,7 @@ DESCRIPTION = metadata.get('description', 'Huntsman Telescope dome control')
 AUTHOR = metadata.get('author', 'Huntsman Team')
 AUTHOR_EMAIL = metadata.get('author_email', '')
 LICENSE = metadata.get('license', 'unknown')
-URL = metadata.get('url', 'http://huntsman.space')
+URL = metadata.get('url', 'https://huntsman.space')
 __minimum_python_version__ = metadata.get("minimum_python_version", "3.7")
 
 # Enforce Python version check - this is the same check as in __init__.py but
