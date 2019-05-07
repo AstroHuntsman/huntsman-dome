@@ -1,0 +1,14 @@
+name: domehunter
+
+channels:
+    - astropy
+
+dependencies:
+    - python>=3.7
+    - astropy
+    - Cython
+    - matplotlib
+    - numpy
+    - sphinx-astropy
+   - pip:
+       - -r requirements.txt
