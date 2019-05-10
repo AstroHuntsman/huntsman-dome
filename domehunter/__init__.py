@@ -1,8 +1,11 @@
+"""Run dome control a raspberry pi GPIO."""
+
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 
 # Packages may add whatever they like to this file, but
 # should keep this content at the top.
 # ----------------------------------------------------------------------------
+from gpiozero import DigitalInputDevice
 from ._astropy_init import *
 # ----------------------------------------------------------------------------
 
@@ -25,50 +28,94 @@ if not _ASTROPY_SETUP_:
     # For egg_info test builds to pass, put package imports here.
     pass
 
-from .x2dome import X2Dome
-from .domepi import DomePi
 
+class Dome(X2DomeRPC):
+    """Interface to dome control raspberry pi GPIO.
 
-def create_dome():
-    """Create a X2 bridge to a raspberry Pi Dome controller.
-
-    Maybe this will just setup the configuration via a yaml.
-    """
-    dome = HuntsmanDome()
-    print("Dome created.")
-    return(dome)
-
-
-class HuntsmanDome():
-    """Class that establishes link between TSX and the Pi via X2.
+    Might start with: https://gpiozero.readthedocs.io/en/stable/
+    but might use something else if we buy a fancy Pi HAT.
     """
 
     def __init__(self, *args, **kwargs):
-        """Initalize the Pi GPIO and establish X2 port."""
-        self._x2driver = X2Dome()
-        self._domepi = DomePi()
-        self._west_is_ccw = True
+        """Setup raspberry pi GPIO environment."""
+        self.dome_status = "unknown"
 
-    def move_ccw(self, degrees_ccw):
-        print(f"Sending command to move {degrees_ccw} CCW")
-        cmd_status = self._domepi.move_ccw(degrees_ccw)
-        return cmd_status
+        self.encoder_count = 0
+        self.encoder = DigitalInputDevice(ENCODER_PIN_NUMBER)
+        self.encoder.when_activated = self._increment_count
 
-    def move_west(self, degrees_west):
-        print(f"Sending command to move {degrees_west} West")
+        self._at_home = False
+        self.home_sensor = DigitalInputDevice(HOME_SENSOR_PIN_NUMBER)
+        self.home_sensor.when_deactivated = self._set_not_home()
+        self.home_sensor.when_activated = self._set_at_home()
+
+        self.dome_status = "unknown"
+
+##################################################################################################
+# Properties
+##################################################################################################
+
+    @property
+    def is_home(self):
+        return self._at_home
+
+    @property
+    def status(self):
+        """Return a text string describing dome rotators current status."""
+
+
+##################################################################################################
+# Methods
+##################################################################################################
+
+    """These map directly onto the AbstractMethods created by RPC."""
+
+    def abort():
+        """Stop everything."""
+        pass
+
+    def getAzEl():
+        """Return AZ and Elevation."""
+        pass
+
+##################################################################################################
+# Private Methods
+##################################################################################################
+
+    def _set_at_home():
+        self._at_home = True
+
+    def _set_not_home():
+        self._at_home = False
+
+    def _increment_count():
+        if self.current_direction == "CW":
+            self.encoder_count += 1
+        elif self.current_direction == "CCW":
+            self.encoder_count -= 1
+        elif self.current_direction is None:
+            if self.last_direction == "CW":
+                self.encoder_count += 1
+            elif self.last_direction == "CCW":
+                self.encoder_count -= 1
+
+    def _move_west(self, degrees_west):
+        print(f"Moving {degrees_west} West")
         if self._west_is_ccw:
-            cmd_status = self._domepi.move_ccw(degrees_west)
+            cmd_status = self.move_ccw(degrees_west)
         else:
-            cmd_status = self._domepi.move_cw(degrees_west)
+            cmd_status = self.move_cw(degrees_west)
 
         return cmd_status
 
-    def start_daemon(self):
-        print("Starting dome control daemon.")
-        x2driver = self._x2driver.connect()
-        return x2driver
+    def _move_cw(self, degrees):
+        print(f"Sending GPIO move_cw({degrees}) command.")
+        self.current_direction = "CW"
+        cmd_status = True
+        return cmd_status
 
-    def halt_daemon(self):
-        print("Halting dome control daemon")
-        self._x2driver.disconnect()
-        self._domepi.all_stop()
+    def _move_ccw(self, degrees):
+        print(f"Sending GPIO move_ccw({degrees}) command.")
+        self.current_direction = "CCW"
+        cmd_status = True
+        return cmd_status
