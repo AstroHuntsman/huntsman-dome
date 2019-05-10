@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """Example of how to move the dome CCW."""
-from domehunter import create_dome
+from domehunter import Dome
 from astropy import units as u
 
 
@@ -11,8 +11,8 @@ def main(degrees_ccw,
 
     See argparse help string below for details about parameters.
     """
-    dome = create_dome()
-    dome_moved = dome.move_ccw(degrees_ccw)
+    dome = Dome()
+    dome_moved = dome._move_ccw(degrees_ccw)
     return dome_moved
 
 

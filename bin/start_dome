@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Starts the main dome control daemon."""
 
-from domehunter import create_dome
+from domehunter import Dome
 
 
 def main(**kwargs):
@@ -9,7 +9,7 @@ def main(**kwargs):
 
     See argparse help string below for details about parameters.
     """
-    dome = create_dome()
+    dome = Dome()
     dome.start_daemon()
     try:
         print('Dome control daemon started. Ctrl+C to halt.')

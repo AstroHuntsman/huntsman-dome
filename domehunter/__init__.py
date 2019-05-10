@@ -5,7 +5,9 @@
 # Packages may add whatever they like to this file, but
 # should keep this content at the top.
 # ----------------------------------------------------------------------------
-from gpiozero import DigitalInputDevice
+from gpiozero import DigitalInputDevice, Device
+from gpiozero.pins.mock import MockFactory
+
 from ._astropy_init import *
 # ----------------------------------------------------------------------------
 
@@ -29,15 +31,35 @@ if not _ASTROPY_SETUP_:
     pass
 
 
+class X2DomeRPC():
+    """Dummy class until real RPC class is available."""
+
+    def __init__(self, *args, **kwargs):
+        """Create dummy class until real RPC class is available."""
+
+
 class Dome(X2DomeRPC):
-    """Interface to dome control raspberry pi GPIO.
+    """
+    Interface to dome control raspberry pi GPIO.
 
     Might start with: https://gpiozero.readthedocs.io/en/stable/
     but might use something else if we buy a fancy Pi HAT.
     """
 
-    def __init__(self, *args, **kwargs):
-        """Setup raspberry pi GPIO environment."""
+    def __init__(self, testing=True, *args, **kwargs):
+        """Initialize raspberry pi GPIO environment."""
+        if testing:
+            # Set the default pin factory to a mock factory
+            Device.pin_factory = MockFactory()
+
+            ENCODER_PIN_NUMBER = 7
+            HOME_SENSOR_PIN_NUMBER = 11
+        else:
+            """ Do not change until you're sure!!! """
+            # https://pinout.xyz/pinout/automation_hat
+            ENCODER_PIN_NUMBER = None
+            HOME_SENSOR_PIN_NUMBER = None
+
         self.dome_status = "unknown"
 
         self.encoder_count = 0
@@ -57,11 +79,13 @@ class Dome(X2DomeRPC):
 
     @property
     def is_home(self):
+        """Send True if the dome is at home."""
         return self._at_home
 
     @property
     def status(self):
         """Return a text string describing dome rotators current status."""
+        pass
 
 
 ##################################################################################################
@@ -70,25 +94,34 @@ class Dome(X2DomeRPC):
 
     """These map directly onto the AbstractMethods created by RPC."""
 
-    def abort():
+    def abort(self):
         """Stop everything."""
         pass
 
-    def getAzEl():
+    def getAzEl(self):
         """Return AZ and Elevation."""
         pass
+
+    def start_daemon(self):
+        """Maybe start the RCP daemon here?."""
+        raise NotImplementedError
+
+    def halt_daemon(self):
+        """Maybe start the RCP daemon here?."""
+        raise NotImplementedError
 
 ##################################################################################################
 # Private Methods
 ##################################################################################################
 
-    def _set_at_home():
+    def _set_at_home(self):
         self._at_home = True
 
-    def _set_not_home():
+    def _set_not_home(self):
         self._at_home = False
 
-    def _increment_count():
+    def _increment_count(self, device=None):
+        print(f"{device} activated _increment_count")
         if self.current_direction == "CW":
             self.encoder_count += 1
         elif self.current_direction == "CCW":
