@@ -1,0 +1,32 @@
+// Protocol buffer interface for the TheSkyX X2 Dome interface,
+// http://www.bisque.com/x2standard/class_x2_dome.html
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+service X2Dome {
+  rpc GetAzEl (Empty) returns (AzEl);
+  rpc GotoAzEl (AzEl) returns (Empty);
+  rpc Abort (Empty) returns (Empty);
+  rpc Open (Empty) returns (Empty);
+  rpc Close (Empty) returns (Empty);
+  rpc Park (Empty) returns (Empty);
+  rpc UnPark (Empty) returns (Empty);
+  rpc FindHome (Empty) returns (Empty);
+  rpc GotoComplete (Empty) returns (IsComplete);
+  rpc OpenComplete (Empty) returns (IsComplete);
+  rpc CloseComplete (Empty) returns (IsComplete);
+  rpc ParkComplete (Empty) returns (IsComplete);
+  rpc UnParkComplete (Empty) returns (IsComplete);
+  rpc FindHomeComplete (Empty) returns (IsComplete);
+  rpc Sync (AzEl) returns (Empty);
+}
+
+message AzEl {
+  double Az = 1;
+  double El = 2;
+}
+
+message IsComplete {
+  bool Complete = 1;
+}
