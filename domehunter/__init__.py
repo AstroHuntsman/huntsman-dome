@@ -1,4 +1,4 @@
-"""Run dome control a raspberry pi GPIO."""
+"""Run dome control on a raspberry pi GPIO."""
 
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 
@@ -64,14 +64,15 @@ class Dome(X2DomeRPC):
 
         self.encoder_count = 0
         self.encoder = DigitalInputDevice(ENCODER_PIN_NUMBER)
+        # _increment_count function to run when encoder is triggered
         self.encoder.when_activated = self._increment_count
 
         self._at_home = False
         self.home_sensor = DigitalInputDevice(HOME_SENSOR_PIN_NUMBER)
-        self.home_sensor.when_deactivated = self._set_not_home()
-        self.home_sensor.when_activated = self._set_at_home()
-
-        self.dome_status = "unknown"
+        # _set_not_home function is run when home sensor is NOT being triggered
+        self.home_sensor.when_deactivated = self._set_not_home
+        # _set_at_home function is run when home sensor is triggered
+        self.home_sensor.when_activated = self._set_at_home
 
 ##################################################################################################
 # Properties

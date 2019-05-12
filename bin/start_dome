@@ -2,6 +2,7 @@
 """Starts the main dome control daemon."""
 
 from domehunter import Dome
+import time
 
 
 def main(**kwargs):
@@ -14,7 +15,7 @@ def main(**kwargs):
     try:
         print('Dome control daemon started. Ctrl+C to halt.')
         while True:
-            pass
+            time.sleep(0.1)
     except KeyboardInterrupt:
         dome.halt_daemon()
 
@@ -33,4 +34,4 @@ if __name__ == '__main__':
     success = main(**vars(args))
     if args.verbose:
         if success:
-            print("Dome successfully created daemon")
+            print("Successfully created, ran and shutdown dome daemon")
