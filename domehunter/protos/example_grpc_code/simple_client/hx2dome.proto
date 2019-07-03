@@ -1,0 +1,57 @@
+// Protocol buffer interface for the TheSkyX X2 Dome interface,
+// http://www.bisque.com/x2standard/class_x2_dome.html
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+package hx2dome;
+
+service HX2Dome {
+  // Dome API
+  rpc dapiGetAzEl (google.protobuf.Empty) returns (AzEl) {};
+  rpc dapiGotoAzEl (AzEl) returns (ReturnCode) {};
+  rpc dapiAbort (google.protobuf.Empty) returns (ReturnCode) {};
+  rpc dapiOpen (google.protobuf.Empty) returns (ReturnCode) {};
+  rpc dapiClose (google.protobuf.Empty) returns (ReturnCode) {};
+  rpc dapiPark (google.protobuf.Empty) returns (ReturnCode) {};
+  rpc dapiUnpark (google.protobuf.Empty) returns (ReturnCode) {};
+  rpc dapiFindHome (google.protobuf.Empty) returns (ReturnCode) {};
+  rpc dapiGotoComplete (google.protobuf.Empty) returns (IsComplete) {};
+  rpc dapiOpenComplete (google.protobuf.Empty) returns (IsComplete) {};
+  rpc dapiCloseComplete (google.protobuf.Empty) returns (IsComplete) {};
+  rpc dapiParkComplete (google.protobuf.Empty) returns (IsComplete) {};
+  rpc dapiUnparkComplete (google.protobuf.Empty) returns (IsComplete) {};
+  rpc dapiFindHomeComplete (google.protobuf.Empty) returns (IsComplete) {};
+  rpc dapiSync (AzEl) returns (ReturnCode) {};
+  // Hardware Info Interface
+  rpc deviceInfoNameShort (google.protobuf.Empty) returns (BasicString) {};
+  rpc deviceInfoNameLong (google.protobuf.Empty) returns (BasicString) {};
+  rpc deviceInfoDetailedDescription (google.protobuf.Empty) returns (BasicString) {};
+  rpc deviceInfoFirmwareVersion (google.protobuf.Empty) returns (BasicString) {};
+  rpc deviceInfoModel (google.protobuf.Empty) returns (BasicString) {};
+}
+
+message ReturnCode {
+  // X2 Dome interface specifies plain `int`, but protocal buffers don't have a
+  // corresponding type and on most platforms `int` is an alias for `int32`.
+  int32 return_code = 1;
+}
+
+message AzEl {
+  // When azimuth-elevation are returned return code will be defined, when being
+  // passed as an argument there won't be.
+  int32 return_code = 1;
+  double az = 2;
+  double el = 3;
+}
+
+message IsComplete {
+  // The *Complete functions return a return code along with the boolean value.
+  int32 return_code = 1;
+  bool is_complete = 2;
+}
+
+message BasicString {
+  // X2 had a class specifically for string output, BasicStringInferface
+  string basic_string = 1;
+}
