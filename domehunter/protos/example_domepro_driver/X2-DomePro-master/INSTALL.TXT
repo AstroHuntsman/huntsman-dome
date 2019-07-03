@@ -1,0 +1,5 @@
+Install :
+Copy the  'domelist DomePro.txt' file to the "Common/Miscellaneous Files" directory inside of TheSkyX Pro.
+Copy libDomePro.dlll, Astrometric.png and DomePro.ui to the "Common/PlugIns/DomePlugIns" directory inside of TheSkyX Pro.
+
+

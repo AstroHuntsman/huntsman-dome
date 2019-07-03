@@ -1,0 +1,545 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>X2Dome</class>
+ <widget class="QDialog" name="X2Dome">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>600</width>
+    <height>550</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>600</width>
+    <height>550</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>600</width>
+    <height>550</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>DomePro settings</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_5">
+   <item>
+    <widget class="X2Form" name="X2Form">
+     <property name="minimumSize">
+      <size>
+       <width>560</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>9999</width>
+       <height>9999</height>
+      </size>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <property name="SerialPortName" stdset="0">
+      <string/>
+     </property>
+     <widget class="QGroupBox" name="MaxDomeIIParams">
+      <property name="geometry">
+       <rect>
+        <x>8</x>
+        <y>160</y>
+        <width>560</width>
+        <height>280</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>Dome Azimuth Settings</string>
+      </property>
+      <widget class="QGroupBox" name="groupBox_2">
+       <property name="geometry">
+        <rect>
+         <x>288</x>
+         <y>24</y>
+         <width>264</width>
+         <height>248</height>
+        </rect>
+       </property>
+       <property name="title">
+        <string>Encoders</string>
+       </property>
+       <widget class="QPushButton" name="pushButton">
+        <property name="geometry">
+         <rect>
+          <x>8</x>
+          <y>96</y>
+          <width>136</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Gauge CPR right</string>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="checkBox_2">
+        <property name="geometry">
+         <rect>
+          <x>8</x>
+          <y>160</y>
+          <width>248</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Encoder Polarity (checked = positive)</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_3">
+        <property name="geometry">
+         <rect>
+          <x>8</x>
+          <y>64</y>
+          <width>136</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Rotation coast (deg.) : </string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label">
+        <property name="geometry">
+         <rect>
+          <x>8</x>
+          <y>32</y>
+          <width>136</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Counts per rev :</string>
+        </property>
+       </widget>
+       <widget class="QSpinBox" name="ticksPerRev">
+        <property name="geometry">
+         <rect>
+          <x>152</x>
+          <y>32</y>
+          <width>80</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+        <property name="maximum">
+         <number>65535</number>
+        </property>
+       </widget>
+       <widget class="QDoubleSpinBox" name="doubleSpinBox">
+        <property name="geometry">
+         <rect>
+          <x>152</x>
+          <y>64</y>
+          <width>80</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+        <property name="decimals">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <double>360.000000000000000</double>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_5">
+        <property name="geometry">
+         <rect>
+          <x>8</x>
+          <y>128</y>
+          <width>136</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Gauge CPR left</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_5">
+        <property name="geometry">
+         <rect>
+          <x>152</x>
+          <y>96</y>
+          <width>96</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>: R_Value</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_6">
+        <property name="geometry">
+         <rect>
+          <x>152</x>
+          <y>128</y>
+          <width>96</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>: L_Value</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_6">
+        <property name="geometry">
+         <rect>
+          <x>72</x>
+          <y>184</y>
+          <width>168</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Set CPR from Gauged</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QGroupBox" name="groupBox">
+       <property name="geometry">
+        <rect>
+         <x>8</x>
+         <y>24</y>
+         <width>264</width>
+         <height>96</height>
+        </rect>
+       </property>
+       <property name="title">
+        <string>Motors</string>
+       </property>
+       <widget class="QCheckBox" name="checkBox">
+        <property name="geometry">
+         <rect>
+          <x>8</x>
+          <y>24</y>
+          <width>232</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Polarity (checked = positive)</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_14">
+        <property name="geometry">
+         <rect>
+          <x>16</x>
+          <y>48</y>
+          <width>168</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Over current protection (A):</string>
+        </property>
+       </widget>
+       <widget class="QDoubleSpinBox" name="overCurrentProtection">
+        <property name="geometry">
+         <rect>
+          <x>184</x>
+          <y>48</y>
+          <width>62</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_15">
+        <property name="geometry">
+         <rect>
+          <x>24</x>
+          <y>72</y>
+          <width>128</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>(0.0 to disable OCP)</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QGroupBox" name="groupBox_4">
+       <property name="geometry">
+        <rect>
+         <x>8</x>
+         <y>136</y>
+         <width>264</width>
+         <height>136</height>
+        </rect>
+       </property>
+       <property name="title">
+        <string>Homing</string>
+       </property>
+       <widget class="QLabel" name="label_2">
+        <property name="geometry">
+         <rect>
+          <x>16</x>
+          <y>64</y>
+          <width>136</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Home Position (Deg.) :</string>
+        </property>
+       </widget>
+       <widget class="QDoubleSpinBox" name="homePosition">
+        <property name="geometry">
+         <rect>
+          <x>168</x>
+          <y>64</y>
+          <width>80</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+        <property name="maximum">
+         <double>359.990000000000009</double>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_12">
+        <property name="geometry">
+         <rect>
+          <x>16</x>
+          <y>32</y>
+          <width>136</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Homing direction :</string>
+        </property>
+       </widget>
+       <widget class="QComboBox" name="comboBox_3">
+        <property name="geometry">
+         <rect>
+          <x>128</x>
+          <y>32</y>
+          <width>120</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <item>
+         <property name="text">
+          <string>Moving Left</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Moving Right</string>
+         </property>
+        </item>
+       </widget>
+       <widget class="QLabel" name="label_13">
+        <property name="geometry">
+         <rect>
+          <x>16</x>
+          <y>96</y>
+          <width>136</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Park  Position (Deg.) :</string>
+        </property>
+       </widget>
+       <widget class="QDoubleSpinBox" name="parkPosition">
+        <property name="geometry">
+         <rect>
+          <x>168</x>
+          <y>96</y>
+          <width>80</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+        <property name="maximum">
+         <double>359.990000000000009</double>
+        </property>
+       </widget>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="layoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>152</x>
+        <y>8</y>
+        <width>264</width>
+        <height>148</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_4">
+       <item row="2" column="0" alignment="Qt::AlignHCenter">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>© RTI-Zone.org, 2018</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_logo">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="pixmap">
+          <pixmap>Astrometric.png</pixmap>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="X2_PhotoFileName" stdset="0">
+          <string>Astrometric.png</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="layoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>344</x>
+        <y>480</y>
+        <width>213</width>
+        <height>40</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <item>
+        <spacer name="horizontalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButtonCancel">
+         <property name="text">
+          <string>Cancel</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButtonOK">
+         <property name="text">
+          <string>OK</string>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+         <property name="autoDefault">
+          <bool>true</bool>
+         </property>
+         <property name="default">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QPushButton" name="pushButton_2">
+      <property name="geometry">
+       <rect>
+        <x>336</x>
+        <y>448</y>
+        <width>200</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Diagnostic data</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_3">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>448</y>
+        <width>216</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Dome Shutter/Roof seetings</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_4">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>480</y>
+        <width>216</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Timeouts and automatic closure</string>
+      </property>
+     </widget>
+     <zorder>layoutWidget</zorder>
+     <zorder>layoutWidget</zorder>
+     <zorder>MaxDomeIIParams</zorder>
+     <zorder>pushButton_2</zorder>
+     <zorder>pushButton_3</zorder>
+     <zorder>pushButton_4</zorder>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>X2Form</class>
+   <extends>QFrame</extends>
+   <header>x2form.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+ <designerdata>
+  <property name="gridDeltaX">
+   <number>8</number>
+  </property>
+  <property name="gridDeltaY">
+   <number>8</number>
+  </property>
+  <property name="gridSnapX">
+   <bool>true</bool>
+  </property>
+  <property name="gridSnapY">
+   <bool>true</bool>
+  </property>
+  <property name="gridVisible">
+   <bool>true</bool>
+  </property>
+ </designerdata>
+</ui>

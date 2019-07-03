@@ -1,0 +1,328 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		9322CC931E2D9E1100A8E881 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9322CC921E2D9E1100A8E881 /* IOKit.framework */; };
+		9322CC951E2D9E1B00A8E881 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9322CC941E2D9E1B00A8E881 /* CoreFoundation.framework */; };
+		9322CC9D1E2D9F9A00A8E881 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9322CC971E2D9F9A00A8E881 /* main.cpp */; };
+		9322CC9E1E2D9F9A00A8E881 /* main.h in Headers */ = {isa = PBXBuildFile; fileRef = 9322CC981E2D9F9A00A8E881 /* main.h */; };
+		9322CC9F1E2D9F9A00A8E881 /* domepro.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9322CC991E2D9F9A00A8E881 /* domepro.cpp */; };
+		9322CCA01E2D9F9A00A8E881 /* domepro.h in Headers */ = {isa = PBXBuildFile; fileRef = 9322CC9A1E2D9F9A00A8E881 /* domepro.h */; };
+		9322CCA11E2D9F9A00A8E881 /* x2dome.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9322CC9B1E2D9F9A00A8E881 /* x2dome.cpp */; };
+		9322CCA21E2D9F9A00A8E881 /* x2dome.h in Headers */ = {isa = PBXBuildFile; fileRef = 9322CC9C1E2D9F9A00A8E881 /* x2dome.h */; };
+		93879F5E1F1ECEA2005BFF2A /* UI_map.h in Headers */ = {isa = PBXBuildFile; fileRef = 93879F5D1F1ECEA2005BFF2A /* UI_map.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		9322CC8A1E2D9DEE00A8E881 /* libDomePro.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libDomePro.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		9322CC921E2D9E1100A8E881 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
+		9322CC941E2D9E1B00A8E881 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
+		9322CC971E2D9F9A00A8E881 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		9322CC981E2D9F9A00A8E881 /* main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
+		9322CC991E2D9F9A00A8E881 /* domepro.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = domepro.cpp; sourceTree = "<group>"; };
+		9322CC9A1E2D9F9A00A8E881 /* domepro.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = domepro.h; sourceTree = "<group>"; };
+		9322CC9B1E2D9F9A00A8E881 /* x2dome.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = x2dome.cpp; sourceTree = "<group>"; };
+		9322CC9C1E2D9F9A00A8E881 /* x2dome.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = x2dome.h; sourceTree = "<group>"; };
+		93879F5D1F1ECEA2005BFF2A /* UI_map.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UI_map.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		9322CC871E2D9DEE00A8E881 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9322CC951E2D9E1B00A8E881 /* CoreFoundation.framework in Frameworks */,
+				9322CC931E2D9E1100A8E881 /* IOKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		9322CC811E2D9DEE00A8E881 = {
+			isa = PBXGroup;
+			children = (
+				9322CC961E2D9F1300A8E881 /* Sources */,
+				9322CC8B1E2D9DEE00A8E881 /* Products */,
+				9322CC911E2D9E1100A8E881 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		9322CC8B1E2D9DEE00A8E881 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9322CC8A1E2D9DEE00A8E881 /* libDomePro.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9322CC911E2D9E1100A8E881 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				9322CC941E2D9E1B00A8E881 /* CoreFoundation.framework */,
+				9322CC921E2D9E1100A8E881 /* IOKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		9322CC961E2D9F1300A8E881 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				93879F5D1F1ECEA2005BFF2A /* UI_map.h */,
+				9322CC971E2D9F9A00A8E881 /* main.cpp */,
+				9322CC981E2D9F9A00A8E881 /* main.h */,
+				9322CC991E2D9F9A00A8E881 /* domepro.cpp */,
+				9322CC9A1E2D9F9A00A8E881 /* domepro.h */,
+				9322CC9B1E2D9F9A00A8E881 /* x2dome.cpp */,
+				9322CC9C1E2D9F9A00A8E881 /* x2dome.h */,
+			);
+			name = Sources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		9322CC881E2D9DEE00A8E881 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9322CC9E1E2D9F9A00A8E881 /* main.h in Headers */,
+				93879F5E1F1ECEA2005BFF2A /* UI_map.h in Headers */,
+				9322CCA01E2D9F9A00A8E881 /* domepro.h in Headers */,
+				9322CCA21E2D9F9A00A8E881 /* x2dome.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		9322CC891E2D9DEE00A8E881 /* DomePro */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9322CC8E1E2D9DEE00A8E881 /* Build configuration list for PBXNativeTarget "DomePro" */;
+			buildPhases = (
+				9322CC861E2D9DEE00A8E881 /* Sources */,
+				9322CC871E2D9DEE00A8E881 /* Frameworks */,
+				9322CC881E2D9DEE00A8E881 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DomePro;
+			productName = DomePro;
+			productReference = 9322CC8A1E2D9DEE00A8E881 /* libDomePro.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		9322CC821E2D9DEE00A8E881 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0820;
+				ORGANIZATIONNAME = "RTI-Zone";
+				TargetAttributes = {
+					9322CC891E2D9DEE00A8E881 = {
+						CreatedOnToolsVersion = 8.2.1;
+						DevelopmentTeam = PB97QXVYQC;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 9322CC851E2D9DEE00A8E881 /* Build configuration list for PBXProject "DomePro" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 9322CC811E2D9DEE00A8E881;
+			productRefGroup = 9322CC8B1E2D9DEE00A8E881 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				9322CC891E2D9DEE00A8E881 /* DomePro */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		9322CC861E2D9DEE00A8E881 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9322CCA11E2D9F9A00A8E881 /* x2dome.cpp in Sources */,
+				9322CC9F1E2D9F9A00A8E881 /* domepro.cpp in Sources */,
+				9322CC9D1E2D9F9A00A8E881 /* main.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		9322CC8C1E2D9DEE00A8E881 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libstdc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = NO;
+				SDKROOT = macosx;
+				VALID_ARCHS = "i386 x86_64";
+			};
+			name = Debug;
+		};
+		9322CC8D1E2D9DEE00A8E881 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libstdc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+				VALID_ARCHS = "i386 x86_64";
+			};
+			name = Release;
+		};
+		9322CC8F1E2D9DEE00A8E881 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LIBRARY = "libstdc++";
+				CODE_SIGN_IDENTITY = "";
+				DEVELOPMENT_TEAM = PB97QXVYQC;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				EXECUTABLE_PREFIX = lib;
+				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
+				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = SB_MAC_BUILD;
+				HEADER_SEARCH_PATHS = (
+					"\"$(SRCROOT)/\"",
+					"\"$(SRCROOT)/../..\"",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				ONLY_ACTIVE_ARCH = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				VALID_ARCHS = "i386 x86_64";
+			};
+			name = Debug;
+		};
+		9322CC901E2D9DEE00A8E881 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LIBRARY = "libstdc++";
+				CODE_SIGN_IDENTITY = "";
+				DEVELOPMENT_TEAM = PB97QXVYQC;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				EXECUTABLE_PREFIX = lib;
+				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = SB_MAC_BUILD;
+				HEADER_SEARCH_PATHS = (
+					"\"$(SRCROOT)/\"",
+					"\"$(SRCROOT)/../..\"",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				ONLY_ACTIVE_ARCH = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				VALID_ARCHS = "i386 x86_64";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		9322CC851E2D9DEE00A8E881 /* Build configuration list for PBXProject "DomePro" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9322CC8C1E2D9DEE00A8E881 /* Debug */,
+				9322CC8D1E2D9DEE00A8E881 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9322CC8E1E2D9DEE00A8E881 /* Build configuration list for PBXNativeTarget "DomePro" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9322CC8F1E2D9DEE00A8E881 /* Debug */,
+				9322CC901E2D9DEE00A8E881 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 9322CC821E2D9DEE00A8E881 /* Project object */;
+}
