@@ -23,6 +23,9 @@ the dome rotation motor. It controls the activation of the motor
 and tracks the dome position using an encoder. It returns infomation
 (such as dome position) to the c++ component using gRPC as well.
 
+The c++ code is built around Software Bisque's X2 standard. For more
+infomation on this `see here <https://www.bisque.com/x2standard/class_x2_dome.html#a7ffd792950cdd0abe1b022e7a8caff9e>`.
+
 Requirements
 ---------------
 
@@ -31,13 +34,6 @@ Requirements
 
 Getting Started
 ---------------
-
-Within the ``domehunter/protos/`` directory are a number of files and
-directories. ``example_domepro_driver/`` Contains an example of a
-c++ X2Dome driver for reference. For more infomation on the X2
-standard `see here <https://www.bisque.com/x2standard/class_x2_dome.html#a7ffd792950cdd0abe1b022e7a8caff9e>`_. ``example_grpc_code`` contains
-several simply gRPC implementations using a c++ client and a
-python server.
 
 The code for the Huntsman dome driver is contained in the
 ``domehunter/protos/src`` directory. This directory contains both
@@ -52,24 +48,19 @@ tools. The human written files are,
 * ``hx2dome.proto_server.py``
 
 The remaining cpp and python files are automatically produced
-by gRPC and shouldn't need to be looked at.
+by gRPC and shouldn't need to be looked at. If for some reason
+you want to generate these files yourself, see the
+*gRPC automatically generated files* section below.
 
-|
+The files for compilation and installation are found in the
+``domehunter/protos/`` directory. The relevant files are,
 
-In the ``domehunter/protos/`` directory there are a number of shell
-scripts. These can be used to generate the gRPC files within the ``src/``
-directory. These scripts contain path variables that may need to be
-adjusted to your local machine. You shouldnt need to worry about
-this as the generated files are committed to the repositry and
-shouldn't need to be generated.
-
-The remaining files in ``domehunter/protos/`` include,
 
 * ``domelistHuntsmanDome.txt``
 * ``TheSkyX_plugin_install.sh``
 * ``Makefile``
 
-The first two are files are used to installed the compiled c++
+The first two are files are used to install the compiled c++
 driver. You should be able to simply run the shell script once
 the driver is compiled and located in the ``domehunter/protos/``
 directory, with filename ``libHuntsmanDome.so``.
@@ -88,6 +79,18 @@ a remote procedure call through to the gRPC python server. Currently
 the server will just return a dummy response to the c++ driver,
 which will be passed to TheSkyX. In the future the gRPC python server
 will be used to issue commands to the dome hardware.
+
+gRPC automatically generated files
+----------------------------------
+
+In the ``domehunter/protos/`` directory there are a number of shell
+scripts. These can be used to generate the gRPC files within the ``src/``
+directory. These scripts contain path variables that may need to be
+adjusted to your local machine. You shouldn't need to worry about
+this as the generated files are committed to the repositry and
+shouldn't need to be generated.
+
+
 
 
 
