@@ -26,7 +26,8 @@ and tracks the dome position using an encoder. It returns infomation
 Requirements
 ---------------
 
-``grpc`` See instructions `here <https://grpc.io/docs/quickstart/python/>`_.
+``grpc python`` See instructions `here <https://grpc.io/docs/quickstart/python/>`_.
+``grpc c++`` See instructions `here <https://grpc.io/docs/quickstart/cpp/>`_.
 
 Getting Started
 ---------------
