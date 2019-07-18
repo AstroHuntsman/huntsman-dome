@@ -8,7 +8,10 @@ import time
 
 from gpiozero import Device, DigitalInputDevice, DigitalOutputDevice
 from gpiozero.pins.mock import MockFactory
-
+# if we want to use the automation hat status lights we need to
+# import the pimoroni led driver
+import sn3218
+sn3218.disable()
 from ._astropy_init import *
 
 # ----------------------------------------------------------------------------
@@ -41,12 +44,12 @@ class Dome():
     https://gpiozero.readthedocs.io/en/stable/
     """
 
-    def __init__(self, testing=True, *args, **kwargs):
+    def __init__(self, testing=True, debug_lights=False, *args, **kwargs):
         """Initialize raspberry pi GPIO environment."""
         if testing:
             # Set the default pin factory to a mock factory
             Device.pin_factory = MockFactory()
-
+            # input 1 on automation hat
             ENCODER_PIN_NUMBER = 26
             # input 2 on the automation hat
             HOME_SENSOR_PIN_NUMBER = 20
@@ -61,6 +64,7 @@ class Dome():
             BOUNCE_TIME = 0.1
 
             self.encoder_pin = Device.pin_factory.pin(ENCODER_PIN_NUMBER)
+            self.home_sensor_pin = Device.pin_factory.pin(HOME_SENSOR_PIN_NUMBER)
         else:
             """ Do not change until you're sure!!! """
             # input 1 on automation hat
@@ -70,19 +74,46 @@ class Dome():
             # relay 1 on automation hat
             ROTATION_RELAY_PIN_NUMBER = 13
             # relay 2 on automation hat
-            # on position for CW and off for CCW?
+            # no position for CW and nc for CCW?
             DIRECTION_RELAY_PIN_NUMBER = 19
             # set the timeout length variable to None for non testing mode
             WAIT_TIMEOUT = None
             # set a variable for bounce_time in seconds
             BOUNCE_TIME = 0.1
 
+        if debug_lights:
+            sn3218.enable()
+            self.led_lights_id = {
+                                    'power': 0b100000000000000000,
+                                    'comms': 0b010000000000000000,
+                                    'warn': 0b001000000000000000,
+                                    'input_1': 0b000100000000000000,
+                                    'input_2': 0b000010000000000000,
+                                    'input_3': 0b000001000000000000,
+                                    'relay_3_nc': 0b000000100000000000,
+                                    'relay_3_no': 0b000000010000000000,
+                                    'relay_2_nc': 0b000000001000000000,
+                                    'relay_2_no': 0b000000000100000000,
+                                    'relay_1_nc': 0b000000000010000000,
+                                    'relay_1_no': 0b000000000001000000,
+                                    'output_3': 0b000000000000100000,
+                                    'output_2': 0b000000000000010000,
+                                    'output_1': 0b000000000000001000,
+                                    'adc_3': 0b000000000000000100,
+                                    'adc_2': 0b000000000000000010,
+                                    'adc_1': 0b000000000000000001
+                                 }
+            # led_status is binary number, each zero/position sets the state
+            # of an LED, where 0 is off and 1 is on
+            self.led_status = 0b000000000000000000
+            sn3218.enable_leds(self.led_status)
         # initialize status and az as unknown, to ensure we have properly
         # calibrated az
         self.testing = testing
+        self.debug_lights = debug_lights
         self.dome_status = "unknown"
         self.dome_az = None
-        self.current_direction = None
+
 
         # create a instance variable to track the dome motor encoder ticks
         self.encoder_count = 0
@@ -113,6 +144,11 @@ class Dome():
             ROTATION_RELAY_PIN_NUMBER, initial_value=False)
         self.direction_relay = DigitalOutputDevice(
             DIRECTION_RELAY_PIN_NUMBER, initial_value=False)
+        # because we initiliase the relay in the nc position
+        self.current_direction = "CCW"
+        if debug_lights:
+            self._turn_led_on(leds=['relay_2_nc'])
+            self._turn_led_on(leds=['relay_1_nc'])
 
         # set a wait time for testing mode that exceeds BOUNCE_TIME
         self.t_wait = BOUNCE_TIME + 0.05
@@ -219,6 +255,8 @@ class Dome():
         # rotate the dome until we hit home, to give reference point
         self._move_cw()
         self.home_sensor.wait_for_active(timeout=self.wait_timeout)
+        if self.testing:
+            self.home_sensor_pin.drive_high()
         time.sleep(0.1)
         self._stop_moving()
         self.encoder_count = 0
@@ -230,10 +268,14 @@ class Dome():
             time.sleep(0.5)
             self._move_cw()
             if self.testing:
+                self.home_sensor_pin.drive_low()
                 self._simulate_ticks(num_ticks=10)
             self.home_sensor.wait_for_active(timeout=self.wait_timeout)
+            if self.testing:
+                self.home_sensor_pin.drive_high()
             time.sleep(0.5)
             self._stop_moving()
+
             rotation_count += 1
 
         self.az_per_tick = 360 / (self.encoder_count / rotation_count)
@@ -244,14 +286,19 @@ class Dome():
 ###############################################################################
 
     def _set_at_home(self):
+        self._turn_led_on(leds=['input_2'])
         self._at_home = True
 
     def _set_not_home(self):
+        self._turn_led_off(leds=['input_2'])
         self._at_home = False
 
     def _increment_count(self):
         # Unsure what purpose the device variable is supposed to serve here?
         print(f"Encoder activated _increment_count")
+        self._turn_led_on(leds=['input_1'])
+        time.sleep(0.01)
+        self._turn_led_off(leds=['input_1'])
         if self.current_direction == "CW":
             self.encoder_count += 1
         elif self.current_direction == "CCW":
@@ -269,29 +316,44 @@ class Dome():
         return ticks * self.az_per_tick
 
     def _move_cw(self):
+        if self.testing and self._at_home:
+            self.home_sensor_pin.drive_low()
         self.last_direction = self.current_direction
         self.current_direction = "CW"
         # set the direction relay switch to CW position
         self.direction_relay.on()
+        if self.last_direction == "CCW":
+            self._turn_led_off(leds=['relay_2_nc'])
+        self._turn_led_on(leds=['relay_2_no'])
         # turn on rotation
         self.rotation_relay.on()
+        self._turn_led_on(leds=['relay_1_no'])
+        self._turn_led_off(leds=['relay_1_nc'])
         cmd_status = True
         return cmd_status
 
     def _move_ccw(self):
+        if self.testing and self._at_home:
+            self.home_sensor_pin.drive_low()
         self.last_direction = self.current_direction
         self.current_direction = "CCW"
         # set the direction relay switch to CCW position
         self.direction_relay.off()
+        if self.last_direction == "CW":
+            self._turn_led_off(leds=['relay_2_no'])
+        self._turn_led_on(leds=['relay_2_nc'])
         # turn on rotation
         self.rotation_relay.on()
+        self._turn_led_on(leds=['relay_1_no'])
+        self._turn_led_off(leds=['relay_1_nc'])
         cmd_status = True
         return cmd_status
 
     def _stop_moving(self):
         self.rotation_relay.off()
+        self._turn_led_off(leds=['relay_1_no'])
+        self._turn_led_on(leds=['relay_1_nc'])
         self.last_direction = self.current_direction
-        self.current_direction = None
 
     def _simulate_ticks(self, num_ticks):
         tick_count = 0
@@ -301,3 +363,22 @@ class Dome():
             self.encoder_pin.drive_high()
             time.sleep(self.t_wait)
             tick_count += 1
+
+    def _turn_led_on(self, leds=[]):
+        # pass a list of strings of the leds to turn on
+        if self.debug_lights:
+            for led in leds:
+                self.led_status |= self.led_lights_id[led]
+            sn3218.enable_leds(self.led_status)
+        pass
+
+    def _turn_led_off(self, leds=[]):
+        # pass a list of strings of the leds to turn off
+        # note: need something to prevent us turning an LED off/on more than
+        # once in a row because it will affect the binary led_status in
+        # unintended ways
+        if self.debug_lights:
+            for led in leds:
+                self.led_status ^= self.led_lights_id[led]
+            sn3218.enable_leds(self.led_status)
+        pass
