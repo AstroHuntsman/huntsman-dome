@@ -1,19 +1,29 @@
 """Run dome control on a raspberry pi GPIO."""
 
 
-# Licensed under a 3-clause BSD style license - see LICENSE.rst
 import sys
 import time
+import warnings
 
-# if we want to use the automation hat status lights we need to
-# import the pimoroni led driver
-import sn3218
 from gpiozero import Device, DigitalInputDevice, DigitalOutputDevice
 from gpiozero.pins.mock import MockFactory
 
 from ._astropy_init import *
 
-sn3218.disable()
+# if we want to use the automation hat status lights we need to
+# import the pimoroni led driver
+try:
+    import sn3218
+    sn3218.disable()
+except OSError:
+    warnings.warn(
+        "AutomationHAT hardware not detected, testing=True and debug_lights=False recommended.")
+    pass
+except:
+    warnings.warn(
+        "Something went wrong in importing sn3218, status lights unlikely to work.")
+    pass
+
 
 # ----------------------------------------------------------------------------
 
