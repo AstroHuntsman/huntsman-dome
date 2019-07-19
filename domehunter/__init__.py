@@ -1,18 +1,19 @@
 """Run dome control on a raspberry pi GPIO."""
 
+
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
-# should keep this content at the top.
-# ----------------------------------------------------------------------------
 import sys
 import time
 
-from gpiozero import Device, DigitalInputDevice, DigitalOutputDevice
-from gpiozero.pins.mock import MockFactory
 # if we want to use the automation hat status lights we need to
 # import the pimoroni led driver
 import sn3218
-sn3218.disable()
+from gpiozero import Device, DigitalInputDevice, DigitalOutputDevice
+from gpiozero.pins.mock import MockFactory
+
 from ._astropy_init import *
+
+sn3218.disable()
 
 # ----------------------------------------------------------------------------
 
@@ -64,7 +65,8 @@ class Dome():
             BOUNCE_TIME = 0.1
 
             self.encoder_pin = Device.pin_factory.pin(ENCODER_PIN_NUMBER)
-            self.home_sensor_pin = Device.pin_factory.pin(HOME_SENSOR_PIN_NUMBER)
+            self.home_sensor_pin = Device.pin_factory.pin(
+                HOME_SENSOR_PIN_NUMBER)
         else:
             """ Do not change until you're sure!!! """
             # input 1 on automation hat
@@ -82,38 +84,39 @@ class Dome():
             BOUNCE_TIME = 0.1
 
         if debug_lights:
-            sn3218.enable()
-            self.led_lights_id = {
-                                    'power': 0b100000000000000000,
-                                    'comms': 0b010000000000000000,
-                                    'warn': 0b001000000000000000,
-                                    'input_1': 0b000100000000000000,
-                                    'input_2': 0b000010000000000000,
-                                    'input_3': 0b000001000000000000,
-                                    'relay_3_nc': 0b000000100000000000,
-                                    'relay_3_no': 0b000000010000000000,
-                                    'relay_2_nc': 0b000000001000000000,
-                                    'relay_2_no': 0b000000000100000000,
-                                    'relay_1_nc': 0b000000000010000000,
-                                    'relay_1_no': 0b000000000001000000,
-                                    'output_3': 0b000000000000100000,
-                                    'output_2': 0b000000000000010000,
-                                    'output_1': 0b000000000000001000,
-                                    'adc_3': 0b000000000000000100,
-                                    'adc_2': 0b000000000000000010,
-                                    'adc_1': 0b000000000000000001
-                                 }
             # led_status is binary number, each zero/position sets the state
             # of an LED, where 0 is off and 1 is on
             self.led_status = 0b000000000000000000
+            sn3218.output([0x10] * 18)
             sn3218.enable_leds(self.led_status)
+            sn3218.enable()
+            self.led_lights_ind = {
+                'power': 2,
+                'comms': 3,
+                'warn': 4,
+                'input_1': 5,
+                'input_2': 6,
+                'input_3': 7,
+                'relay_3_nc': 8,
+                'relay_3_no': 9,
+                'relay_2_nc': 10,
+                'relay_2_no': 11,
+                'relay_1_nc': 12,
+                'relay_1_no': 13,
+                'output_3': 14,
+                'output_2': 15,
+                'output_1': 16,
+                'adc_3': 17,
+                'adc_2': 18,
+                'adc_1': 19
+            }
+
         # initialize status and az as unknown, to ensure we have properly
         # calibrated az
         self.testing = testing
         self.debug_lights = debug_lights
         self.dome_status = "unknown"
         self.dome_az = None
-
 
         # create a instance variable to track the dome motor encoder ticks
         self.encoder_count = 0
@@ -367,18 +370,39 @@ class Dome():
     def _turn_led_on(self, leds=[]):
         # pass a list of strings of the leds to turn on
         if self.debug_lights:
+            # this function needs a bunch of checks at some point
+            # like length of the binary number, whether things have the right
+            # type at the end etc etc
+            #
+            # take the current led_status and convert to a string in binary
+            # format (18bit)
+            new_state = format(self.led_status, '#020b')
+            # from that string create a list of characters
+            # use the keys in the leds list and the led_lights_ind
+            new_state = list(new_state)
             for led in leds:
-                self.led_status |= self.led_lights_id[led]
+                ind = self.led_lights_ind[led]
+                new_state[ind] = '1'
+            # convert the updated list to a string and then to a binary int
+            new_state = ''.join(new_state)
+            self.led_status = int(new_state, 2)
             sn3218.enable_leds(self.led_status)
         pass
 
     def _turn_led_off(self, leds=[]):
         # pass a list of strings of the leds to turn off
-        # note: need something to prevent us turning an LED off/on more than
-        # once in a row because it will affect the binary led_status in
-        # unintended ways
         if self.debug_lights:
+            # take the current led_status and convert to a string in binary
+            # format (18bit)
+            new_state = format(self.led_status, '#020b')
+            # from that string create a list of characters
+            # use the keys in the leds list and the led_lights_ind
+            new_state = list(new_state)
             for led in leds:
-                self.led_status ^= self.led_lights_id[led]
+                ind = self.led_lights_ind[led]
+                new_state[ind] = '0'
+            # convert the updated list to a string and then to a binary int
+            new_state = ''.join(new_state)
+            self.led_status = int(new_state, 2)
             sn3218.enable_leds(self.led_status)
         pass
