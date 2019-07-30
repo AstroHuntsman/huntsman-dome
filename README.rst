@@ -26,6 +26,9 @@ and tracks the dome position using an encoder. It returns infomation
 The c++ code is built around Software Bisque's X2 standard. For more
 infomation on this `see here <https://www.bisque.com/x2standard/class_x2_dome.html#a7ffd792950cdd0abe1b022e7a8caff9e>`.
 
+C++/gRPC Component
+==================
+
 Requirements
 ---------------
 
@@ -91,7 +94,25 @@ this as the generated files are committed to the repositry and
 shouldn't need to be generated.
 
 
+Python RaspberryPi Component
+============================
 
+Requirements
+---------------
+Required:
+- `gpiozero` python library
+Optional:
+- `smbus` and `sn3218` python libraries
+
+Note: The `smbus` and `sn3218` are used to control the automationHAT status
+LEDs. If you plan on running the code without the automationHAT these libraries
+aren't required.
+
+Getting Started
+---------------
+Follow the example jupyter notebook in the examples direction
+(`dome_control_example`). The automationHAT hardware is not required to run the
+code in testing mode.
 
 
 License
@@ -102,8 +123,3 @@ the terms of the BSD 3-Clause license. This package is based upon
 the `Astropy package template <https://github.com/astropy/package-template>`_
 which is licensed under the BSD 3-clause licence. See the licenses folder for
 more information.
-
-
-
-
-

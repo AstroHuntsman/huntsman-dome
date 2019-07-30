@@ -1,2 +1,4 @@
 astropy_helpers
 gpiozero
+smbus
+sn3218
