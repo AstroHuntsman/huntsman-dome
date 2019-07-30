@@ -95,9 +95,14 @@ class Dome():
         (unknown at initialisation) and position of the direction relay switch
         (initialised in the CCW position).
         """
+        # in case a previous instance has been initialised, tell the
+        # pin factory to release all the pins
+
         if testing:
             # Set the default pin factory to a mock factory
             Device.pin_factory = MockFactory()
+            # release all the pins, just in case there
+            Device.pin_factory.reset()
             # input 1 on automation hat
             ENCODER_PIN_NUMBER = 26
             # input 2 on the automation hat
@@ -350,6 +355,9 @@ class Dome():
         # set the azimuth per encoder tick factor based on how many ticks we
         # counted over n rotations
         self.az_per_tick = 360 / (self.encoder_count / rotation_count)
+        # set dome azimuth to 0?
+        # problem, this isn't compensating for any overshooting
+        self.dome_az = 0
         pass
 
 ###############################################################################
