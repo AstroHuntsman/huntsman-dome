@@ -101,22 +101,22 @@ Requirements
 ---------------
 Required:
 
-* `gpiozero` python library
+* ``gpiozero`` python library
 
 Optional:
 
-* `smbus` and `sn3218` python libraries
+* ``smbus`` and ``sn3218`` python libraries
 
 Note:
 
-The `smbus` and `sn3218` are used to control the automationHAT status
+The ``smbus`` and ``sn3218`` are used to control the automationHAT status
 LEDs. If you plan on running the code without the automationHAT these libraries
 aren't required.
 
 Getting Started
 ---------------
 Follow the example jupyter notebook in the examples direction
-(`dome_control_example`). The automationHAT hardware is not required to run the
+(``dome_control_example``). The automationHAT hardware is not required to run the
 code in testing mode.
 
 
