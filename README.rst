@@ -100,11 +100,16 @@ Python RaspberryPi Component
 Requirements
 ---------------
 Required:
-- `gpiozero` python library
-Optional:
-- `smbus` and `sn3218` python libraries
 
-Note: The `smbus` and `sn3218` are used to control the automationHAT status
+* `gpiozero` python library
+
+Optional:
+
+* `smbus` and `sn3218` python libraries
+
+Note:
+
+The `smbus` and `sn3218` are used to control the automationHAT status
 LEDs. If you plan on running the code without the automationHAT these libraries
 aren't required.
 
