@@ -1,10 +1,10 @@
 # Makefile for libHuntsmanDome
 
 CXX = g++
-CFLAGS = -fPIC -Wall -Wextra -O2 -g -DSB_LINUX_BUILD -I. -I./src/licensedinterfaces/\
+CFLAGS = -fPIC  -O2 -g -DSB_LINUX_BUILD -I. -I./src/licensedinterfaces/\
          -L/usr/local/lib -lprotobuf -pthread -lgrpc++ -pthread -I/usr/local/include
 
-CPPFLAGS = -fPIC -Wall -Wextra -O2 -g -DSB_LINUX_BUILD -I. -I./src/licensedinterfaces/ -I/usr/local/include\
+CPPFLAGS = -fPIC -O2 -g -DSB_LINUX_BUILD -I. -I./src/licensedinterfaces/ -I/usr/local/include\
 	   -L/usr/local/lib -lprotobuf -pthread -lgrpc++ -pthread 
 
 CXXFLAGS += -std=c++11
