@@ -98,25 +98,25 @@ class Dome():
         (unknown at initialisation) and position of the direction relay switch
         (initialised in the CCW position).
         """
-
-        # input 1 on automation hat
-        ENCODER_PIN_NUMBER = 26
-        # input 2 on the automation hat
-        HOME_SENSOR_PIN_NUMBER = 20
-        # relay 1 on automation hat
-        ROTATION_RELAY_PIN_NUMBER = 13
-        # relay 2 on automation hat
-        # on position for CW and off for CCW
-        DIRECTION_RELAY_PIN_NUMBER = 19
-        # set a timeout length in seconds for wait_for_active() calls
-        WAIT_TIMEOUT = 1
-        # set a variable for bounce_time in seconds, this is just cool
-        # off period where the object will ignore additional (de)activation
-        BOUNCE_TIME = 0.1
-
         if testing:
             # Set the default pin factory to a mock factory
             Device.pin_factory = MockFactory()
+            # release all the pins, just in case there
+            Device.pin_factory.reset()
+            # input 1 on automation hat
+            ENCODER_PIN_NUMBER = 26
+            # input 2 on the automation hat
+            HOME_SENSOR_PIN_NUMBER = 20
+            # relay 1 on automation hat
+            ROTATION_RELAY_PIN_NUMBER = 13
+            # relay 2 on automation hat
+            # on position for CW and off for CCW?
+            DIRECTION_RELAY_PIN_NUMBER = 19
+            # set a timeout length in seconds for wait_for_active() calls
+            WAIT_TIMEOUT = 1
+            # set a variable for bounce_time in seconds, this is just cool
+            # off period where the object will ignore additional (de)activation
+            BOUNCE_TIME = 0.1
 
             # in testing mode we need to create a seperate pin object so we can
             # simulate the activation of our fake DIDs and DODs
