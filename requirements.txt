@@ -1,4 +1,5 @@
 astropy_helpers
+pytest-astropy
 gpiozero
 smbus
 sn3218

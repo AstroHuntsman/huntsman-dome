@@ -119,6 +119,15 @@ Follow the example jupyter notebook in the examples direction
 (``dome_control_example``). The automationHAT hardware is not required to run the
 code in testing mode.
 
+Tests
+-----
+In order to run the test suite, go to the source direction (``huntsman-dome/``)
+and run the following command::
+
+  python setup.py test --coverage
+
+Which will produce a coverage report in ``huntsman-dome/htmlcov``
+
 
 License
 -------
