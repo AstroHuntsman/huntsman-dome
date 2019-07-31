@@ -38,12 +38,12 @@ Requirements
 ``grpc c++`` See instructions `here <https://grpc.io/docs/quickstart/cpp/>`_.
 
 To install the above on OSX, run:
+
 ``
 pip install --upgrade pip
 pip install grpcio
 brew install protobuf-c
 brew install grpc
-
 ``
 
 Getting Started
