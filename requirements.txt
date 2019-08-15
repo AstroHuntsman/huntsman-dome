@@ -1,4 +1,4 @@
 astropy_helpers
 gpiozero
-smbus
-sn3218
+smbus # optional for LED use
+sn3218 # optional for LED use
