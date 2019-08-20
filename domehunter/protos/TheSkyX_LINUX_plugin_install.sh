@@ -34,8 +34,8 @@ fi
 cp "./domelist HuntsmanDome.txt" "$TheSkyX_Path/Resources/Common/Miscellaneous Files/"
 cp "./libHuntsmanDome.so" "$TheSkyX_Path/Resources/Common/$PLUGINS_DIR/DomePlugIns/"
 
-# NOTE if trying to install on a linux machine change "/usr/bin/stat -f " to "/usr/bin/stat -c "
-app_owner=`/usr/bin/stat -f "%u" "$TheSkyX_Path" | xargs id -n -u`
+# NOTE if trying to install on a mac machine change "/usr/bin/stat -c" to "usr/bin/stat -f"
+app_owner=`/usr/bin/stat -c "%u" "$TheSkyX_Path" | xargs id -n -u`
 if [ ! -z "$app_owner" ]; then
 	chown $app_owner "$TheSkyX_Path/Resources/Common/Miscellaneous Files/domelist HuntsmanDome.txt"
 	chown $app_owner "$TheSkyX_Path/Resources/Common/$PLUGINS_DIR/DomePlugIns/libHuntsmanDome.so"

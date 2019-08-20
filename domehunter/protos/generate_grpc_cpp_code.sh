@@ -9,8 +9,7 @@ if [ "$1" == "clean" ]; then
 else
 	HDOME_PATH="$HOME/Documents/REPOS"
 	PROTOS_PATH="$HDOME_PATH/huntsman-dome/domehunter/protos/src/"
-	PROTO_PATH1="/usr/local/include/google/protobuf/"
-	PROTO_PATH2="$HDOME_PATH/huntsman-dome/domehunter/protos/src/hx2dome.proto"
+	PROTO_FILE="$HDOME_PATH/huntsman-dome/domehunter/protos/src/hx2dome.proto"
 	GRPC_CPP_PLUGIN_PATH="$(which grpc_cpp_plugin)"
 
 	echo -e "Generating GRPC C++ code\n"
@@ -18,8 +17,8 @@ else
 	echo -e "protoc -I $PROTOS_PATH --cpp_out=. src/hx2dome.proto\n"
 	protoc -I "$PROTOS_PATH" --cpp_out=. hx2dome.proto
 
-	echo -e "protoc -I $PROTOS_PATH --grpc_out=. --proto_path=$PROTO_PATH1 $PROTO_PATH2 --plugin=protoc-gen-grpc=$GRPC_CPP_PLUGIN_PATH\n"
-	protoc -I "$PROTOS_PATH" --grpc_out=. --proto_path="$PROTO_PATH1" "$PROTO_PATH2" --plugin=protoc-gen-grpc="$GRPC_CPP_PLUGIN_PATH"
+	echo -e "protoc -I $PROTOS_PATH --grpc_out=. $PROTO_FILE --plugin=protoc-gen-grpc=$GRPC_CPP_PLUGIN_PATH\n"
+	protoc -I "$PROTOS_PATH" --grpc_out=. "$PROTO_FILE" --plugin=protoc-gen-grpc="$GRPC_CPP_PLUGIN_PATH"
 
 	echo -e "Moving generated GRPC C++ code to src/\n"
 	mv hx2dome.grpc.pb.cc src/hx2dome.grpc.pb.cpp
@@ -34,6 +33,6 @@ else
 
 	#echo -e "Cleaning out object files.\n"
 	#rm *.o
-
+	
 	echo -e "Done.\n"
 fi

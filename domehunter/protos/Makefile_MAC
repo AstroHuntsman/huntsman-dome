@@ -1,0 +1,43 @@
+# Makefile for libHuntsmanDome
+
+CXX = /Library/Developer/CommandLineTools/usr/bin/clang++
+
+CFLAGS = -pipe -O2 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk\
+         -fPIC -DSB_MAC_BUILD -g -I. -I./src/licensedinterfaces\
+         -pthread -I/usr/local/include
+
+CPPFLAGS = -pipe -O2 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk\
+           -fPIC -DSB_MAC_BUILD -g -I. -I./src/licensedinterfaces\
+           -pthread -I/usr/local/include
+
+CXXFLAGS += -pipe -stdlib=libc++ -O2 -std=gnu++11 -isysroot\
+            /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -fPIC -DSB_MAC_BUILD
+
+LDFLAGS = -stdlib=libc++ -headerpad_max_install_names\
+          -Wl,-syslibroot,/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk\
+          -Wl,-rpath,@executable_path/Frameworks\
+          -Wl,-rpath,/User/bob/anaconda3/envs/huntsman/lib\
+          -single_module -dynamiclib -L/usr/local/lib -lprotobuf -pthread\
+          -lgrpc++ -lgrpc++_reflection -ldl -lgrpc
+
+RM = rm -f
+STRIP = strip
+TARGET_LIB = libHuntsmanDome.so
+
+SRCS = src/main.cpp src/x2dome.cpp src/hx2dome.grpc.pb.cpp src/hx2dome.pb.cpp
+
+OBJS = $(SRCS:.cpp=.o)
+
+.PHONY: all
+all: ${TARGET_LIB}
+
+$(TARGET_LIB): $(OBJS)
+    $(CXX) $^ ${LDFLAGS} -o $@
+    $(STRIP) $@ >/dev/null 2>&1  || true
+
+$(SRCS:.cpp=.d):%.d:%.cpp
+    $(CXX) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -MM $< >$@
+
+.PHONY: clean
+clean:
+    ${RM} ${TARGET_LIB} ${OBJS}

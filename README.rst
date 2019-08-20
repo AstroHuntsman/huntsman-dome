@@ -41,8 +41,10 @@ To install the above on OSX, run::
 
   pip install --upgrade pip
   pip install grpcio
-  brew install protobuf-c
-  brew install grpc
+  pip install grpcio-tools
+  brew tap grpc/grpc
+  brew install -s -- --with-plugins grpc
+  brew install protobuf
 
 Getting Started
 ---------------
