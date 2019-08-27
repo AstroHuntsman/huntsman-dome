@@ -1,2 +1,6 @@
 astropy_helpers
+grpcio
+grpcio-tools
 gpiozero
+smbus # optional for LED use
+sn3218 # optional for LED use

@@ -1,0 +1,36 @@
+# Makefile for libHuntsmanDome
+
+CXX = g++
+
+CFLAGS = -fPIC -O2 -g -DSB_MAC_BUILD -arch i386 -I. -I./src/licensedinterfaces/\
+         -L/usr/local/lib -lprotobuf -pthread -lgrpc++ -I/usr/local/include\
+
+CPPFLAGS = -fPIC -O2 -g -DSB_MAC_BUILD -I. -I./src/licensedinterfaces/\
+           -pthread -I/usr/local/include -I/usr/local/bin/grpc\
+
+CXXFLAGS += -std=c++11
+
+LDFLAGS = -shared -stdlib=libc++ -L/usr/local/lib -lprotobuf -pthread\
+          -lgrpc++ -lgrpc++_reflection -ldl
+
+RM = rm -f
+STRIP = strip
+TARGET_LIB = libHuntsmanDome.dylib
+
+SRCS = src/main.cpp src/x2dome.cpp src/hx2dome.grpc.pb.cpp src/hx2dome.pb.cpp
+
+OBJS = $(SRCS:.cpp=.o)
+
+.PHONY: all
+all: ${TARGET_LIB}
+
+$(TARGET_LIB): $(OBJS)
+    $(CXX) $^ ${LDFLAGS} -o $@
+    $(STRIP) $@ >/dev/null 2>&1  || true
+
+$(SRCS:.cpp=.d):%.d:%.cpp
+    $(CXX) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -MM $< >$@
+
+.PHONY: clean
+clean:
+    ${RM} ${TARGET_LIB} ${OBJS}

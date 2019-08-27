@@ -1,4 +1,3 @@
 //See hardwarelist.txt for details on this file format.
 //Version|Manufacturer|Model|Comment|MapsTo|PlugInDllName|X2Developer|Windows|Mac|Linux|
-1|Huntsman Telescope|Huntsman Telescope Dome Controller v1| | |libHuntsmanDome||0|0|1|
-
+1|Huntsman Telescope|Huntsman Telescope Dome Controller v1| | |libHuntsmanDome||0|1|1|
