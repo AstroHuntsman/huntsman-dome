@@ -30,11 +30,12 @@ C++/gRPC Component
 ==================
 
 Requirements
----------------
+------------
 
 ``grpc python`` For reference see `here <https://grpc.io/docs/quickstart/python/>`_.
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-To install (on MacOS or Linux) the grpc python packages needed run the following::
+To install (on MacOS or Linux) the required grpc python packages run the following::
 
   python -m pip install --upgrade pip
   python -m pip install grpcio
@@ -42,16 +43,19 @@ To install (on MacOS or Linux) the grpc python packages needed run the following
 
 
 ``grpc c++`` For reference see `here <https://grpc.io/docs/quickstart/cpp/>`_.
+------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-Instructions to install from source on any OS can be found `here <https://github.com/grpc/grpc/blob/master/BUILDING.md>`_.
+Detailed instructions to install from source on any OS can be found `here <https://github.com/grpc/grpc/blob/master/BUILDING.md>`_.
 
-To install depedencies for a linux OS run the following::
+For convenience a summary of the required steps is given below.
+
+To install depedencies for a linux OS, run the following::
 
   [sudo] apt-get install build-essential autoconf libtool pkg-config
   [sudo] apt-get install libgflags-dev libgtest-dev
   [sudo] apt-get install clang libc++-dev
 
-To do the same on MacOS (with homebrew installed) run::
+To do the same on MacOS (with homebrew installed), run::
 
   [sudo] xcode-select --install
   brew install autoconf automake libtool shtool
@@ -74,7 +78,7 @@ Now to build grpc from source on Linux or MacOS run the following::
   make install
 
 
-To install the above on OSX, run::
+Alternatively to installing from source, you can install via homebrew on MacOS by running::
 
   brew tap grpc/grpc
   brew install -s -- --with-plugins grpc
@@ -99,9 +103,10 @@ The files for compilation and installation are found in the
 * ``Makefile``
 
 The first two are files are used to install the compiled c++
-driver. You should be able to simply run the shell script once
-the driver is compiled and located in the ``domehunter/protos/``
-directory, with filename ``libHuntsmanDome.so``.
+driver into TheSkyX application directory. You should be 
+able to simply run the shell script once the driver is compiled 
+and located in the ``domehunter/protos/`` directory, with 
+filename ``libHuntsmanDome.so``.
 
 |
 
@@ -111,7 +116,7 @@ In order to compile the driver simply run the makefile recipe for your OS (LINUX
   make -f Makefile_LINUX
 
 This will produce a .so file in the protos directory for Linux and a .dylib file for Mac.
-This file as well as the ``domelistHuntsmanDome.txt`` file need to be copied into TheSkyX
+This file, as well as the ``domelistHuntsmanDome.txt`` file need to be copied into TheSkyX
 application directory. This can be done by running the installation script::
 
   . TheSkyX_LINUX_plugin_install.sh
