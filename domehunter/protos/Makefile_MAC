@@ -1,28 +1,21 @@
 # Makefile for libHuntsmanDome
 
-CXX = /Library/Developer/CommandLineTools/usr/bin/clang++
+CXX = g++
 
-CFLAGS = -pipe -O2 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk\
-         -fPIC -DSB_MAC_BUILD -g -I. -I./src/licensedinterfaces\
-         -pthread -I/usr/local/include
+CFLAGS = -fPIC -O2 -g -DSB_MAC_BUILD -arch i386 -I. -I./src/licensedinterfaces/\
+         -L/usr/local/lib -lprotobuf -pthread -lgrpc++ -I/usr/local/include\
 
-CPPFLAGS = -pipe -O2 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk\
-           -fPIC -DSB_MAC_BUILD -g -I. -I./src/licensedinterfaces\
-           -pthread -I/usr/local/include
+CPPFLAGS = -fPIC -O2 -g -DSB_MAC_BUILD -I. -I./src/licensedinterfaces/\
+           -pthread -I/usr/local/include -I/usr/local/bin/grpc\
 
-CXXFLAGS += -pipe -stdlib=libc++ -O2 -std=gnu++11 -isysroot\
-            /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -fPIC -DSB_MAC_BUILD
+CXXFLAGS += -std=c++11
 
-LDFLAGS = -stdlib=libc++ -headerpad_max_install_names\
-          -Wl,-syslibroot,/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk\
-          -Wl,-rpath,@executable_path/Frameworks\
-          -Wl,-rpath,/User/bob/anaconda3/envs/huntsman/lib\
-          -single_module -dynamiclib -L/usr/local/lib -lprotobuf -pthread\
-          -lgrpc++ -lgrpc++_reflection -ldl -lgrpc
+LDFLAGS = -shared -stdlib=libc++ -L/usr/local/lib -lprotobuf -pthread\
+          -lgrpc++ -lgrpc++_reflection -ldl
 
 RM = rm -f
 STRIP = strip
-TARGET_LIB = libHuntsmanDome.so
+TARGET_LIB = libHuntsmanDome.dylib
 
 SRCS = src/main.cpp src/x2dome.cpp src/hx2dome.grpc.pb.cpp src/hx2dome.pb.cpp
 

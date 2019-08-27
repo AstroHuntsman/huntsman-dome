@@ -32,19 +32,60 @@ C++/gRPC Component
 Requirements
 ---------------
 
-``grpc python`` See instructions `here <https://grpc.io/docs/quickstart/python/>`_.
+``grpc python`` For reference see `here <https://grpc.io/docs/quickstart/python/>`_.
+
+To install (on MacOS or Linux) the grpc python packages needed run the following::
+
+  python -m pip install --upgrade pip
+  python -m pip install grpcio
+  python -m pip install grpcio-tools
 
 
-``grpc c++`` See instructions `here <https://grpc.io/docs/quickstart/cpp/>`_.
+``grpc c++`` For reference see `here <https://grpc.io/docs/quickstart/cpp/>`_.
+
+Instructions to install from source on any OS can be found `here <https://github.com/grpc/grpc/blob/master/BUILDING.md>`_.
+
+To install depedencies for a linux OS run the following::
+
+  [sudo] apt-get install build-essential autoconf libtool pkg-config
+  [sudo] apt-get install libgflags-dev libgtest-dev
+  [sudo] apt-get install clang libc++-dev
+
+To do the same on MacOS (with homebrew installed) run::
+
+  [sudo] xcode-select --install
+  brew install autoconf automake libtool shtool
+  brew install gflags
+
+Now to build grpc from source on Linux or MacOS run the following::
+
+  cd /usr/local/bin/
+  git clone -b $(curl -L https://grpc.io/release) https://github.com/grpc/grpc
+  cd grpc/
+  git submodule update --init
+  make
+  make install
+  cd third_party/protobuf/
+  git submodule update --init --recursive
+  ./autogen.sh
+  ./configure
+  make
+  make check
+  make install
+
 
 To install the above on OSX, run::
 
-  pip install --upgrade pip
-  pip install grpcio
-  pip install grpcio-tools
   brew tap grpc/grpc
   brew install -s -- --with-plugins grpc
   brew install protobuf
+  brew install protobuf-c
+
+However, this may require some editing of the driver makefiles. Specifically
+the include and linking flags, as homebrew will place relevant files and
+libraries in different locations to the installation from source method
+outlined above. The makefiles are written with the installation from source
+setup in mind.
 
 Getting Started
 ---------------
@@ -64,7 +105,18 @@ directory, with filename ``libHuntsmanDome.so``.
 
 |
 
-In order to compile the driver simply run the makefile recipe.
+In order to compile the driver simply run the makefile recipe for your OS (LINUX/MAC)::
+
+  cd domehunter/protos/
+  make -f Makefile_LINUX
+
+This will produce a .so file in the protos directory for Linux and a .dylib file for Mac.
+This file as well as the ``domelistHuntsmanDome.txt`` file need to be copied into TheSkyX
+application directory. This can be done by running the installation script::
+
+  . TheSkyX_LINUX_plugin_install.sh
+
+Replace `LINUX` with `MAC` if installing on a MacOS system and vice versa.
 
 |
 
@@ -85,7 +137,7 @@ scripts. These can be used to generate the gRPC files within the ``src/``
 directory. These scripts contain path variables that may need to be
 adjusted to your local machine. You shouldn't need to worry about
 this as the generated files are committed to the repositry and
-shouldn't need to be generated.
+shouldn't need to be generated (I think...?).
 
 The code for the Huntsman dome driver is contained in the
 ``domehunter/protos/src`` directory. This directory contains both
