@@ -12,15 +12,17 @@ from ._astropy_init import *
 
 # if we want to use the automation hat status lights we need to
 # import the pimoroni led driver
-try:
+try:  # pragma: no cover
     import sn3218
     sn3218.disable()
-except OSError:
+except OSError:  # pragma: no cover
     warnings.warn(
-        "AutomationHAT hardware not detected, testing=True and debug_lights=False recommended.")
-except:
+        "AutomationHAT hardware not detected, testing=True and"
+        " debug_lights=False recommended.")
+except:  # pragma: no cover
     warnings.warn(
-        "Something went wrong in importing sn3218, status lights unlikely to work.")
+        "Something went wrong in importing sn3218,"
+        " status lights unlikely to work.")
 
 
 # ----------------------------------------------------------------------------
@@ -31,13 +33,14 @@ except:
 __minimum_python_version__ = "3.6"
 
 
-class UnsupportedPythonError(Exception):
+class UnsupportedPythonError(Exception):  # pragma: no cover
     pass
 
 
-if sys.version_info < tuple((int(val) for val in __minimum_python_version__.split('.'))):
+minimum = tuple((int(val) for val in __minimum_python_version__.split('.')))
+if sys.version_info < minimum:  # pragma: no cover
     raise UnsupportedPythonError(
-        "domehunter does not support Python < {}".format(__minimum_python_version__))
+        f'domehunter does not support Python < {__minimum_python_version__}')
 
 if not _ASTROPY_SETUP_:
     # For egg_info test builds to pass, put package imports here.
@@ -98,13 +101,11 @@ class Dome():
         (unknown at initialisation) and position of the direction relay switch
         (initialised in the CCW position).
         """
-        # in case a previous instance has been initialised, tell the
-        # pin factory to release all the pins
-
         if testing:
             # Set the default pin factory to a mock factory
             Device.pin_factory = MockFactory()
-            # release all the pins, just in case there
+            # in case a previous instance has been initialised, tell the
+            # pin factory to release all the pins
             Device.pin_factory.reset()
             # input 1 on automation hat
             ENCODER_PIN_NUMBER = 26
@@ -135,39 +136,40 @@ class Dome():
         # set the timeout for wait_for_active()
         self.wait_timeout = WAIT_TIMEOUT
 
-        if debug_lights:
-            # led_status is set with binary number, each zero/position sets the
-            # state of an LED, where 0 is off and 1 is on
-            self.led_status = 0b000000000000000000
+        # led_status is set with binary number, each zero/position sets the
+        # state of an LED, where 0 is off and 1 is on
+        self.led_status = 0b000000000000000000
+        # create a dictionary of the LED name as the key and the digit of
+        # the self.led_status binary integer it corresponds to. This means
+        # we can convert the binary integer to a string and use the index
+        # to change a 0 to 1 and vice versa and then convert back to a
+        # binary integer. The updated self.led_status can then be sent to
+        # the LED controller.
+        self.led_lights_ind = {
+            'power': 2,
+            'comms': 3,
+            'warn': 4,
+            'input_1': 5,
+            'input_2': 6,
+            'input_3': 7,
+            'relay_3_normally_closed': 8,
+            'relay_3_normally_open': 9,
+            'relay_2_normally_closed': 10,
+            'relay_2_normally_open': 11,
+            'relay_1_normally_closed': 12,
+            'relay_1_normally_open': 13,
+            'output_3': 14,
+            'output_2': 15,
+            'output_1': 16,
+            'adc_3': 17,
+            'adc_2': 18,
+            'adc_1': 19
+        }
+        if debug_lights:  # pragma: no cover
+            # if we are actually using the debug lights we can enable them now
             sn3218.output([0x10] * 18)
             sn3218.enable_leds(self.led_status)
             sn3218.enable()
-            # create a dictionary of the LED name as the key and the digit of
-            # the self.led_status binary integer it corresponds to. This means
-            # we can convert the binary integer to a string and use the index
-            # to change a 0 to 1 and vice versa and then convert back to a
-            # binary integer. The updated self.led_status can then be sent to
-            # the LED controller.
-            self.led_lights_ind = {
-                'power': 2,
-                'comms': 3,
-                'warn': 4,
-                'input_1': 5,
-                'input_2': 6,
-                'input_3': 7,
-                'relay_3_normally_closed': 8,
-                'relay_3_normally_open': 9,
-                'relay_2_normally_closed': 10,
-                'relay_2_normally_open': 11,
-                'relay_1_normally_closed': 12,
-                'relay_1_normally_open': 13,
-                'output_3': 14,
-                'output_2': 15,
-                'output_1': 16,
-                'adc_3': 17,
-                'adc_2': 18,
-                'adc_1': 19
-            }
 
         # initialize status and az as unknown, to ensure we have properly
         # calibrated az
@@ -209,7 +211,7 @@ class Dome():
         self.current_direction = "CCW"
 
         # turn on the relay LEDs if we are debugging
-        if debug_lights:
+        if debug_lights:  # pragma: no cover
             self._turn_led_on(leds=['relay_2_normally_closed'])
             self._turn_led_on(leds=['relay_1_normally_closed'])
 
@@ -269,11 +271,11 @@ class Dome():
 
         """
         if self.dome_az is None:
-            print('Dome is not yet calibrated, running through calibration\
-                   procedure, then will go to AZ specified.')
+            print('Dome is not yet calibrated, running through calibration'
+                  ' procedure, then will go to AZ specified.')
             self.calibrate_dome_encoder_counts()
-        delta_az = az - self.dome_az
 
+        delta_az = az - self.dome_az
         # determine whether CW or CCW gives the short path to desired az
         if abs(delta_az) > 180:
             if delta_az > 0:
@@ -346,7 +348,7 @@ class Dome():
         if self.testing:
             # in testing mode we need to "fake" the activation of the home pin
             self.home_sensor_pin.drive_high()
-        time.sleep(0.1)
+
         self._stop_moving()
         self.encoder_count = 0
 
@@ -354,17 +356,18 @@ class Dome():
         # ticks per revolution
         rotation_count = 0
         while rotation_count < num_cal_rotations:
-            time.sleep(0.5)
             self._move_cw()
             if self.testing:
                 # tell the fake home sensor that we have left home
                 self.home_sensor_pin.drive_low()
                 self._simulate_ticks(num_ticks=10)
+
             self.home_sensor.wait_for_active(timeout=self.wait_timeout)
+
             if self.testing:
                 # tell the fake home sensor that we have come back to home
                 self.home_sensor_pin.drive_high()
-            time.sleep(0.5)
+
             self._stop_moving()
 
             rotation_count += 1
@@ -372,6 +375,9 @@ class Dome():
         # set the azimuth per encoder tick factor based on how many ticks we
         # counted over n rotations
         self.az_per_tick = 360 / (self.encoder_count / rotation_count)
+        # set dome azimuth to 0?
+        # problem, this isn't compensating for any overshooting
+        self.dome_az = 0
 
 ###############################################################################
 # Private Methods
@@ -541,7 +547,7 @@ class Dome():
             time.sleep(self.test_mode_delay_duration)
             tick_count += 1
 
-    def _turn_led_on(self, leds=[]):
+    def _turn_led_on(self, leds=[]):  # pragma: no cover
         """
         Method of turning a set of debugging LEDs on
 
@@ -576,7 +582,7 @@ class Dome():
         # pass the new binary int to LED controller
         sn3218.enable_leds(self.led_status)
 
-    def _turn_led_off(self, leds=[]):
+    def _turn_led_off(self, leds=[]):  # pragma: no cover
         """
         Method of turning a set of debugging LEDs off.
 
@@ -587,7 +593,7 @@ class Dome():
 
         """
         # pass a list of strings of the leds to turn off
-        if self.debug_lights:
+        if not(self.debug_lights):
             return None
         if leds == []:
             # if leds is an empty list do nothing

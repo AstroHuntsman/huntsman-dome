@@ -24,7 +24,7 @@ def test_dome_initialisation(testing_dome):
     assert testing_dome._dome_status == "unknown"
     assert testing_dome.dome_az is None
     assert testing_dome.encoder_count == 0
-    assert testing_dome.az_per_tick == 1
+    assert testing_dome.az_per_tick == None
     assert testing_dome._at_home is False
     assert testing_dome.current_direction == "CCW"
 
@@ -49,20 +49,37 @@ def test_abort(testing_dome):
 def test_getAz(dome_az_90):
     assert dome_az_90.getAz() == 90
     assert dome_az_90.getAz() == dome_az_90.dome_az
-    # if dome_az is None, the dome should automatically calibrate itself
-    # check that the calibration ended succesfully at home position
+    # if dome_az is None then getAz() will return None
     dome_az_90.dome_az = None
-    assert dome_az_90.getAz() == 0
-    assert dome_az_90.az_per_tick == 36
+    assert dome_az_90.getAz() is None
 
 
 def test_GotoAz(dome_az_90):
+    # test fixture has az_per_tick attribute of 10
     dome_az_90.GotoAz(300)
     assert dome_az_90.dome_az == 290
     assert dome_az_90.encoder_count == 29
     dome_az_90.GotoAz(2)
     assert dome_az_90.dome_az == 10
     assert dome_az_90.encoder_count == 1
+
+
+def test_GotoAz_dome_az_is_None(testing_dome):
+    # if dome az is None GotoAz() will trigger calibration routine
+    assert testing_dome.dome_az is None
+    # in testing mode the dome will simulate 10 encoder ticks
+    # this means the calibrated az_per_tick will be 36
+    testing_dome.GotoAz(315)
+    assert testing_dome.dome_az == 288
+    assert testing_dome.encoder_count == 8
+    assert testing_dome.az_per_tick == 36
+
+
+def calibrate_dome_encoder_counts(testing_dome):
+    testing_dome.calibrate_dome_encoder_counts()
+    assert testing_dome.dome_az == 0
+    assert testing_dome.encoder_count == 20
+    assert testing_dome.az_per_tick == 36
 
 
 @pytest.mark.parametrize("current_dir", ["CW", "CCW", None])
