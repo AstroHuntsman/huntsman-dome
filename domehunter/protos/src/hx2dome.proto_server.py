@@ -26,6 +26,7 @@ _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 # dapiFindHomeComplete    (google.protobuf.Empty)   returns   (IsComplete) {};
 # dapiSync                (AzEl)                    returns   (ReturnCode) {};
 
+
 class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
 
     def dapiGetAzEl(self, request, context):
@@ -38,12 +39,15 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
         return response
 
     def dapiGotoAzEl(self, request, context):
-        # print something for debugging, so I know python server is actually getting a request from client
+        # print something for debugging
+        # so I know python server is actually getting a request from client
         print(f'Receiving: GotoAzEl Az={request.az}, El={request.el}')
         time.sleep(1)
-        # increment the return code by 1 so I can see the client/server communication is working
+        # increment the return code by 1 so I can see the client/server
+        # communication is working
         response = hx2dome_pb2.ReturnCode(return_code=request.return_code+1)
-        print(f'Sending: GotoAzEl complete, return code={response.return_code}\n')
+        print(f'Sending: GotoAzEl complete,'
+              ' return code={response.return_code}\n')
         time.sleep(1)
         return response
 
