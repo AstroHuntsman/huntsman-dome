@@ -98,6 +98,9 @@ class Dome():
         (unknown at initialisation) and position of the direction relay switch
         (initialised in the CCW position).
         """
+        # in case a previous instance has been initialised, tell the
+        # pin factory to release all the pins
+
         if testing:
             # Set the default pin factory to a mock factory
             Device.pin_factory = MockFactory()
