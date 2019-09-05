@@ -39,20 +39,7 @@ public:
 					MutexInterface*					             pIOMutex,
 					TickCountInterface*				           pTickCount,
 					std::shared_ptr<Channel>             channel
-				) : m_pGRPCstub(HX2Dome::NewStub(channel))
-				{
-					(void)pszSelection;
-					m_nPrivateISIndex			= nISIndex;
-					m_pSerX							  = pSerX;
-					m_pTheSkyXForMounts		= pTheSkyXForMounts;
-					m_pSleeper						= pSleeper;
-					m_pIniUtil						= pIniUtil;
-					m_pLogger						  = pLogger;
-					m_pIOMutex						= pIOMutex;
-					m_pTickCount					= pTickCount;
-
-					m_bLinked = false;
-				};
+				);
 	virtual ~X2Dome();
 
 	/*!\name DriverRootInterface Implementation

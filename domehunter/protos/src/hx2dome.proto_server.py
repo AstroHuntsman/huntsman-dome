@@ -18,12 +18,12 @@ _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 # dapiPark                (google.protobuf.Empty)   returns   (ReturnCode) {};
 # dapiUnpark              (google.protobuf.Empty)   returns   (ReturnCode) {};
 # dapiFindHome            (google.protobuf.Empty)   returns   (ReturnCode) {};
-# dapiGotoComplete        (google.protobuf.Empty)   returns   (IsComplete) {};
-# dapiOpenComplete        (google.protobuf.Empty)   returns   (IsComplete) {};
-# dapiCloseComplete       (google.protobuf.Empty)   returns   (IsComplete) {};
-# dapiParkComplete        (google.protobuf.Empty)   returns   (IsComplete) {};
-# dapiUnparkComplete      (google.protobuf.Empty)   returns   (IsComplete) {};
-# dapiFindHomeComplete    (google.protobuf.Empty)   returns   (IsComplete) {};
+# dapiIsGotoComplete      (google.protobuf.Empty)   returns   (IsComplete) {};
+# dapiIsOpenComplete      (google.protobuf.Empty)   returns   (IsComplete) {};
+# dapiIsCloseComplete     (google.protobuf.Empty)   returns   (IsComplete) {};
+# dapiIsParkComplete      (google.protobuf.Empty)   returns   (IsComplete) {};
+# dapiIsUnparkComplete    (google.protobuf.Empty)   returns   (IsComplete) {};
+# dapiIsFindHomeComplete  (google.protobuf.Empty)   returns   (IsComplete) {};
 # dapiSync                (AzEl)                    returns   (ReturnCode) {};
 
 
@@ -32,7 +32,11 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
     def dapiGetAzEl(self, request, context):
         print(f'Receiving: GetAzEl request')
         time.sleep(1)
-        # send back a made up AzEl
+
+        # our cpp TheSkyX driver uses the dapiGetAzEl rpc to check link
+        # need to add code to get az and el from rpi
+        # for now just give dummy numbers
+        # if something wrong with rpi and no response change return code
         response = hx2dome_pb2.AzEl(return_code=1, az=10.0, el=20.0)
         print(f'Sending: Az={response.az}, El={response.el}')
         time.sleep(1)
@@ -45,50 +49,68 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
         time.sleep(1)
         # increment the return code by 1 so I can see the client/server
         # communication is working
-        response = hx2dome_pb2.ReturnCode(return_code=request.return_code+1)
+        response = hx2dome_pb2.ReturnCode(return_code=request.return_code)
         print(f'Sending: GotoAzEl complete,'
-              ' return code={response.return_code}\n')
+              f' return code={response.return_code}\n')
         time.sleep(1)
         return response
 
     def dapiAbort(self, request, context):
-        return None
+        # add in rpi code to stop all dome operations
+        # maybe print to console/any rpi side logging
+        response = hx2dome_pb2.ReturnCode(return_code=0)
+        return response
 
     def dapiOpen(self, request, context):
-        return None
+        response = hx2dome_pb2.ReturnCode(return_code=0)
+        return response
 
     def dapiClose(self, request, context):
-        return None
+        response = hx2dome_pb2.ReturnCode(return_code=0)
+        return response
 
     def dapiPark(self, request, context):
-        return None
+        response = hx2dome_pb2.ReturnCode(return_code=0)
+        return response
 
     def dapiUnpark(self, request, context):
-        return None
+        response = hx2dome_pb2.ReturnCode(return_code=0)
+        return response
 
     def dapiFindHome(self, request, context):
-        return None
+        response = hx2dome_pb2.ReturnCode(return_code=0)
+        return response
 
-    def dapiGotoComplete(self, request, context):
-        return None
+    def dapiIsGotoComplete(self, request, context):
+        print("      ITS DOING IT, ITS DOING IT    ")
+        response = hx2dome_pb2.IsComplete(is_complete=True)
+        return response
 
-    def dapiOpenComplete(self, request, context):
-        return None
+    def dapiIsOpenComplete(self, request, context):
+        response = hx2dome_pb2.IsComplete(is_complete=True)
+        return response
 
-    def dapiCloseComplete(self, request, context):
-        return None
+    def dapiIsCloseComplete(self, request, context):
+        response = hx2dome_pb2.IsComplete(is_complete=True)
+        return response
 
-    def dapiParkComplete(self, request, context):
-        return None
+    def dapiIsParkComplete(self, request, context):
+        response = hx2dome_pb2.IsComplete(is_complete=True)
+        return response
 
-    def dapiUnparkComplete(self, request, context):
-        return None
+    def dapiIsUnparkComplete(self, request, context):
+        response = hx2dome_pb2.IsComplete(is_complete=True)
+        return response
 
-    def dapiFindHomeComplete(self, request, context):
-        return None
+    def dapiIsFindHomeComplete(self, request, context):
+        print("      PHONING HOME    ")
+        response = hx2dome_pb2.IsComplete(is_complete=True)
+        return response
 
     def dapiSync(self, request, context):
-        return None
+        print("      IM SINKINGGGGGGGGG    ")
+        response = hx2dome_pb2.ReturnCode(return_code=0)
+        return response
 
 
 def serve():

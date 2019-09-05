@@ -27,12 +27,12 @@ static const char* HX2Dome_method_names[] = {
   "/hx2dome.HX2Dome/dapiPark",
   "/hx2dome.HX2Dome/dapiUnpark",
   "/hx2dome.HX2Dome/dapiFindHome",
-  "/hx2dome.HX2Dome/dapiGotoComplete",
-  "/hx2dome.HX2Dome/dapiOpenComplete",
-  "/hx2dome.HX2Dome/dapiCloseComplete",
-  "/hx2dome.HX2Dome/dapiParkComplete",
-  "/hx2dome.HX2Dome/dapiUnparkComplete",
-  "/hx2dome.HX2Dome/dapiFindHomeComplete",
+  "/hx2dome.HX2Dome/dapiIsGotoComplete",
+  "/hx2dome.HX2Dome/dapiIsOpenComplete",
+  "/hx2dome.HX2Dome/dapiIsCloseComplete",
+  "/hx2dome.HX2Dome/dapiIsParkComplete",
+  "/hx2dome.HX2Dome/dapiIsUnparkComplete",
+  "/hx2dome.HX2Dome/dapiIsFindHomeComplete",
   "/hx2dome.HX2Dome/dapiSync",
   "/hx2dome.HX2Dome/deviceInfoNameShort",
   "/hx2dome.HX2Dome/deviceInfoNameLong",
@@ -56,12 +56,12 @@ HX2Dome::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel)
   , rpcmethod_dapiPark_(HX2Dome_method_names[5], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_dapiUnpark_(HX2Dome_method_names[6], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_dapiFindHome_(HX2Dome_method_names[7], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_dapiGotoComplete_(HX2Dome_method_names[8], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_dapiOpenComplete_(HX2Dome_method_names[9], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_dapiCloseComplete_(HX2Dome_method_names[10], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_dapiParkComplete_(HX2Dome_method_names[11], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_dapiUnparkComplete_(HX2Dome_method_names[12], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_dapiFindHomeComplete_(HX2Dome_method_names[13], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_dapiIsGotoComplete_(HX2Dome_method_names[8], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_dapiIsOpenComplete_(HX2Dome_method_names[9], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_dapiIsCloseComplete_(HX2Dome_method_names[10], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_dapiIsParkComplete_(HX2Dome_method_names[11], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_dapiIsUnparkComplete_(HX2Dome_method_names[12], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_dapiIsFindHomeComplete_(HX2Dome_method_names[13], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_dapiSync_(HX2Dome_method_names[14], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_deviceInfoNameShort_(HX2Dome_method_names[15], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_deviceInfoNameLong_(HX2Dome_method_names[16], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
@@ -230,124 +230,124 @@ void HX2Dome::Stub::experimental_async::dapiFindHome(::grpc::ClientContext* cont
   return ::grpc::internal::ClientAsyncResponseReaderFactory< ::hx2dome::ReturnCode>::Create(channel_.get(), cq, rpcmethod_dapiFindHome_, context, request, false);
 }
 
-::grpc::Status HX2Dome::Stub::dapiGotoComplete(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::hx2dome::IsComplete* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_dapiGotoComplete_, context, request, response);
+::grpc::Status HX2Dome::Stub::dapiIsGotoComplete(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::hx2dome::IsComplete* response) {
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_dapiIsGotoComplete_, context, request, response);
 }
 
-void HX2Dome::Stub::experimental_async::dapiGotoComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)> f) {
-  return ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_dapiGotoComplete_, context, request, response, std::move(f));
+void HX2Dome::Stub::experimental_async::dapiIsGotoComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)> f) {
+  return ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_dapiIsGotoComplete_, context, request, response, std::move(f));
 }
 
-void HX2Dome::Stub::experimental_async::dapiGotoComplete(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)> f) {
-  return ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_dapiGotoComplete_, context, request, response, std::move(f));
+void HX2Dome::Stub::experimental_async::dapiIsGotoComplete(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)> f) {
+  return ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_dapiIsGotoComplete_, context, request, response, std::move(f));
 }
 
-::grpc::ClientAsyncResponseReader< ::hx2dome::IsComplete>* HX2Dome::Stub::AsyncdapiGotoCompleteRaw(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::hx2dome::IsComplete>::Create(channel_.get(), cq, rpcmethod_dapiGotoComplete_, context, request, true);
+::grpc::ClientAsyncResponseReader< ::hx2dome::IsComplete>* HX2Dome::Stub::AsyncdapiIsGotoCompleteRaw(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::hx2dome::IsComplete>::Create(channel_.get(), cq, rpcmethod_dapiIsGotoComplete_, context, request, true);
 }
 
-::grpc::ClientAsyncResponseReader< ::hx2dome::IsComplete>* HX2Dome::Stub::PrepareAsyncdapiGotoCompleteRaw(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::hx2dome::IsComplete>::Create(channel_.get(), cq, rpcmethod_dapiGotoComplete_, context, request, false);
+::grpc::ClientAsyncResponseReader< ::hx2dome::IsComplete>* HX2Dome::Stub::PrepareAsyncdapiIsGotoCompleteRaw(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::hx2dome::IsComplete>::Create(channel_.get(), cq, rpcmethod_dapiIsGotoComplete_, context, request, false);
 }
 
-::grpc::Status HX2Dome::Stub::dapiOpenComplete(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::hx2dome::IsComplete* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_dapiOpenComplete_, context, request, response);
+::grpc::Status HX2Dome::Stub::dapiIsOpenComplete(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::hx2dome::IsComplete* response) {
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_dapiIsOpenComplete_, context, request, response);
 }
 
-void HX2Dome::Stub::experimental_async::dapiOpenComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)> f) {
-  return ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_dapiOpenComplete_, context, request, response, std::move(f));
+void HX2Dome::Stub::experimental_async::dapiIsOpenComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)> f) {
+  return ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_dapiIsOpenComplete_, context, request, response, std::move(f));
 }
 
-void HX2Dome::Stub::experimental_async::dapiOpenComplete(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)> f) {
-  return ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_dapiOpenComplete_, context, request, response, std::move(f));
+void HX2Dome::Stub::experimental_async::dapiIsOpenComplete(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)> f) {
+  return ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_dapiIsOpenComplete_, context, request, response, std::move(f));
 }
 
-::grpc::ClientAsyncResponseReader< ::hx2dome::IsComplete>* HX2Dome::Stub::AsyncdapiOpenCompleteRaw(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::hx2dome::IsComplete>::Create(channel_.get(), cq, rpcmethod_dapiOpenComplete_, context, request, true);
+::grpc::ClientAsyncResponseReader< ::hx2dome::IsComplete>* HX2Dome::Stub::AsyncdapiIsOpenCompleteRaw(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::hx2dome::IsComplete>::Create(channel_.get(), cq, rpcmethod_dapiIsOpenComplete_, context, request, true);
 }
 
-::grpc::ClientAsyncResponseReader< ::hx2dome::IsComplete>* HX2Dome::Stub::PrepareAsyncdapiOpenCompleteRaw(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::hx2dome::IsComplete>::Create(channel_.get(), cq, rpcmethod_dapiOpenComplete_, context, request, false);
+::grpc::ClientAsyncResponseReader< ::hx2dome::IsComplete>* HX2Dome::Stub::PrepareAsyncdapiIsOpenCompleteRaw(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::hx2dome::IsComplete>::Create(channel_.get(), cq, rpcmethod_dapiIsOpenComplete_, context, request, false);
 }
 
-::grpc::Status HX2Dome::Stub::dapiCloseComplete(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::hx2dome::IsComplete* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_dapiCloseComplete_, context, request, response);
+::grpc::Status HX2Dome::Stub::dapiIsCloseComplete(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::hx2dome::IsComplete* response) {
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_dapiIsCloseComplete_, context, request, response);
 }
 
-void HX2Dome::Stub::experimental_async::dapiCloseComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)> f) {
-  return ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_dapiCloseComplete_, context, request, response, std::move(f));
+void HX2Dome::Stub::experimental_async::dapiIsCloseComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)> f) {
+  return ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_dapiIsCloseComplete_, context, request, response, std::move(f));
 }
 
-void HX2Dome::Stub::experimental_async::dapiCloseComplete(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)> f) {
-  return ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_dapiCloseComplete_, context, request, response, std::move(f));
+void HX2Dome::Stub::experimental_async::dapiIsCloseComplete(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)> f) {
+  return ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_dapiIsCloseComplete_, context, request, response, std::move(f));
 }
 
-::grpc::ClientAsyncResponseReader< ::hx2dome::IsComplete>* HX2Dome::Stub::AsyncdapiCloseCompleteRaw(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::hx2dome::IsComplete>::Create(channel_.get(), cq, rpcmethod_dapiCloseComplete_, context, request, true);
+::grpc::ClientAsyncResponseReader< ::hx2dome::IsComplete>* HX2Dome::Stub::AsyncdapiIsCloseCompleteRaw(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::hx2dome::IsComplete>::Create(channel_.get(), cq, rpcmethod_dapiIsCloseComplete_, context, request, true);
 }
 
-::grpc::ClientAsyncResponseReader< ::hx2dome::IsComplete>* HX2Dome::Stub::PrepareAsyncdapiCloseCompleteRaw(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::hx2dome::IsComplete>::Create(channel_.get(), cq, rpcmethod_dapiCloseComplete_, context, request, false);
+::grpc::ClientAsyncResponseReader< ::hx2dome::IsComplete>* HX2Dome::Stub::PrepareAsyncdapiIsCloseCompleteRaw(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::hx2dome::IsComplete>::Create(channel_.get(), cq, rpcmethod_dapiIsCloseComplete_, context, request, false);
 }
 
-::grpc::Status HX2Dome::Stub::dapiParkComplete(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::hx2dome::IsComplete* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_dapiParkComplete_, context, request, response);
+::grpc::Status HX2Dome::Stub::dapiIsParkComplete(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::hx2dome::IsComplete* response) {
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_dapiIsParkComplete_, context, request, response);
 }
 
-void HX2Dome::Stub::experimental_async::dapiParkComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)> f) {
-  return ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_dapiParkComplete_, context, request, response, std::move(f));
+void HX2Dome::Stub::experimental_async::dapiIsParkComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)> f) {
+  return ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_dapiIsParkComplete_, context, request, response, std::move(f));
 }
 
-void HX2Dome::Stub::experimental_async::dapiParkComplete(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)> f) {
-  return ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_dapiParkComplete_, context, request, response, std::move(f));
+void HX2Dome::Stub::experimental_async::dapiIsParkComplete(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)> f) {
+  return ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_dapiIsParkComplete_, context, request, response, std::move(f));
 }
 
-::grpc::ClientAsyncResponseReader< ::hx2dome::IsComplete>* HX2Dome::Stub::AsyncdapiParkCompleteRaw(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::hx2dome::IsComplete>::Create(channel_.get(), cq, rpcmethod_dapiParkComplete_, context, request, true);
+::grpc::ClientAsyncResponseReader< ::hx2dome::IsComplete>* HX2Dome::Stub::AsyncdapiIsParkCompleteRaw(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::hx2dome::IsComplete>::Create(channel_.get(), cq, rpcmethod_dapiIsParkComplete_, context, request, true);
 }
 
-::grpc::ClientAsyncResponseReader< ::hx2dome::IsComplete>* HX2Dome::Stub::PrepareAsyncdapiParkCompleteRaw(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::hx2dome::IsComplete>::Create(channel_.get(), cq, rpcmethod_dapiParkComplete_, context, request, false);
+::grpc::ClientAsyncResponseReader< ::hx2dome::IsComplete>* HX2Dome::Stub::PrepareAsyncdapiIsParkCompleteRaw(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::hx2dome::IsComplete>::Create(channel_.get(), cq, rpcmethod_dapiIsParkComplete_, context, request, false);
 }
 
-::grpc::Status HX2Dome::Stub::dapiUnparkComplete(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::hx2dome::IsComplete* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_dapiUnparkComplete_, context, request, response);
+::grpc::Status HX2Dome::Stub::dapiIsUnparkComplete(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::hx2dome::IsComplete* response) {
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_dapiIsUnparkComplete_, context, request, response);
 }
 
-void HX2Dome::Stub::experimental_async::dapiUnparkComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)> f) {
-  return ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_dapiUnparkComplete_, context, request, response, std::move(f));
+void HX2Dome::Stub::experimental_async::dapiIsUnparkComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)> f) {
+  return ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_dapiIsUnparkComplete_, context, request, response, std::move(f));
 }
 
-void HX2Dome::Stub::experimental_async::dapiUnparkComplete(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)> f) {
-  return ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_dapiUnparkComplete_, context, request, response, std::move(f));
+void HX2Dome::Stub::experimental_async::dapiIsUnparkComplete(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)> f) {
+  return ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_dapiIsUnparkComplete_, context, request, response, std::move(f));
 }
 
-::grpc::ClientAsyncResponseReader< ::hx2dome::IsComplete>* HX2Dome::Stub::AsyncdapiUnparkCompleteRaw(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::hx2dome::IsComplete>::Create(channel_.get(), cq, rpcmethod_dapiUnparkComplete_, context, request, true);
+::grpc::ClientAsyncResponseReader< ::hx2dome::IsComplete>* HX2Dome::Stub::AsyncdapiIsUnparkCompleteRaw(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::hx2dome::IsComplete>::Create(channel_.get(), cq, rpcmethod_dapiIsUnparkComplete_, context, request, true);
 }
 
-::grpc::ClientAsyncResponseReader< ::hx2dome::IsComplete>* HX2Dome::Stub::PrepareAsyncdapiUnparkCompleteRaw(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::hx2dome::IsComplete>::Create(channel_.get(), cq, rpcmethod_dapiUnparkComplete_, context, request, false);
+::grpc::ClientAsyncResponseReader< ::hx2dome::IsComplete>* HX2Dome::Stub::PrepareAsyncdapiIsUnparkCompleteRaw(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::hx2dome::IsComplete>::Create(channel_.get(), cq, rpcmethod_dapiIsUnparkComplete_, context, request, false);
 }
 
-::grpc::Status HX2Dome::Stub::dapiFindHomeComplete(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::hx2dome::IsComplete* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_dapiFindHomeComplete_, context, request, response);
+::grpc::Status HX2Dome::Stub::dapiIsFindHomeComplete(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::hx2dome::IsComplete* response) {
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_dapiIsFindHomeComplete_, context, request, response);
 }
 
-void HX2Dome::Stub::experimental_async::dapiFindHomeComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)> f) {
-  return ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_dapiFindHomeComplete_, context, request, response, std::move(f));
+void HX2Dome::Stub::experimental_async::dapiIsFindHomeComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)> f) {
+  return ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_dapiIsFindHomeComplete_, context, request, response, std::move(f));
 }
 
-void HX2Dome::Stub::experimental_async::dapiFindHomeComplete(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)> f) {
-  return ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_dapiFindHomeComplete_, context, request, response, std::move(f));
+void HX2Dome::Stub::experimental_async::dapiIsFindHomeComplete(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)> f) {
+  return ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_dapiIsFindHomeComplete_, context, request, response, std::move(f));
 }
 
-::grpc::ClientAsyncResponseReader< ::hx2dome::IsComplete>* HX2Dome::Stub::AsyncdapiFindHomeCompleteRaw(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::hx2dome::IsComplete>::Create(channel_.get(), cq, rpcmethod_dapiFindHomeComplete_, context, request, true);
+::grpc::ClientAsyncResponseReader< ::hx2dome::IsComplete>* HX2Dome::Stub::AsyncdapiIsFindHomeCompleteRaw(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::hx2dome::IsComplete>::Create(channel_.get(), cq, rpcmethod_dapiIsFindHomeComplete_, context, request, true);
 }
 
-::grpc::ClientAsyncResponseReader< ::hx2dome::IsComplete>* HX2Dome::Stub::PrepareAsyncdapiFindHomeCompleteRaw(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::hx2dome::IsComplete>::Create(channel_.get(), cq, rpcmethod_dapiFindHomeComplete_, context, request, false);
+::grpc::ClientAsyncResponseReader< ::hx2dome::IsComplete>* HX2Dome::Stub::PrepareAsyncdapiIsFindHomeCompleteRaw(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::hx2dome::IsComplete>::Create(channel_.get(), cq, rpcmethod_dapiIsFindHomeComplete_, context, request, false);
 }
 
 ::grpc::Status HX2Dome::Stub::dapiSync(::grpc::ClientContext* context, const ::hx2dome::AzEl& request, ::hx2dome::ReturnCode* response) {
@@ -515,32 +515,32 @@ HX2Dome::Service::Service() {
       HX2Dome_method_names[8],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< HX2Dome::Service, ::hx2dome::Empty, ::hx2dome::IsComplete>(
-          std::mem_fn(&HX2Dome::Service::dapiGotoComplete), this)));
+          std::mem_fn(&HX2Dome::Service::dapiIsGotoComplete), this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       HX2Dome_method_names[9],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< HX2Dome::Service, ::hx2dome::Empty, ::hx2dome::IsComplete>(
-          std::mem_fn(&HX2Dome::Service::dapiOpenComplete), this)));
+          std::mem_fn(&HX2Dome::Service::dapiIsOpenComplete), this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       HX2Dome_method_names[10],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< HX2Dome::Service, ::hx2dome::Empty, ::hx2dome::IsComplete>(
-          std::mem_fn(&HX2Dome::Service::dapiCloseComplete), this)));
+          std::mem_fn(&HX2Dome::Service::dapiIsCloseComplete), this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       HX2Dome_method_names[11],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< HX2Dome::Service, ::hx2dome::Empty, ::hx2dome::IsComplete>(
-          std::mem_fn(&HX2Dome::Service::dapiParkComplete), this)));
+          std::mem_fn(&HX2Dome::Service::dapiIsParkComplete), this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       HX2Dome_method_names[12],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< HX2Dome::Service, ::hx2dome::Empty, ::hx2dome::IsComplete>(
-          std::mem_fn(&HX2Dome::Service::dapiUnparkComplete), this)));
+          std::mem_fn(&HX2Dome::Service::dapiIsUnparkComplete), this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       HX2Dome_method_names[13],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< HX2Dome::Service, ::hx2dome::Empty, ::hx2dome::IsComplete>(
-          std::mem_fn(&HX2Dome::Service::dapiFindHomeComplete), this)));
+          std::mem_fn(&HX2Dome::Service::dapiIsFindHomeComplete), this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       HX2Dome_method_names[14],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
@@ -632,42 +632,42 @@ HX2Dome::Service::~Service() {
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
 }
 
-::grpc::Status HX2Dome::Service::dapiGotoComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) {
+::grpc::Status HX2Dome::Service::dapiIsGotoComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) {
   (void) context;
   (void) request;
   (void) response;
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
 }
 
-::grpc::Status HX2Dome::Service::dapiOpenComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) {
+::grpc::Status HX2Dome::Service::dapiIsOpenComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) {
   (void) context;
   (void) request;
   (void) response;
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
 }
 
-::grpc::Status HX2Dome::Service::dapiCloseComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) {
+::grpc::Status HX2Dome::Service::dapiIsCloseComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) {
   (void) context;
   (void) request;
   (void) response;
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
 }
 
-::grpc::Status HX2Dome::Service::dapiParkComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) {
+::grpc::Status HX2Dome::Service::dapiIsParkComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) {
   (void) context;
   (void) request;
   (void) response;
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
 }
 
-::grpc::Status HX2Dome::Service::dapiUnparkComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) {
+::grpc::Status HX2Dome::Service::dapiIsUnparkComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) {
   (void) context;
   (void) request;
   (void) response;
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
 }
 
-::grpc::Status HX2Dome::Service::dapiFindHomeComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) {
+::grpc::Status HX2Dome::Service::dapiIsFindHomeComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) {
   (void) context;
   (void) request;
   (void) response;

@@ -54,33 +54,33 @@ class HX2DomeStub(object):
         request_serializer=hx2dome__pb2.Empty.SerializeToString,
         response_deserializer=hx2dome__pb2.ReturnCode.FromString,
         )
-    self.dapiGotoComplete = channel.unary_unary(
-        '/hx2dome.HX2Dome/dapiGotoComplete',
+    self.dapiIsGotoComplete = channel.unary_unary(
+        '/hx2dome.HX2Dome/dapiIsGotoComplete',
         request_serializer=hx2dome__pb2.Empty.SerializeToString,
         response_deserializer=hx2dome__pb2.IsComplete.FromString,
         )
-    self.dapiOpenComplete = channel.unary_unary(
-        '/hx2dome.HX2Dome/dapiOpenComplete',
+    self.dapiIsOpenComplete = channel.unary_unary(
+        '/hx2dome.HX2Dome/dapiIsOpenComplete',
         request_serializer=hx2dome__pb2.Empty.SerializeToString,
         response_deserializer=hx2dome__pb2.IsComplete.FromString,
         )
-    self.dapiCloseComplete = channel.unary_unary(
-        '/hx2dome.HX2Dome/dapiCloseComplete',
+    self.dapiIsCloseComplete = channel.unary_unary(
+        '/hx2dome.HX2Dome/dapiIsCloseComplete',
         request_serializer=hx2dome__pb2.Empty.SerializeToString,
         response_deserializer=hx2dome__pb2.IsComplete.FromString,
         )
-    self.dapiParkComplete = channel.unary_unary(
-        '/hx2dome.HX2Dome/dapiParkComplete',
+    self.dapiIsParkComplete = channel.unary_unary(
+        '/hx2dome.HX2Dome/dapiIsParkComplete',
         request_serializer=hx2dome__pb2.Empty.SerializeToString,
         response_deserializer=hx2dome__pb2.IsComplete.FromString,
         )
-    self.dapiUnparkComplete = channel.unary_unary(
-        '/hx2dome.HX2Dome/dapiUnparkComplete',
+    self.dapiIsUnparkComplete = channel.unary_unary(
+        '/hx2dome.HX2Dome/dapiIsUnparkComplete',
         request_serializer=hx2dome__pb2.Empty.SerializeToString,
         response_deserializer=hx2dome__pb2.IsComplete.FromString,
         )
-    self.dapiFindHomeComplete = channel.unary_unary(
-        '/hx2dome.HX2Dome/dapiFindHomeComplete',
+    self.dapiIsFindHomeComplete = channel.unary_unary(
+        '/hx2dome.HX2Dome/dapiIsFindHomeComplete',
         request_serializer=hx2dome__pb2.Empty.SerializeToString,
         response_deserializer=hx2dome__pb2.IsComplete.FromString,
         )
@@ -176,42 +176,42 @@ class HX2DomeServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def dapiGotoComplete(self, request, context):
+  def dapiIsGotoComplete(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def dapiOpenComplete(self, request, context):
+  def dapiIsOpenComplete(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def dapiCloseComplete(self, request, context):
+  def dapiIsCloseComplete(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def dapiParkComplete(self, request, context):
+  def dapiIsParkComplete(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def dapiUnparkComplete(self, request, context):
+  def dapiIsUnparkComplete(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def dapiFindHomeComplete(self, request, context):
+  def dapiIsFindHomeComplete(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -303,33 +303,33 @@ def add_HX2DomeServicer_to_server(servicer, server):
           request_deserializer=hx2dome__pb2.Empty.FromString,
           response_serializer=hx2dome__pb2.ReturnCode.SerializeToString,
       ),
-      'dapiGotoComplete': grpc.unary_unary_rpc_method_handler(
-          servicer.dapiGotoComplete,
+      'dapiIsGotoComplete': grpc.unary_unary_rpc_method_handler(
+          servicer.dapiIsGotoComplete,
           request_deserializer=hx2dome__pb2.Empty.FromString,
           response_serializer=hx2dome__pb2.IsComplete.SerializeToString,
       ),
-      'dapiOpenComplete': grpc.unary_unary_rpc_method_handler(
-          servicer.dapiOpenComplete,
+      'dapiIsOpenComplete': grpc.unary_unary_rpc_method_handler(
+          servicer.dapiIsOpenComplete,
           request_deserializer=hx2dome__pb2.Empty.FromString,
           response_serializer=hx2dome__pb2.IsComplete.SerializeToString,
       ),
-      'dapiCloseComplete': grpc.unary_unary_rpc_method_handler(
-          servicer.dapiCloseComplete,
+      'dapiIsCloseComplete': grpc.unary_unary_rpc_method_handler(
+          servicer.dapiIsCloseComplete,
           request_deserializer=hx2dome__pb2.Empty.FromString,
           response_serializer=hx2dome__pb2.IsComplete.SerializeToString,
       ),
-      'dapiParkComplete': grpc.unary_unary_rpc_method_handler(
-          servicer.dapiParkComplete,
+      'dapiIsParkComplete': grpc.unary_unary_rpc_method_handler(
+          servicer.dapiIsParkComplete,
           request_deserializer=hx2dome__pb2.Empty.FromString,
           response_serializer=hx2dome__pb2.IsComplete.SerializeToString,
       ),
-      'dapiUnparkComplete': grpc.unary_unary_rpc_method_handler(
-          servicer.dapiUnparkComplete,
+      'dapiIsUnparkComplete': grpc.unary_unary_rpc_method_handler(
+          servicer.dapiIsUnparkComplete,
           request_deserializer=hx2dome__pb2.Empty.FromString,
           response_serializer=hx2dome__pb2.IsComplete.SerializeToString,
       ),
-      'dapiFindHomeComplete': grpc.unary_unary_rpc_method_handler(
-          servicer.dapiFindHomeComplete,
+      'dapiIsFindHomeComplete': grpc.unary_unary_rpc_method_handler(
+          servicer.dapiIsFindHomeComplete,
           request_deserializer=hx2dome__pb2.Empty.FromString,
           response_serializer=hx2dome__pb2.IsComplete.SerializeToString,
       ),

@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='hx2dome',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\rhx2dome.proto\x12\x07hx2dome\"!\n\nReturnCode\x12\x13\n\x0breturn_code\x18\x01 \x01(\x05\"3\n\x04\x41zEl\x12\x13\n\x0breturn_code\x18\x01 \x01(\x05\x12\n\n\x02\x61z\x18\x02 \x01(\x01\x12\n\n\x02\x65l\x18\x03 \x01(\x01\"6\n\nIsComplete\x12\x13\n\x0breturn_code\x18\x01 \x01(\x05\x12\x13\n\x0bis_complete\x18\x02 \x01(\x08\"#\n\x0b\x42\x61sicString\x12\x14\n\x0c\x62\x61sic_string\x18\x01 \x01(\t\"\x07\n\x05\x45mpty2\x8a\t\n\x07HX2Dome\x12.\n\x0b\x64\x61piGetAzEl\x12\x0e.hx2dome.Empty\x1a\r.hx2dome.AzEl\"\x00\x12\x34\n\x0c\x64\x61piGotoAzEl\x12\r.hx2dome.AzEl\x1a\x13.hx2dome.ReturnCode\"\x00\x12\x32\n\tdapiAbort\x12\x0e.hx2dome.Empty\x1a\x13.hx2dome.ReturnCode\"\x00\x12\x31\n\x08\x64\x61piOpen\x12\x0e.hx2dome.Empty\x1a\x13.hx2dome.ReturnCode\"\x00\x12\x32\n\tdapiClose\x12\x0e.hx2dome.Empty\x1a\x13.hx2dome.ReturnCode\"\x00\x12\x31\n\x08\x64\x61piPark\x12\x0e.hx2dome.Empty\x1a\x13.hx2dome.ReturnCode\"\x00\x12\x33\n\ndapiUnpark\x12\x0e.hx2dome.Empty\x1a\x13.hx2dome.ReturnCode\"\x00\x12\x35\n\x0c\x64\x61piFindHome\x12\x0e.hx2dome.Empty\x1a\x13.hx2dome.ReturnCode\"\x00\x12\x39\n\x10\x64\x61piGotoComplete\x12\x0e.hx2dome.Empty\x1a\x13.hx2dome.IsComplete\"\x00\x12\x39\n\x10\x64\x61piOpenComplete\x12\x0e.hx2dome.Empty\x1a\x13.hx2dome.IsComplete\"\x00\x12:\n\x11\x64\x61piCloseComplete\x12\x0e.hx2dome.Empty\x1a\x13.hx2dome.IsComplete\"\x00\x12\x39\n\x10\x64\x61piParkComplete\x12\x0e.hx2dome.Empty\x1a\x13.hx2dome.IsComplete\"\x00\x12;\n\x12\x64\x61piUnparkComplete\x12\x0e.hx2dome.Empty\x1a\x13.hx2dome.IsComplete\"\x00\x12=\n\x14\x64\x61piFindHomeComplete\x12\x0e.hx2dome.Empty\x1a\x13.hx2dome.IsComplete\"\x00\x12\x30\n\x08\x64\x61piSync\x12\r.hx2dome.AzEl\x1a\x13.hx2dome.ReturnCode\"\x00\x12=\n\x13\x64\x65viceInfoNameShort\x12\x0e.hx2dome.Empty\x1a\x14.hx2dome.BasicString\"\x00\x12<\n\x12\x64\x65viceInfoNameLong\x12\x0e.hx2dome.Empty\x1a\x14.hx2dome.BasicString\"\x00\x12G\n\x1d\x64\x65viceInfoDetailedDescription\x12\x0e.hx2dome.Empty\x1a\x14.hx2dome.BasicString\"\x00\x12\x43\n\x19\x64\x65viceInfoFirmwareVersion\x12\x0e.hx2dome.Empty\x1a\x14.hx2dome.BasicString\"\x00\x12\x39\n\x0f\x64\x65viceInfoModel\x12\x0e.hx2dome.Empty\x1a\x14.hx2dome.BasicString\"\x00\x62\x06proto3')
+  serialized_pb=_b('\n\rhx2dome.proto\x12\x07hx2dome\"!\n\nReturnCode\x12\x13\n\x0breturn_code\x18\x01 \x01(\x05\"3\n\x04\x41zEl\x12\x13\n\x0breturn_code\x18\x01 \x01(\x05\x12\n\n\x02\x61z\x18\x02 \x01(\x01\x12\n\n\x02\x65l\x18\x03 \x01(\x01\"6\n\nIsComplete\x12\x13\n\x0breturn_code\x18\x01 \x01(\x05\x12\x13\n\x0bis_complete\x18\x02 \x01(\x08\"#\n\x0b\x42\x61sicString\x12\x14\n\x0c\x62\x61sic_string\x18\x01 \x01(\t\"\x07\n\x05\x45mpty2\x96\t\n\x07HX2Dome\x12.\n\x0b\x64\x61piGetAzEl\x12\x0e.hx2dome.Empty\x1a\r.hx2dome.AzEl\"\x00\x12\x34\n\x0c\x64\x61piGotoAzEl\x12\r.hx2dome.AzEl\x1a\x13.hx2dome.ReturnCode\"\x00\x12\x32\n\tdapiAbort\x12\x0e.hx2dome.Empty\x1a\x13.hx2dome.ReturnCode\"\x00\x12\x31\n\x08\x64\x61piOpen\x12\x0e.hx2dome.Empty\x1a\x13.hx2dome.ReturnCode\"\x00\x12\x32\n\tdapiClose\x12\x0e.hx2dome.Empty\x1a\x13.hx2dome.ReturnCode\"\x00\x12\x31\n\x08\x64\x61piPark\x12\x0e.hx2dome.Empty\x1a\x13.hx2dome.ReturnCode\"\x00\x12\x33\n\ndapiUnpark\x12\x0e.hx2dome.Empty\x1a\x13.hx2dome.ReturnCode\"\x00\x12\x35\n\x0c\x64\x61piFindHome\x12\x0e.hx2dome.Empty\x1a\x13.hx2dome.ReturnCode\"\x00\x12;\n\x12\x64\x61piIsGotoComplete\x12\x0e.hx2dome.Empty\x1a\x13.hx2dome.IsComplete\"\x00\x12;\n\x12\x64\x61piIsOpenComplete\x12\x0e.hx2dome.Empty\x1a\x13.hx2dome.IsComplete\"\x00\x12<\n\x13\x64\x61piIsCloseComplete\x12\x0e.hx2dome.Empty\x1a\x13.hx2dome.IsComplete\"\x00\x12;\n\x12\x64\x61piIsParkComplete\x12\x0e.hx2dome.Empty\x1a\x13.hx2dome.IsComplete\"\x00\x12=\n\x14\x64\x61piIsUnparkComplete\x12\x0e.hx2dome.Empty\x1a\x13.hx2dome.IsComplete\"\x00\x12?\n\x16\x64\x61piIsFindHomeComplete\x12\x0e.hx2dome.Empty\x1a\x13.hx2dome.IsComplete\"\x00\x12\x30\n\x08\x64\x61piSync\x12\r.hx2dome.AzEl\x1a\x13.hx2dome.ReturnCode\"\x00\x12=\n\x13\x64\x65viceInfoNameShort\x12\x0e.hx2dome.Empty\x1a\x14.hx2dome.BasicString\"\x00\x12<\n\x12\x64\x65viceInfoNameLong\x12\x0e.hx2dome.Empty\x1a\x14.hx2dome.BasicString\"\x00\x12G\n\x1d\x64\x65viceInfoDetailedDescription\x12\x0e.hx2dome.Empty\x1a\x14.hx2dome.BasicString\"\x00\x12\x43\n\x19\x64\x65viceInfoFirmwareVersion\x12\x0e.hx2dome.Empty\x1a\x14.hx2dome.BasicString\"\x00\x12\x39\n\x0f\x64\x65viceInfoModel\x12\x0e.hx2dome.Empty\x1a\x14.hx2dome.BasicString\"\x00\x62\x06proto3')
 )
 
 
@@ -245,7 +245,7 @@ _HX2DOME = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   serialized_start=217,
-  serialized_end=1379,
+  serialized_end=1391,
   methods=[
   _descriptor.MethodDescriptor(
     name='dapiGetAzEl',
@@ -320,8 +320,8 @@ _HX2DOME = _descriptor.ServiceDescriptor(
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
-    name='dapiGotoComplete',
-    full_name='hx2dome.HX2Dome.dapiGotoComplete',
+    name='dapiIsGotoComplete',
+    full_name='hx2dome.HX2Dome.dapiIsGotoComplete',
     index=8,
     containing_service=None,
     input_type=_EMPTY,
@@ -329,8 +329,8 @@ _HX2DOME = _descriptor.ServiceDescriptor(
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
-    name='dapiOpenComplete',
-    full_name='hx2dome.HX2Dome.dapiOpenComplete',
+    name='dapiIsOpenComplete',
+    full_name='hx2dome.HX2Dome.dapiIsOpenComplete',
     index=9,
     containing_service=None,
     input_type=_EMPTY,
@@ -338,8 +338,8 @@ _HX2DOME = _descriptor.ServiceDescriptor(
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
-    name='dapiCloseComplete',
-    full_name='hx2dome.HX2Dome.dapiCloseComplete',
+    name='dapiIsCloseComplete',
+    full_name='hx2dome.HX2Dome.dapiIsCloseComplete',
     index=10,
     containing_service=None,
     input_type=_EMPTY,
@@ -347,8 +347,8 @@ _HX2DOME = _descriptor.ServiceDescriptor(
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
-    name='dapiParkComplete',
-    full_name='hx2dome.HX2Dome.dapiParkComplete',
+    name='dapiIsParkComplete',
+    full_name='hx2dome.HX2Dome.dapiIsParkComplete',
     index=11,
     containing_service=None,
     input_type=_EMPTY,
@@ -356,8 +356,8 @@ _HX2DOME = _descriptor.ServiceDescriptor(
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
-    name='dapiUnparkComplete',
-    full_name='hx2dome.HX2Dome.dapiUnparkComplete',
+    name='dapiIsUnparkComplete',
+    full_name='hx2dome.HX2Dome.dapiIsUnparkComplete',
     index=12,
     containing_service=None,
     input_type=_EMPTY,
@@ -365,8 +365,8 @@ _HX2DOME = _descriptor.ServiceDescriptor(
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
-    name='dapiFindHomeComplete',
-    full_name='hx2dome.HX2Dome.dapiFindHomeComplete',
+    name='dapiIsFindHomeComplete',
+    full_name='hx2dome.HX2Dome.dapiIsFindHomeComplete',
     index=13,
     containing_service=None,
     input_type=_EMPTY,
