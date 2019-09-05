@@ -2,7 +2,7 @@
 
 CXX = g++
 
-CFLAGS = -fPIC -O2 -g -DSB_MAC_BUILD -arch i386 -I. -I./src/licensedinterfaces/\
+CFLAGS = -fPIC -O2 -g -DSB_MAC_BUILD -I. -I./src/licensedinterfaces/\
          -L/usr/local/lib -lprotobuf -pthread -lgrpc++ -I/usr/local/include\
 
 CPPFLAGS = -fPIC -O2 -g -DSB_MAC_BUILD -I. -I./src/licensedinterfaces/\
