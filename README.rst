@@ -85,11 +85,9 @@ Alternatively to installing from source, you can install via homebrew on MacOS b
   brew install protobuf
   brew install protobuf-c
 
-However, this may require some editing of the driver makefiles. Specifically
-the include and linking flags, as homebrew will place relevant files and
-libraries in different locations to the installation from source method
-outlined above. The makefiles are written with the installation from source
-setup in mind.
+The homebrew installation method has been tested on MacOS HighSierra. However,
+If problems occur during compilation (missing header files etc) you might want
+to try installing from source.
 
 Getting Started
 ---------------
@@ -99,13 +97,13 @@ The files for compilation and installation are found in the
 
 
 * ``domelistHuntsmanDome.txt``
-* ``TheSkyX_plugin_install.sh``
-* ``Makefile``
+* ``TheSkyX_plugin_[MAC,LINUX]_install.sh``
+* ``Makefile_[MAC,LINUX]``
 
 The first two are files are used to install the compiled c++
-driver into TheSkyX application directory. You should be 
-able to simply run the shell script once the driver is compiled 
-and located in the ``domehunter/protos/`` directory, with 
+driver into TheSkyX application directory. You should be
+able to simply run the shell script once the driver is compiled
+and located in the ``domehunter/protos/`` directory, with
 filename ``libHuntsmanDome.so``.
 
 |
