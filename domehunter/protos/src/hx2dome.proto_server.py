@@ -329,8 +329,9 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             # if dome is not moving lets just consider the command complete
             # TODO: better method of determine command completion
             is_complete = not is_dome_moving
-            responnse = hx2dome_pb2.IsComplete(
+            response = hx2dome_pb2.IsComplete(
                 return_code=0, is_complete=is_dome_moving)
+            return response
 
     def dapiIsOpenComplete(self, request, context):
         """TheSkyX RPC to request the completetion status of dapiOpen.
@@ -359,7 +360,6 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             # Shutter control is not implemented yet so no rpi code yet
             response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
             return response
-            pass
 
     def dapiIsCloseComplete(self, request, context):
         """TheSkyX RPC to request the completetion status of dapiClose.
@@ -388,7 +388,6 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             # Shutter control is not implemented yet so no rpi code yet
             response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
             return response
-            pass
 
     def dapiIsParkComplete(self, request, context):
         """TheSkyX RPC to request the completetion status of dapiPark.
@@ -418,7 +417,6 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             # not really doing anything with park yet
             response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
             return response
-            pass
 
     def dapiIsUnparkComplete(self, request, context):
         """TheSkyX RPC to request the completetion status of dapiUnpark.
@@ -448,7 +446,6 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             # not really doing anything with park yet
             response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
             return response
-            pass
 
     def dapiIsFindHomeComplete(self, request, context):
         """TheSkyX RPC to request the completetion status of dapiFindHome.
@@ -479,8 +476,10 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             # lets just consider the command complete
             # TODO: better method of determine command completion
             is_complete = not is_dome_moving & self.dome.is_home
-            responnse = hx2dome_pb2.IsComplete(
-                return_code=0, is_complete=is_dome_moving)
+            print(f'is_complete is: {is_complete}, type: {type(is_complete)}')
+            response = hx2dome_pb2.IsComplete(
+                return_code=0, is_complete=is_complete)
+            return response
 
     def dapiSync(self, request, context):
         """TheSkyX rpc to request a calibration of the dome followed by a new
