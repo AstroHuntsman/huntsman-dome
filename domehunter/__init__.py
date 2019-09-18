@@ -392,7 +392,7 @@ class Dome():
 
         """
         # if dome already home, do nothing
-        if self.is_home():
+        if self.is_home:
             return
         else:
             self._move_cw()

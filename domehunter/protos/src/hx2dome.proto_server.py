@@ -325,7 +325,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
             return response
         else:
-            is_dome_moving = self.dome.dome_in_motion()
+            is_dome_moving = self.dome.dome_in_motion
             # if dome is not moving lets just consider the command complete
             # TODO: better method of determine command completion
             is_complete = not is_dome_moving
@@ -474,7 +474,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             response = hx2dome_pb2.IsComplete(is_complete=True)
             return response
         else:
-            is_dome_moving = self.dome.dome_in_motion()
+            is_dome_moving = self.dome.dome_in_motion
             # if dome is not moving and dome.is_home() returns True
             # lets just consider the command complete
             # TODO: better method of determine command completion
