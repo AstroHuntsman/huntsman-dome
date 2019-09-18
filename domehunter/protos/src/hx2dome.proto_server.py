@@ -476,7 +476,6 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             # lets just consider the command complete
             # TODO: better method of determine command completion
             is_complete = not is_dome_moving & self.dome.is_home
-            print(f'is_complete is: {is_complete}, type: {type(is_complete)}')
             response = hx2dome_pb2.IsComplete(
                 return_code=0, is_complete=is_complete)
             return response

@@ -125,9 +125,6 @@ class Dome():
             DIRECTION_RELAY_PIN_NUMBER = 19
             # set a timeout length in seconds for wait_for_active() calls
             WAIT_TIMEOUT = 1
-            # set a variable for bounce_time in seconds, this is just cool
-            # off period where the object will ignore additional (de)activation
-            BOUNCE_TIME = 0.1
 
             # in testing mode we need to create a seperate pin object so we can
             # simulate the activation of our fake DIDs and DODs
@@ -137,6 +134,10 @@ class Dome():
         else:
             # set the timeout length variable to None for non testing mode
             WAIT_TIMEOUT = None
+
+        # set a variable for bounce_time in seconds, this is just cool
+        # off period where the object will ignore additional (de)activation
+        BOUNCE_TIME = 0.1
 
         # set a wait time for testing mode that exceeds BOUNCE_TIME
         self.test_mode_delay_duration = BOUNCE_TIME + 0.05
