@@ -353,11 +353,11 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
 
         """
         if self.server_testing:
-            response = hx2dome_pb2.IsComplete(is_complete=True)
+            response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
             return response
         else:
             # Shutter control is not implemented yet so no rpi code yet
-            response = hx2dome_pb2.IsComplete(is_complete=True)
+            response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
             return response
             pass
 
@@ -382,11 +382,11 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
 
         """
         if self.server_testing:
-            response = hx2dome_pb2.IsComplete(is_complete=True)
+            response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
             return response
         else:
             # Shutter control is not implemented yet so no rpi code yet
-            response = hx2dome_pb2.IsComplete(is_complete=True)
+            response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
             return response
             pass
 
@@ -411,12 +411,12 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
 
         """
         if self.server_testing:
-            response = hx2dome_pb2.IsComplete(is_complete=True)
+            response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
             return response
         else:
             # TODO: unsure what action to trigger in automationHAT for "Park"
             # not really doing anything with park yet
-            response = hx2dome_pb2.IsComplete(is_complete=True)
+            response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
             return response
             pass
 
@@ -441,12 +441,12 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
 
         """
         if self.server_testing:
-            response = hx2dome_pb2.IsComplete(is_complete=True)
+            response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
             return response
         else:
             # TODO: unsure what action to trigger in automationHAT for "Park"
             # not really doing anything with park yet
-            response = hx2dome_pb2.IsComplete(is_complete=True)
+            response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
             return response
             pass
 
@@ -471,7 +471,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
         """
         print("      PHONING HOME    ")
         if self.server_testing:
-            response = hx2dome_pb2.IsComplete(is_complete=True)
+            response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
             return response
         else:
             is_dome_moving = self.dome.dome_in_motion
@@ -479,7 +479,8 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             # lets just consider the command complete
             # TODO: better method of determine command completion
             is_complete = not is_dome_moving & self.dome.is_home
-            responnse = hx2dome_pb2.IsComplete(is_complete=is_dome_moving)
+            responnse = hx2dome_pb2.IsComplete(
+                return_code=0, is_complete=is_dome_moving)
 
     def dapiSync(self, request, context):
         """TheSkyX rpc to request a calibration of the dome followed by a new
