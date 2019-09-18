@@ -16,15 +16,34 @@ one written in c++ the other in python.
 The C++ component is a X2Dome driver that interfaces with TheSkyX
 and passes commands through to the python component. This is done
 using the `gRPC <https://grpc.io/>`_ framework, allowing the c++
-component to pass infomation to the python component.
+component to pass information to the python component.
 
 The python component is implemented on a raspberry pi that controls
 the dome rotation motor. It controls the activation of the motor
-and tracks the dome position using an encoder. It returns infomation
+and tracks the dome position using an encoder. It returns information
 (such as dome position) to the c++ component using gRPC as well.
 
 The c++ code is built around Software Bisque's X2 standard. For more
 infomation on this `see here <https://www.bisque.com/x2standard/class_x2_dome.html#a7ffd792950cdd0abe1b022e7a8caff9e>`.
+
+HOW TO RUN THE STUPID THING
+===========================
+
+For installation of dependencies/instructions for compiling and installing the
+required TheSkyX driver see sections below. Assuming everything is set up
+correctly, this is how you would set up the dome control system.
+
+* Navigate to the directory containing the gRPC python server file
+* ``$ cd huntsman-dome/domehunter/protos/src/``
+* Use the -h flag to get information on the available command line flags
+* ``$ python hx2dome.proto_server.py -h ``
+* To run server in simulated hardware mode run with the -sh flag
+* ``$ python hx2dome.proto_server.py -sh ``
+* Now the server is running, you may start TheSkyX
+* Within TheSkyX go to the Dome Setup menu and select the Huntsman Telescope
+* Open TheSkyX log window and place by the python server window to watch for activity/status messages
+
+
 
 C++/gRPC Component
 ==================
@@ -49,7 +68,7 @@ Detailed instructions to install from source on any OS can be found `here <https
 
 For convenience a summary of the required steps is given below.
 
-To install depedencies for a linux OS, run the following::
+To install dependencies for a linux OS, run the following::
 
   [sudo] apt-get install build-essential autoconf libtool pkg-config
   [sudo] apt-get install libgflags-dev libgtest-dev
@@ -89,8 +108,8 @@ The homebrew installation method has been tested on MacOS HighSierra. However,
 If problems occur during compilation (missing header files etc) you might want
 to try installing from source.
 
-Getting Started
----------------
+Compiling TheSkyX Driver
+------------------------
 
 The files for compilation and installation are found in the
 ``domehunter/protos/`` directory. The relevant files are,
@@ -127,10 +146,11 @@ Once the driver is installed in TheSkyX, it can be selected from
 the dome selection menu. Before issuing any commands, start the
 ``domehunter/protos/src/hx2dome.proto_server.py`` in a new terminal.
 When you issue a command through TheSkyX, the c++ driver will send
-a remote procedure call through to the gRPC python server. Currently
-the server will just return a dummy response to the c++ driver,
-which will be passed to TheSkyX. In the future the gRPC python server
-will be used to issue commands to the dome hardware.
+a remote procedure call through to the gRPC python server.
+
+The gRPC python server can be run in a communication test mode that doesn't
+require any hardware. It will simply return dummy messages back to the TheSkyX
+driver.
 
 gRPC automatically generated files
 ----------------------------------
