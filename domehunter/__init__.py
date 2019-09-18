@@ -359,13 +359,19 @@ class Dome():
         # now set dome to rotate n times so we can determine the number of
         # ticks per revolution
         rotation_count = 0
+        # pause to let things settle/get a noticeable blink of debug_lights
+        time.sleep(0.5)
+
         while rotation_count < num_cal_rotations:
             self._move_cw()
             if self.testing:
                 # tell the fake home sensor that we have left home
                 self.home_sensor_pin.drive_low()
                 self._simulate_ticks(num_ticks=10)
-
+            # need to introduce a small pause before wait_for_active as we
+            # start from home position and want to make sure we clear the
+            # sensor before we start waiting for it to come around again
+            time.sleep(0.5)
             self.home_sensor.wait_for_active(timeout=self.wait_timeout)
 
             if self.testing:
@@ -373,6 +379,8 @@ class Dome():
                 self.home_sensor_pin.drive_high()
 
             self._stop_moving()
+            # another short pause to get an obvious blink of debug_lights
+            time.sleep(0.1)
 
             rotation_count += 1
 
@@ -395,7 +403,7 @@ class Dome():
         """
         # if dome already home, do nothing
         if self.is_home:
-            return
+            self.encoder_count = 0
         else:
             self._move_cw()
             self.home_sensor.wait_for_active(timeout=self.wait_timeout)
@@ -405,7 +413,6 @@ class Dome():
 
             self._stop_moving()
             self.encoder_count = 0
-            return
 
 ###############################################################################
 # Private Methods
