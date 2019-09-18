@@ -47,6 +47,13 @@ if not _ASTROPY_SETUP_:
     pass
 
 
+# TODO: set up functions to raise custom exceptions to allow server to
+#       properly handle exceptions
+class DomeCommandError(Exception):  # pragma: no cover
+    # generic dome command error, placeholder for now
+    pass
+
+
 class Dome():
     """
     Interface to dome control raspberry pi GPIO.
@@ -171,11 +178,11 @@ class Dome():
             sn3218.enable_leds(self.led_status)
             sn3218.enable()
 
-        # initialize status and az as unknown, to ensure we have properly
-        # calibrated az
+        # initialize az as unknown, to ensure we have properly calibrated az
         self.testing = testing
         self.debug_lights = debug_lights
-        self._dome_status = "unknown"
+        # dome wont be moving when initlialised
+        self._dome_moving = False
         self.dome_az = None
 
         # create a instance variable to track the dome motor encoder ticks
@@ -225,9 +232,11 @@ class Dome():
         return self._at_home
 
     @property
-    def status(self):
-        """Return a text string describing dome rotators current status."""
-        return self._dome_status
+    def dome_in_motion(self):
+        """Send True if dome is in motion."""
+        # This property is set to false by the _stop_moving() private method
+        # and to set to true by the _move_cw() and _move_ccw() private methods
+        return self._dome_moving
 
 ###############################################################################
 # Methods
@@ -343,14 +352,7 @@ class Dome():
 
         """
         # rotate the dome until we hit home, to give reference point
-        self._move_cw()
-        self.home_sensor.wait_for_active(timeout=self.wait_timeout)
-        if self.testing:
-            # in testing mode we need to "fake" the activation of the home pin
-            self.home_sensor_pin.drive_high()
-
-        self._stop_moving()
-        self.encoder_count = 0
+        self.find_home()
 
         # now set dome to rotate n times so we can determine the number of
         # ticks per revolution
@@ -378,6 +380,30 @@ class Dome():
         # set dome azimuth to 0?
         # problem, this isn't compensating for any overshooting
         self.dome_az = 0
+
+    def find_home(self):
+        """
+        Move Dome to home position.
+
+        Parameters
+        ----------
+        num_cal_rotations : integer
+            Number of rotations to perform to calibrate encoder.
+
+        """
+        # if dome already home, do nothing
+        if self.is_home():
+            return
+        else:
+            self._move_cw()
+            self.home_sensor.wait_for_active(timeout=self.wait_timeout)
+            if self.testing:
+                # in testing mode need to "fake" the activation of the home pin
+                self.home_sensor_pin.drive_high()
+
+            self._stop_moving()
+            self.encoder_count = 0
+            return
 
 ###############################################################################
 # Private Methods
@@ -482,6 +508,7 @@ class Dome():
         self._turn_led_on(leds=['relay_2_normally_open'])
         # turn on rotation
         self.rotation_relay.on()
+        self._dome_moving = True
         # update the rotation relay debug LEDs
         self._turn_led_on(leds=['relay_1_normally_open'])
         self._turn_led_off(leds=['relay_1_normally_closed'])
@@ -507,6 +534,7 @@ class Dome():
         self.current_direction = "CCW"
         # set the direction relay switch to CCW position
         self.direction_CW_relay.off()
+        self._dome_moving = False
         # update the debug LEDs
         if self.last_direction == "CW":
             self._turn_led_off(leds=['relay_2_normally_open'])
@@ -524,6 +552,7 @@ class Dome():
         Stop dome movement by switching the dome rotation relay off.
         """
         self.rotation_relay.off()
+        self._dome_moving = False
         # update the debug LEDs
         self._turn_led_off(leds=['relay_1_normally_open'])
         self._turn_led_on(leds=['relay_1_normally_closed'])
