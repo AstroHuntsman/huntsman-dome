@@ -475,10 +475,10 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             return response
         else:
             is_dome_moving = self.dome.dome_in_motion
-            # if dome is not moving and dome.is_home() returns True
+            # if dome is not moving and dome.is_home returns True
             # lets just consider the command complete
             # TODO: better method of determine command completion
-            is_complete = not is_dome_moving & self.dome.is_home()
+            is_complete = not is_dome_moving & self.dome.is_home
             responnse = hx2dome_pb2.IsComplete(is_complete=is_dome_moving)
 
     def dapiSync(self, request, context):
