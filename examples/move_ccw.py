@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """Example of how to move the dome CCW."""
-from domehunter import Dome
+from domehunter.dome_control import Dome
 from astropy import units as u
 
 

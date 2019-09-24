@@ -8,13 +8,13 @@ if [ "$1" == "clean" ]; then
 	rm .qmake.stash
 else
 	HDOME_PATH="$HOME/Documents/REPOS"
-	PROTOS_PATH="$HDOME_PATH/huntsman-dome/domehunter/protos/src/"
-	PROTO_FILE="$HDOME_PATH/huntsman-dome/domehunter/protos/src/hx2dome.proto"
+	PROTOS_PATH="$HDOME_PATH/huntsman-dome/domehunter/gRPC-TheSkyX-driver/"
+	PROTO_FILE="$HDOME_PATH/huntsman-dome/domehunter/gRPC-TheSkyX-driver/hx2dome.proto"
 	GRPC_CPP_PLUGIN_PATH="$(which grpc_cpp_plugin)"
 
 	echo -e "Generating GRPC C++ code\n"
 
-	echo -e "protoc -I $PROTOS_PATH --cpp_out=. src/hx2dome.proto\n"
+	echo -e "protoc -I $PROTOS_PATH --cpp_out=. hx2dome.proto\n"
 	protoc -I "$PROTOS_PATH" --cpp_out=. hx2dome.proto
 
 	echo -e "protoc -I $PROTOS_PATH --grpc_out=. $PROTO_FILE --plugin=protoc-gen-grpc=$GRPC_CPP_PLUGIN_PATH\n"

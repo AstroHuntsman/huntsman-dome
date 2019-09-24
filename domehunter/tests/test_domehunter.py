@@ -1,17 +1,18 @@
 import pytest
 
-import domehunter
+import domehunter.dome_control
+from domehunter.dome_control import Dome
 
 
 @pytest.fixture
 def testing_dome(scope='function'):
-    dome = domehunter.Dome(testing=True, debug_lights=False)
+    dome = Dome(testing=True, debug_lights=False)
     return dome
 
 
 @pytest.fixture
 def dome_az_90(scope='function'):
-    dome = domehunter.Dome(testing=True, debug_lights=False)
+    dome = Dome(testing=True, debug_lights=False)
     dome.dome_az = 90
     dome.az_per_tick = 10
     dome.home_sensor_pin.drive_low()
