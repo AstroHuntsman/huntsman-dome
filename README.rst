@@ -36,9 +36,9 @@ correctly, this is how you would set up the dome control system.
 * Navigate to the directory containing the gRPC python server file
 * ``$ cd huntsman-dome/domehunter/gRPC-server/``
 * Use the -h flag to get information on the available command line flags
-* ``$ python hx2dome.proto_server.py -h ``
+* ``$ python hx2dome.proto_server.py -h``
 * To run server in simulated hardware mode run with the -sh flag
-* ``$ python hx2dome.proto_server.py -sh ``
+* ``$ python hx2dome.proto_server.py -sh``
 * Now the server is running, you may start TheSkyX
 * Within TheSkyX go to the Dome Setup menu and select the Huntsman Telescope
 * Open TheSkyX log window and place by the python server window to watch for activity/status messages
@@ -56,9 +56,9 @@ Requirements
 
 To install (on MacOS or Linux) the required grpc python packages run the following::
 
-  python -m pip install --upgrade pip
-  python -m pip install grpcio
-  python -m pip install grpcio-tools
+  $ python -m pip install --upgrade pip
+  $ python -m pip install grpcio
+  $ python -m pip install grpcio-tools
 
 
 ``grpc c++`` For reference see `here <https://grpc.io/docs/quickstart/cpp/>`_.
@@ -70,39 +70,39 @@ For convenience a summary of the required steps is given below.
 
 To install dependencies for a linux OS, run the following::
 
-  [sudo] apt-get install build-essential autoconf libtool pkg-config
-  [sudo] apt-get install libgflags-dev libgtest-dev
-  [sudo] apt-get install clang libc++-dev
+  $ [sudo] apt-get install build-essential autoconf libtool pkg-config
+  $ [sudo] apt-get install libgflags-dev libgtest-dev
+  $ [sudo] apt-get install clang libc++-dev
 
 To do the same on MacOS (with homebrew installed), run::
 
-  [sudo] xcode-select --install
-  brew install autoconf automake libtool shtool
-  brew install gflags
+  $ [sudo] xcode-select --install
+  $ brew install autoconf automake libtool shtool
+  $ brew install gflags
 
 Now to build grpc from source on Linux or MacOS run the following::
 
-  cd /usr/local/bin/
-  git clone -b $(curl -L https://grpc.io/release) https://github.com/grpc/grpc
-  cd grpc/
-  git submodule update --init
-  make
-  make install
-  cd third_party/protobuf/
-  git submodule update --init --recursive
-  ./autogen.sh
-  ./configure
-  make
-  make check
-  make install
+  $ cd /usr/local/bin/
+  $ git clone -b $(curl -L https://grpc.io/release) https://github.com/grpc/grpc
+  $ cd grpc/
+  $ git submodule update --init
+  $ make
+  $ make install
+  $ cd third_party/protobuf/
+  $ git submodule update --init --recursive
+  $ ./autogen.sh
+  $ ./configure
+  $ make
+  $ make check
+  $ make install
 
 
 Alternatively to installing from source, you can install via homebrew on MacOS by running::
 
-  brew tap grpc/grpc
-  brew install -s -- --with-plugins grpc
-  brew install protobuf
-  brew install protobuf-c
+  $ brew tap grpc/grpc
+  $ brew install -s -- --with-plugins grpc
+  $ brew install protobuf
+  $ brew install protobuf-c
 
 The homebrew installation method has been tested on MacOS HighSierra. However,
 If problems occur during compilation (missing header files etc) you might want
@@ -112,7 +112,7 @@ Compiling TheSkyX Driver
 ------------------------
 
 The files for compilation and installation are found in the
-``domehunter/gRPC-TheSkyX-driver/`` directory. The relevant files are,
+``domehunter/gRPC-TheSkyX-driver/`` directory. The relevant files are;
 
 
 * ``domelistHuntsmanDome.txt``
@@ -126,15 +126,15 @@ driver into TheSkyX application directory.
 
 In order to compile the driver simply run the makefile recipe for your OS (LINUX/MAC)::
 
-  cd domehunter/protos/
-  make -f Makefile_LINUX
+  $ cd domehunter/gRPC-TheSkyX-driver/
+  $ make -f Makefile_LINUX
 
-This will produce a .so file in the ``domehunter/gRPC-TheSkyX-driver/``
-directory for Linux and a .dylib file for Mac. This file, as well as the
+This will produce a ``.so`` file in the ``domehunter/gRPC-TheSkyX-driver/``
+directory for Linux and a ``.dylib`` file for Mac. This file, as well as the
 ``domelistHuntsmanDome.txt`` file need to be copied into TheSkyX application
 directory. This can be done by running the installation script::
 
-  . TheSkyX_LINUX_plugin_install.sh
+  $ . TheSkyX_LINUX_plugin_install.sh
 
 Replace `LINUX` with `MAC` if installing on a MacOS system and vice versa.
 
@@ -149,20 +149,20 @@ a remote procedure call through to the gRPC python server.
 The gRPC python server can be run in a communication test mode that doesn't
 require any hardware. It will simply return dummy messages back to the TheSkyX
 driver. To get help with running the server (in normal or testing mode etc),
-run the following command in terminal,
+run the following command in terminal::
 
-  cd domehunter/gRPC-server/
-  python hx2dome.proto_server.py -h
+  $ cd domehunter/gRPC-server/
+  $ python hx2dome.proto_server.py -h
 
 gRPC automatically generated files
 ----------------------------------
 
 In the ``domehunter/gRPC-TheSkyX-driver/`` directory there are a number
 of shell scripts. These can be used to generate the gRPC files within
-the ``src/`` directory. These scripts contain path variables that may
-need to be adjusted to your local machine. You shouldn't need to worry
-about  this as the generated files are committed to the repository and
-shouldn't need to be generated (I think...?).
+the ``domehunter/gRPC-TheSkyX-driver/src/`` directory. These scripts contain
+path variables that may need to be adjusted to your local machine. You
+shouldn't need to worry about  this as the generated files are committed to
+the repository and shouldn't need to be generated (I think...?).
 
 The code for the Huntsman dome driver is contained in the
 ``domehunter/gRPC-TheSkyX-driver/src`` directory. The code for the gRPC
@@ -181,10 +181,10 @@ tools. The human written files are,
 The remaining cpp and python files are automatically produced
 by gRPC and shouldn't need to be looked at. If for some reason
 you want to generate these files yourself, you can use the following shell
-scripts,
+scripts::
 
-* ``domehunter/gRPC-TheSkyX-driver/generate_grpc_cpp_code.sh``
-* ``domehunter/gRPC-server/generate_grpc_python_code.sh``
+$ domehunter/gRPC-TheSkyX-driver/generate_grpc_cpp_code.sh
+$ domehunter/gRPC-server/generate_grpc_python_code.sh
 
 
 Python RaspberryPi Component
@@ -217,7 +217,7 @@ Tests
 In order to run the test suite, go to the source direction (``huntsman-dome/``)
 and run the following command::
 
-  python setup.py test --coverage
+  $ python setup.py test --coverage
 
 Which will produce a coverage report in ``huntsman-dome/htmlcov``
 
