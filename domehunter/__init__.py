@@ -73,7 +73,16 @@ class Dome():
     https://gpiozero.readthedocs.io/en/stable/
     """
 
-    def __init__(self, testing=True, debug_lights=False, *args, **kwargs):
+    def __init__(self,
+                 testing=True,
+                 debug_lights=False,
+                 ENCODER_PIN_NUMBER=26,
+                 HOME_SENSOR_PIN_NUMBER=20,
+                 ROTATION_RELAY_PIN_NUMBER=13,
+                 DIRECTION_RELAY_PIN_NUMBER=19,
+                 BOUNCE_TIME=0.1,
+                 *args,
+                 **kwargs):
         """
         Initialize raspberry pi GPIO environment.
 
@@ -107,19 +116,32 @@ class Dome():
         designate status infomation about the dome such as dome azimuth
         (unknown at initialisation) and position of the direction relay switch
         (initialised in the CCW position).
+
+        Parameters
+        ----------
+        testing : boolean
+            Toggle to enable a simulated hardware testing mode.
+        debug_lights : boolean
+            Toggle to enable the status LEDs on the automationHAT.
+        ENCODER_PIN_NUMBER : int
+            The GPIO pin that corresponds to the encoder input on the
+            automationHAT (input 1).
+        HOME_SENSOR_PIN_NUMBER : int
+            The GPIO pin that corresponds to the home input on the
+            automationHAT (input 2).
+        ROTATION_RELAY_PIN_NUMBER : int
+            The GPIO pin that corresponds to the rotation relay on the
+            automationHAT (relay 1). The Normally Open (NO) relay position
+            corresponds to clockwise (CW) and the Normally Closed (NC)
+            position corresponds to counterclockwise (CCW).
+        DIRECTION_RELAY_PIN_NUMBER : int
+            The GPIO pin that corresponds to the direction relay on the
+            automationHAT (relay 2).
+        BOUNCE_TIME : float
+            A buffer period (in seconds) where home/encoder input will ignore
+            additional (de)activation.
+
         """
-        # input 1 on automation hat
-        ENCODER_PIN_NUMBER = 26
-        # input 2 on the automation hat
-        HOME_SENSOR_PIN_NUMBER = 20
-        # relay 1 on automation hat
-        ROTATION_RELAY_PIN_NUMBER = 13
-        # relay 2 on automation hat
-        # on position for CW and off for CCW?
-        DIRECTION_RELAY_PIN_NUMBER = 19
-        # set a variable for bounce_time in seconds, this is just cool
-        # off period where the object will ignore additional (de)activation
-        BOUNCE_TIME = 0.1
 
         if testing:
             # Set the default pin factory to a mock factory

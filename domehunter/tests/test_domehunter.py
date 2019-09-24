@@ -21,10 +21,10 @@ def dome_az_90(scope='function'):
 
 def test_dome_initialisation(testing_dome):
     assert testing_dome.testing is True
-    assert testing_dome._dome_status == "unknown"
+    assert testing_dome._dome_moving is False
     assert testing_dome.dome_az is None
     assert testing_dome.encoder_count == 0
-    assert testing_dome.az_per_tick == None
+    assert testing_dome.az_per_tick is None
     assert testing_dome._at_home is False
     assert testing_dome.current_direction == "CCW"
 
@@ -36,7 +36,7 @@ def test_is_home(testing_dome):
 
 
 def test_status(testing_dome):
-    assert testing_dome.status == "unknown"
+    assert testing_dome.dome_in_motion == testing_dome._dome_moving
 
 
 def test_abort(testing_dome):
