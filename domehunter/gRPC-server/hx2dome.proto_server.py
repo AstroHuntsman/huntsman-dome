@@ -89,7 +89,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             return_code = 0
             try:
                 dome_az = self.dome.getAz()
-            except:
+            except Exception:
                 # TODO: proper exception handling
                 dome_az = None
             if dome_az is None:
@@ -131,7 +131,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             return_code = 0
             try:
                 self.dome.GotoAz(request.az)
-            except:
+            except Exception:
                 # TODO: proper error handling
                 return_code = 1
             response = hx2dome_pb2.ReturnCode(return_code=return_code)
@@ -163,7 +163,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             return_code = 0
             try:
                 self.dome.abort()
-            except:
+            except Exception:
                 # TODO: proper error handling
                 return_code = 1
             response = hx2dome_pb2.ReturnCode(return_code=return_code)
@@ -295,7 +295,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             return_code = 0
             try:
                 self.dome.find_home()
-            except:
+            except Exception:
                 # TODO: proper error handling
                 return_code = 1
             response = hx2dome_pb2.ReturnCode(return_code=return_code)
@@ -475,7 +475,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             # if dome is not moving and dome.is_home returns True
             # lets just consider the command complete
             # TODO: better method of determine command completion
-            is_complete = not is_dome_moving & self.dome.is_home
+            is_complete = not is_dome_moving and self.dome.is_home
             response = hx2dome_pb2.IsComplete(
                 return_code=0, is_complete=is_complete)
             return response
@@ -510,7 +510,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
                 self.dome.calibrate_dome_encoder_counts()
                 # after calibrating send dome to requested azimuth
                 self.dome.GotoAz(request.az)
-            except:
+            except Exception:
                 # TODO: proper error handling
                 return_code = 1
             response = hx2dome_pb2.ReturnCode(return_code=return_code)

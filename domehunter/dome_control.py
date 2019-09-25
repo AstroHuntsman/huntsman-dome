@@ -19,32 +19,13 @@ except OSError:  # pragma: no cover
     warnings.warn(
         "AutomationHAT hardware not detected, testing=True and"
         " debug_lights=False recommended.")
-except:  # pragma: no cover
+except Exception:  # pragma: no cover
     warnings.warn(
         "Something went wrong in importing sn3218,"
         " status lights unlikely to work.")
 
 
 # ----------------------------------------------------------------------------
-
-
-# Enforce Python version check during package import.
-# This is the same check as the one at the top of setup.py
-__minimum_python_version__ = "3.6"
-
-
-class UnsupportedPythonError(Exception):  # pragma: no cover
-    pass
-
-
-minimum = tuple((int(val) for val in __minimum_python_version__.split('.')))
-if sys.version_info < minimum:  # pragma: no cover
-    raise UnsupportedPythonError(
-        f'domehunter does not support Python < {__minimum_python_version__}')
-
-if not _ASTROPY_SETUP_:
-    # For egg_info test builds to pass, put package imports here.
-    pass
 
 
 # TODO: set up functions to raise custom exceptions to allow server to
@@ -54,7 +35,7 @@ class DomeCommandError(Exception):  # pragma: no cover
     pass
 
 
-class Dome():
+class Dome(object):
     """
     Interface to dome control raspberry pi GPIO.
 
@@ -131,12 +112,14 @@ class Dome():
             automationHAT (input 2).
         ROTATION_RELAY_PIN_NUMBER : int
             The GPIO pin that corresponds to the rotation relay on the
-            automationHAT (relay 1). The Normally Open (NO) relay position
-            corresponds to clockwise (CW) and the Normally Closed (NC)
-            position corresponds to counterclockwise (CCW).
+            automationHAT (relay 1). The normally open terminal on the
+            rotation relay is connected to the common terminal of the direction
+            relay.
         DIRECTION_RELAY_PIN_NUMBER : int
             The GPIO pin that corresponds to the direction relay on the
-            automationHAT (relay 2).
+            automationHAT (relay 2). The Normally Open (NO) relay position
+            corresponds to clockwise (CW) and the Normally Closed (NC)
+            position corresponds to counterclockwise (CCW).
         BOUNCE_TIME : float
             A buffer period (in seconds) where home/encoder input will ignore
             additional (de)activation.
@@ -238,7 +221,7 @@ class Dome():
             ROTATION_RELAY_PIN_NUMBER, initial_value=False)
         self.direction_CW_relay = DigitalOutputDevice(
             DIRECTION_RELAY_PIN_NUMBER, initial_value=False)
-        # because we initialiase the relay in the nnormally closed position
+        # because we initialiase the relay in the normally closed position
         self.current_direction = "CCW"
 
         # turn on the relay LEDs if we are debugging
@@ -257,9 +240,11 @@ class Dome():
 
     @property
     def dome_in_motion(self):
-        """Send True if dome is in motion."""
-        # This property is set to false by the _stop_moving() private method
-        # and to set to true by the _move_cw() and _move_ccw() private methods
+        """Send True if dome is in motion.
+
+        This property is set to false by the _stop_moving() private method
+        and to set to true by the _move_cw() and _move_ccw() private methods.
+        """
         return self._dome_moving
 
 ###############################################################################
@@ -308,7 +293,7 @@ class Dome():
                   ' procedure, then will go to AZ specified.')
             self.calibrate_dome_encoder_counts()
 
-        delta_az = az - self.dome_az
+        delta_az = int(az - self.dome_az)
         # determine whether CW or CCW gives the short path to desired az
         if abs(delta_az) > 180:
             if delta_az > 0:
@@ -327,6 +312,9 @@ class Dome():
                 if self.testing:
                     # if testing simulate a tick for every cycle of while loop
                     self._simulate_ticks(num_ticks=1)
+                else:
+                    # micro break to spare the little rpi cpu
+                    time.sleep(0.1)
             self._stop_moving()
             # compare original count to current just in case we got more ticks
             # than we asked for
@@ -378,12 +366,12 @@ class Dome():
         # rotate the dome until we hit home, to give reference point
         self.find_home()
 
-        # now set dome to rotate n times so we can determine the number of
-        # ticks per revolution
-        rotation_count = 0
         # pause to let things settle/get a noticeable blink of debug_lights
         time.sleep(0.5)
 
+        rotation_count = 0
+        # now set dome to rotate num_cal_rotations times so we can determine
+        # the number of ticks per revolution
         while rotation_count < num_cal_rotations:
             self._move_cw()
             if self.testing:
@@ -416,11 +404,6 @@ class Dome():
     def find_home(self):
         """
         Move Dome to home position.
-
-        Parameters
-        ----------
-        num_cal_rotations : integer
-            Number of rotations to perform to calibrate encoder.
 
         """
         # if dome already home, do nothing
@@ -469,16 +452,15 @@ class Dome():
         self._turn_led_on(leds=['input_1'])
         time.sleep(0.01)
         self._turn_led_off(leds=['input_1'])
+
+        if self.current_direction is None:
+            self.current_direction = self.last_direction
+
         if self.current_direction == "CW":
             self.encoder_count += 1
         elif self.current_direction == "CCW":
             self.encoder_count -= 1
-        # I'm unsure if this is the best way to handle a situation like this
-        elif self.current_direction is None:
-            if self.last_direction == "CW":
-                self.encoder_count += 1
-            elif self.last_direction == "CCW":
-                self.encoder_count -= 1
+        # TODO what is last_direction is also None?
 
     def _az_to_ticks(self, az):
         """
@@ -486,16 +468,16 @@ class Dome():
 
         Parameters
         ----------
-        az : float
+        az : int
             Dome azimuth position in degrees.
 
         Returns
         -------
-        float
+        int
             Returns azimuth position to corresponding encoder tick count.
 
         """
-        return az / self.az_per_tick
+        return int(az / self.az_per_tick)
 
     def _ticks_to_az(self, ticks):
         """
