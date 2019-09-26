@@ -302,9 +302,9 @@ class Dome(object):
         delta_az = int(az - self.dome_az)
         # determine whether CW or CCW gives the short path to desired az
         while abs(delta_az) > 180:
-            if delta_az > 0:
+            if delta_az > 180:
                 delta_az -= 360
-            else:
+            elif delta_az < -180:
                 delta_az += 360
 
         # if updated delta_az is positive, direction is CW
