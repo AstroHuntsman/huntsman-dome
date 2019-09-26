@@ -395,6 +395,8 @@ class Dome(object):
                 time.sleep(0.1)
                 self.home_sensor_pin.drive_high()
 
+            # without this pause the wait_for_active wasn't waiting (???)
+            time.sleep(0.1)
             self._stop_moving()
             # another short pause to get an obvious blink of debug_lights
             time.sleep(0.1)
