@@ -8,7 +8,7 @@ import grpc
 
 import hx2dome_pb2
 import hx2dome_pb2_grpc
-from domehunter import Dome
+from domehunter.dome_control import Dome
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
@@ -545,15 +545,17 @@ if __name__ == '__main__':
         description="Remote Procedure Call server \
         for issuing observatory dome rotation commands.")
 
-    parser.add_argument('-rh', '--run-with-real-hardware',
-                        dest='testing',
-                        action='store_false',
-                        help="Run server with real hardware.")
+    group = parser.add_mutually_exclusive_group()
 
-    parser.add_argument('-sh', '--run-with-simulated-hardware',
-                        dest='testing',
-                        action='store_true',
-                        help="Run server with simulated hardware.")
+    group.add_argument('-rh', '--run-with-real-hardware',
+                       dest='testing',
+                       action='store_false',
+                       help="Run server with real hardware.")
+
+    group.add_argument('-sh', '--run-with-simulated-hardware',
+                       dest='testing',
+                       action='store_true',
+                       help="Run server with simulated hardware.")
 
     parser.set_defaults(testing=True)
 

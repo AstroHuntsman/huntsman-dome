@@ -3,6 +3,7 @@
 This module contains code to control the dome via an automationHAT.
 """
 from ._astropy_init import *
+import sys
 
 # Enforce Python version check during package import.
 # This is the same check as the one at the top of setup.py

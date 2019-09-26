@@ -16,13 +16,13 @@ try:  # pragma: no cover
     import sn3218
     sn3218.disable()
 except OSError:  # pragma: no cover
-    warnings.warn(
-        "AutomationHAT hardware not detected, testing=True and"
-        " debug_lights=False recommended.")
+    wmsg = ("AutomationHAT hardware not detected, "
+            "testing=True and debug_lights=False recommended.")
+    warnings.warn(wmsg)
 except Exception:  # pragma: no cover
-    warnings.warn(
-        "Something went wrong in importing sn3218,"
-        " status lights unlikely to work.")
+    wmsg = ("Something went wrong in importing sn3218, "
+            "status lights unlikely to work.")
+    warnings.warn(wmsg)
 
 
 # ----------------------------------------------------------------------------
