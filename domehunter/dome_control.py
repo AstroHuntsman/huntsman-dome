@@ -62,7 +62,7 @@ class Dome(object):
                  HOME_SENSOR_PIN_NUMBER=20,
                  ROTATION_RELAY_PIN_NUMBER=13,
                  DIRECTION_RELAY_PIN_NUMBER=19,
-                 BOUNCE_TIME=0.1,
+                 BOUNCE_TIME=0.5,
                  *args,
                  **kwargs):
         """
