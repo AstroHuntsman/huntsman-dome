@@ -57,6 +57,7 @@ class Dome(object):
     def __init__(self,
                  testing=True,
                  debug_lights=False,
+                 home_azimuth=0,
                  ENCODER_PIN_NUMBER=26,
                  HOME_SENSOR_PIN_NUMBER=20,
                  ROTATION_RELAY_PIN_NUMBER=13,
@@ -104,6 +105,9 @@ class Dome(object):
             Toggle to enable a simulated hardware testing mode.
         debug_lights : boolean
             Toggle to enable the status LEDs on the automationHAT.
+        home_azimuth: int
+            The home azimuth position in degrees (integer between 0 and 360).
+            Defaults to 0.
         ENCODER_PIN_NUMBER : int
             The GPIO pin that corresponds to the encoder input on the
             automationHAT (input 1).
@@ -142,8 +146,8 @@ class Dome(object):
             self.home_sensor_pin = Device.pin_factory.pin(
                 HOME_SENSOR_PIN_NUMBER)
         else:
-            # set the timeout length variable to None for non testing mode
-            WAIT_TIMEOUT = None
+            # set the timeout length variable to 5 minutes (units of seconds)
+            WAIT_TIMEOUT = 5*60
 
         # set a wait time for testing mode that exceeds BOUNCE_TIME
         self.test_mode_delay_duration = BOUNCE_TIME + 0.05
@@ -191,6 +195,8 @@ class Dome(object):
         # dome wont be moving when initlialised
         self._dome_moving = False
         self.dome_az = None
+        # set the desired home_az
+        self.home_az = home_azimuth
 
         # create a instance variable to track the dome motor encoder ticks
         self.encoder_count = 0
@@ -295,7 +301,7 @@ class Dome(object):
 
         delta_az = int(az - self.dome_az)
         # determine whether CW or CCW gives the short path to desired az
-        if abs(delta_az) > 180:
+        while abs(delta_az) > 180:
             if delta_az > 0:
                 delta_az -= 360
             else:
@@ -397,9 +403,9 @@ class Dome(object):
         # set the azimuth per encoder tick factor based on how many ticks we
         # counted over n rotations
         self.az_per_tick = 360 / (self.encoder_count / rotation_count)
-        # set dome azimuth to 0?
-        # problem, this isn't compensating for any overshooting
-        self.dome_az = 0
+        # set dome azimuth to home_az position
+        # problem: this isn't compensating for any overshooting
+        self.dome_az = self.home_az
 
     def find_home(self):
         """
@@ -417,6 +423,7 @@ class Dome(object):
                 self.home_sensor_pin.drive_high()
 
             self._stop_moving()
+            self.dome_az = self.home_az
             self.encoder_count = 0
 
 ###############################################################################
@@ -464,7 +471,10 @@ class Dome(object):
 
     def _az_to_ticks(self, az):
         """
-        Convert degrees (azimuth) to equivalent in encoder tick count.
+        Convert degrees (azimuth) to equivalent in encoder tick count. Because
+        we zero the encoder at the home position, this conversion needs to
+        take into account the offset between the zero azimuth position and the
+        zero encoder position.
 
         Parameters
         ----------
@@ -477,7 +487,7 @@ class Dome(object):
             Returns azimuth position to corresponding encoder tick count.
 
         """
-        return int(az / self.az_per_tick)
+        return int((az - self.home_az) % 360 / self.az_per_tick)
 
     def _ticks_to_az(self, ticks):
         """
