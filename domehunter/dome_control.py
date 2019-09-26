@@ -392,6 +392,7 @@ class Dome(object):
 
             if self.testing:
                 # tell the fake home sensor that we have come back to home
+                time.sleep(0.1)
                 self.home_sensor_pin.drive_high()
 
             self._stop_moving()
@@ -417,9 +418,11 @@ class Dome(object):
             self.encoder_count = 0
         else:
             self._move_cw()
+            time.sleep(0.1)
             self.home_sensor.wait_for_active(timeout=self.wait_timeout)
             if self.testing:
                 # in testing mode need to "fake" the activation of the home pin
+                time.sleep(0.5)
                 self.home_sensor_pin.drive_high()
 
             self._stop_moving()
