@@ -58,11 +58,11 @@ class Dome(object):
                  testing=True,
                  debug_lights=False,
                  home_azimuth=0,
-                 ENCODER_PIN_NUMBER=26,
-                 HOME_SENSOR_PIN_NUMBER=20,
-                 ROTATION_RELAY_PIN_NUMBER=13,
-                 DIRECTION_RELAY_PIN_NUMBER=19,
-                 BOUNCE_TIME=0.1,
+                 encoder_pin_number=26,
+                 home_sensor_pin_number=20,
+                 rotation_relay_pin_number=13,
+                 direction_relay_pin_number=19,
+                 bounce_time=0.1,
                  *args,
                  **kwargs):
         """
@@ -82,12 +82,12 @@ class Dome(object):
         Once the necessary pin numbers have been identified we can set about
         creating GPIOzero objects to make use of the automationHat. This
         includes,
-        - A digital input device for the encoder (`ENCODER_PIN_NUMBER`)
-        - A digital input device for the home sensor (`HOME_SENSOR_PIN_NUMBER`)
+        - A digital input device for the encoder (`encoder_pin_number`)
+        - A digital input device for the home sensor (`home_sensor_pin_number`)
         - A digital output device for the motor on/off relay switch
-          (`ROTATION_RELAY_PIN_NUMBER`)
+          (`rotation_relay_pin_number`)
         - A digital output device for the motor direction (CW/CCW) relay switch
-          (`DIRECTION_RELAY_PIN_NUMBER`)
+          (`direction_relay_pin_number`)
 
         The Digital Input Devices (DIDs) have callback functions that can be
         used to call a function upon activation or deactivation  of a sensor
@@ -108,23 +108,23 @@ class Dome(object):
         home_azimuth: int
             The home azimuth position in degrees (integer between 0 and 360).
             Defaults to 0.
-        ENCODER_PIN_NUMBER : int
+        encoder_pin_number : int
             The GPIO pin that corresponds to the encoder input on the
             automationHAT (input 1).
-        HOME_SENSOR_PIN_NUMBER : int
+        home_sensor_pin_number : int
             The GPIO pin that corresponds to the home input on the
             automationHAT (input 2).
-        ROTATION_RELAY_PIN_NUMBER : int
+        rotation_relay_pin_number : int
             The GPIO pin that corresponds to the rotation relay on the
             automationHAT (relay 1). The normally open terminal on the
             rotation relay is connected to the common terminal of the direction
             relay.
-        DIRECTION_RELAY_PIN_NUMBER : int
+        direction_relay_pin_number : int
             The GPIO pin that corresponds to the direction relay on the
             automationHAT (relay 2). The Normally Open (NO) relay position
             corresponds to clockwise (CW) and the Normally Closed (NC)
             position corresponds to counterclockwise (CCW).
-        BOUNCE_TIME : float
+        bounce_time : float
             A buffer period (in seconds) where home/encoder input will ignore
             additional (de)activation.
 
@@ -142,15 +142,15 @@ class Dome(object):
 
             # in testing mode we need to create a seperate pin object so we can
             # simulate the activation of our fake DIDs and DODs
-            self.encoder_pin = Device.pin_factory.pin(ENCODER_PIN_NUMBER)
+            self.encoder_pin = Device.pin_factory.pin(encoder_pin_number)
             self.home_sensor_pin = Device.pin_factory.pin(
-                HOME_SENSOR_PIN_NUMBER)
+                home_sensor_pin_number)
         else:
             # set the timeout length variable to 5 minutes (units of seconds)
             WAIT_TIMEOUT = 5*60
 
-        # set a wait time for testing mode that exceeds BOUNCE_TIME
-        self.test_mode_delay_duration = BOUNCE_TIME + 0.05
+        # set a wait time for testing mode that exceeds bounce_time
+        self.test_mode_delay_duration = bounce_time + 0.05
         # set the timeout for wait_for_active()
         self.wait_timeout = WAIT_TIMEOUT
 
@@ -203,7 +203,7 @@ class Dome(object):
         # bounce_time settings gives the time in seconds that the device will
         # ignore additional activation signals
         self.encoder = DigitalInputDevice(
-            ENCODER_PIN_NUMBER, bounce_time=BOUNCE_TIME)
+            encoder_pin_number, bounce_time=bounce_time)
         # _increment_count function to run when encoder is triggered
         self.encoder.when_activated = self._increment_count
         # set dummy value initially to force a rotation calibration run
@@ -211,7 +211,7 @@ class Dome(object):
 
         self._set_not_home()
         self.home_sensor = DigitalInputDevice(
-            HOME_SENSOR_PIN_NUMBER, bounce_time=BOUNCE_TIME)
+            home_sensor_pin_number, bounce_time=bounce_time)
         # _set_not_home function is run when upon home senser deactivation
         self.home_sensor.when_deactivated = self._set_not_home
         # _set_at_home function is run when home sensor is activated
@@ -224,9 +224,9 @@ class Dome(object):
         # so when moving the dome, first set the direction relay position
         # then activate the rotation relay
         self.rotation_relay = DigitalOutputDevice(
-            ROTATION_RELAY_PIN_NUMBER, initial_value=False)
+            rotation_relay_pin_number, initial_value=False)
         self.direction_CW_relay = DigitalOutputDevice(
-            DIRECTION_RELAY_PIN_NUMBER, initial_value=False)
+            direction_relay_pin_number, initial_value=False)
         # because we initialiase the relay in the normally closed position
         self.current_direction = "CCW"
 

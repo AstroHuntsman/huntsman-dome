@@ -70,9 +70,9 @@ For convenience a summary of the required steps is given below.
 
 To install dependencies for a linux OS, run the following::
 
-  $ [sudo] apt-get install build-essential autoconf libtool pkg-config
-  $ [sudo] apt-get install libgflags-dev libgtest-dev
-  $ [sudo] apt-get install clang libc++-dev
+  $ [sudo] apt install build-essential autoconf libtool pkg-config
+  $ [sudo] apt install libgflags-dev libgtest-dev
+  $ [sudo] apt install clang libc++-dev
 
 To do the same on MacOS (with homebrew installed), run::
 
