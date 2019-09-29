@@ -1,10 +1,13 @@
 """Run dome control on a raspberry pi GPIO."""
 
 
+import math
 import sys
 import time
 import warnings
 
+import astropy.units as u
+from astropy.coordinates import Longitude
 from gpiozero import Device, DigitalInputDevice, DigitalOutputDevice
 from gpiozero.pins.mock import MockFactory
 
@@ -58,6 +61,7 @@ class Dome(object):
                  testing=True,
                  debug_lights=False,
                  home_azimuth=0,
+                 az_position_tolerance=1.0,
                  encoder_pin_number=26,
                  home_sensor_pin_number=20,
                  rotation_relay_pin_number=13,
@@ -108,6 +112,11 @@ class Dome(object):
         home_azimuth: int
             The home azimuth position in degrees (integer between 0 and 360).
             Defaults to 0.
+        az_position_tolerance: int
+            The tolerance used during GotoAz() calls. Dome will move to
+            requested position to within this tolerance. If the calibrated
+            az_per_tick is greater than az_position_tolerance, az_per_tick will
+            be used as the tolerance instead.
         encoder_pin_number : int
             The GPIO pin that corresponds to the encoder input on the
             automationHAT (input 1).
@@ -119,7 +128,7 @@ class Dome(object):
             automationHAT (relay 1). The normally open terminal on the
             rotation relay is connected to the common terminal of the direction
             relay.
-        direction_relay_pin_number : int
+        direction_cw_relay_pin_number : int
             The GPIO pin that corresponds to the direction relay on the
             automationHAT (relay 2). The Normally Open (NO) relay position
             corresponds to clockwise (CW) and the Normally Closed (NC)
@@ -142,12 +151,12 @@ class Dome(object):
 
             # in testing mode we need to create a seperate pin object so we can
             # simulate the activation of our fake DIDs and DODs
-            self.encoder_pin = Device.pin_factory.pin(encoder_pin_number)
-            self.home_sensor_pin = Device.pin_factory.pin(
+            self.__encoder_pin = Device.pin_factory.pin(encoder_pin_number)
+            self.__home_sensor_pin = Device.pin_factory.pin(
                 home_sensor_pin_number)
         else:
             # set the timeout length variable to 5 minutes (units of seconds)
-            WAIT_TIMEOUT = 5*60
+            WAIT_TIMEOUT = 5 * 60
 
         # set a wait time for testing mode that exceeds bounce_time
         self.test_mode_delay_duration = bounce_time + 0.05
@@ -192,30 +201,31 @@ class Dome(object):
         # initialize az as unknown, to ensure we have properly calibrated az
         self.testing = testing
         self.debug_lights = debug_lights
-        # dome wont be moving when initlialised
-        self._dome_moving = False
-        self.dome_az = None
         # set the desired home_az
-        self.home_az = home_azimuth
+        self.az_position_tolerance = az_position_tolerance
+        self.home_az = Longitude(home_azimuth * u.deg)
+        # need something to let us know when dome is calibrating so home sensor
+        # activation doesnt zero encoder counts
+        self.calibrating = False
 
         # create a instance variable to track the dome motor encoder ticks
-        self.encoder_count = 0
+        self.__encoder_count = 0
         # bounce_time settings gives the time in seconds that the device will
         # ignore additional activation signals
-        self.encoder = DigitalInputDevice(
+        self.__encoder = DigitalInputDevice(
             encoder_pin_number, bounce_time=bounce_time)
         # _increment_count function to run when encoder is triggered
-        self.encoder.when_activated = self._increment_count
+        self.__encoder.when_activated = self._increment_count
         # set dummy value initially to force a rotation calibration run
-        self.az_per_tick = None
+        self.__az_per_tick = None
 
         self._set_not_home()
-        self.home_sensor = DigitalInputDevice(
+        self.__home_sensor = DigitalInputDevice(
             home_sensor_pin_number, bounce_time=bounce_time)
         # _set_not_home function is run when upon home senser deactivation
-        self.home_sensor.when_deactivated = self._set_not_home
+        self.__home_sensor.when_deactivated = self._set_not_home
         # _set_at_home function is run when home sensor is activated
-        self.home_sensor.when_activated = self._set_at_home
+        self.__home_sensor.when_activated = self._set_at_home
 
         # these two DODs control the relays that control the dome motor
         # the rotation relay is the on/off switch for dome rotation
@@ -223,9 +233,9 @@ class Dome(object):
         # (using both the normally open and normally close relay terminals)
         # so when moving the dome, first set the direction relay position
         # then activate the rotation relay
-        self.rotation_relay = DigitalOutputDevice(
+        self._rotation_relay = DigitalOutputDevice(
             rotation_relay_pin_number, initial_value=False)
-        self.direction_CW_relay = DigitalOutputDevice(
+        self._direction_relay = DigitalOutputDevice(
             direction_relay_pin_number, initial_value=False)
         # because we initialiase the relay in the normally closed position
         self.current_direction = "CCW"
@@ -240,19 +250,29 @@ class Dome(object):
 ###############################################################################
 
     @property
+    def dome_az(self):
+        """ """
+        return self._ticks_to_az(self.__encoder_count)
+
+    @property
     def is_home(self):
         """Send True if the dome is at home."""
         return self._at_home
 
     @property
     def dome_in_motion(self):
-        """Send True if dome is in motion.
+        """Send True if dome is in motion."""
+        return bool(self._rotation_relay.value)
 
-        This property is set to false by the _stop_moving() private method
-        and to set to true by the _move_cw() and _move_ccw() private methods.
-        """
-        return self._dome_moving
+    @property
+    def encoder_count(self):
+        """Returns the current encoder count."""
+        return self.__encoder_count
 
+    @property
+    def az_per_tick(self):
+        """Returns the calibrated azimuth (in degrees) per encoder tick."""
+        return self.__az_per_tick
 ###############################################################################
 # Methods
 ###############################################################################
@@ -279,10 +299,15 @@ class Dome(object):
             The Dome azimuth in degrees.
 
         """
+        # TODO: Now that dome_az is a property calculated from encoder_count
+        # it is no longer initialised a None, so instead probably need some
+        # other form of error/exception handling here (if encoder_count is
+        # None?)
         if self.dome_az is None:
             print("Cannot return Azimuth as Dome is not yet calibrated.\
                    Run calibration loop")
-        return self.dome_az
+            return self.dome_az
+        return self.dome_az.degree
 
     def GotoAz(self, az):
         """
@@ -295,69 +320,35 @@ class Dome(object):
 
         """
         if self.dome_az is None:
-            print('Dome is not yet calibrated, running through calibration'
-                  ' procedure, then will go to AZ specified.')
-            self.calibrate_dome_encoder_counts()
+            print('Dome Azimuth unknown, finding Home position,'
+                  '- then will go to requested Azimuth position.')
+            self.find_home()
 
-        delta_az = int(az - self.dome_az)
-        # determine whether CW or CCW gives the short path to desired az
-        while abs(delta_az) > 180:
-            if delta_az > 180:
-                delta_az -= 360
-            elif delta_az < -180:
-                delta_az += 360
+        target_az = Longitude(az * u.deg)
+        # calculate delta_az, wrapping at 180 to ensure we take shortest route
+        delta_az = (target_az - self.dome_az).wrap_at(180 * u.degree)
+        # converte delta_az to equivilant in encoder ticks
+        ticks = self._az_to_ticks(delta_az)
+        target_position = self._ticks_to_az(self.encoder_count + ticks)
 
-        # if updated delta_az is positive, direction is CW
         if delta_az > 0:
-            # converted delta_az to equivilant in encoder ticks
-            ticks = self._az_to_ticks(delta_az)
-            target_position = self.encoder_count + ticks
             self._move_cw()
-            # wait until encoder count matches desired delta az
-            while self.encoder_count < target_position:
-                if self.testing:
-                    # if testing simulate a tick for every cycle of while loop
-                    self._simulate_ticks(num_ticks=1)
-                else:
-                    # micro break to spare the little rpi cpu
-                    time.sleep(0.1)
-            self._stop_moving()
-            # compare original count to current just in case we got more ticks
-            # than we asked for
-            old_encoder_count = target_position - ticks
-            # update dome_az based on the actual number of ticks counted
-            self.dome_az += self._ticks_to_az(
-                self.encoder_count - old_encoder_count)
-            # take mod360 of dome_az to keep 0 <= dome_az < 360
-            self.dome_az %= 360
-            # update encoder_count to match the dome_az
-            self.encoder_count = self._az_to_ticks(self.dome_az)
-
-        # if updated delta_az is negative, direction is CCW
-        if delta_az < 0:
-            # converted delta_az to equivilant in encoder ticks
-            ticks = self._az_to_ticks(delta_az)
-            target_position = self.encoder_count + ticks
+        else:
             self._move_ccw()
-            # wait until encoder count matches desired delta az
-            while self.encoder_count >= target_position:
-                if self.testing:
-                    # if testing simulate a tick for every cycle of while loop
-                    self._simulate_ticks(num_ticks=1)
-                else:
-                    # micro break to spare the little rpi cpu
-                    time.sleep(0.1)
-            self._stop_moving()
-            # compare original count to current, just in case we got more ticks
-            # than we asked for
-            old_encoder_count = target_position - ticks
-            # update dome_az based on the actual number of ticks counted
-            self.dome_az += self._ticks_to_az(
-                self.encoder_count - old_encoder_count)
-            # take mod360 of dome_az to keep 0 <= dome_az < 360
-            self.dome_az %= 360
-            # update encoder_count to match the dome_az
-            self.encoder_count = self._az_to_ticks(self.dome_az)
+        # if the requested tolerance is less than az_per_tick use az_per_tick
+        # for the tolerance
+        tolerance = max(self.az_position_tolerance, self.az_per_tick)
+        # wait until encoder count matches desired delta az
+        while not math.isclose(self.dome_az.degree,
+                               target_position.degree,
+                               abs_tol=tolerance):
+            if self.testing:
+                # if testing simulate a tick for every cycle of while loop
+                self._simulate_ticks(num_ticks=1)
+            else:
+                # micro break to spare the little rpi cpu
+                time.sleep(0.1)
+        self._stop_moving()
 
     def calibrate_dome_encoder_counts(self, num_cal_rotations=2):
         """
@@ -376,60 +367,53 @@ class Dome(object):
         time.sleep(0.5)
 
         rotation_count = 0
+        self.calibrating = True
         # now set dome to rotate num_cal_rotations times so we can determine
         # the number of ticks per revolution
         while rotation_count < num_cal_rotations:
             self._move_cw()
             if self.testing:
                 # tell the fake home sensor that we have left home
-                self.home_sensor_pin.drive_low()
+                self.__home_sensor_pin.drive_low()
                 self._simulate_ticks(num_ticks=10)
             # need to introduce a small pause before wait_for_active as we
             # start from home position and want to make sure we clear the
             # sensor before we start waiting for it to come around again
-            time.sleep(0.5)
-            self.home_sensor.wait_for_active(timeout=self.wait_timeout)
+            time.sleep(2)
+            self.__home_sensor.wait_for_active(timeout=self.wait_timeout)
 
             if self.testing:
                 # tell the fake home sensor that we have come back to home
                 time.sleep(0.1)
-                self.home_sensor_pin.drive_high()
+                self.__home_sensor_pin.drive_high()
+                time.sleep(0.1)
 
             # without this pause the wait_for_active wasn't waiting (???)
-            time.sleep(0.1)
-            self._stop_moving()
-            # another short pause to get an obvious blink of debug_lights
             time.sleep(0.1)
 
             rotation_count += 1
 
+        self._stop_moving()
+
         # set the azimuth per encoder tick factor based on how many ticks we
         # counted over n rotations
-        self.az_per_tick = 360 / (self.encoder_count / rotation_count)
-        # set dome azimuth to home_az position
-        # problem: this isn't compensating for any overshooting
-        self.dome_az = self.home_az
+        self.__az_per_tick = 360 / (self.encoder_count / rotation_count)
+        self.calibrating = False
 
     def find_home(self):
         """
         Move Dome to home position.
 
         """
-        # if dome already home, do nothing
-        if self.is_home:
-            self.encoder_count = 0
-        else:
-            self._move_cw()
-            time.sleep(0.1)
-            self.home_sensor.wait_for_active(timeout=self.wait_timeout)
-            if self.testing:
-                # in testing mode need to "fake" the activation of the home pin
-                time.sleep(0.5)
-                self.home_sensor_pin.drive_high()
+        self._move_cw()
+        time.sleep(0.1)
+        self.__home_sensor.wait_for_active(timeout=self.wait_timeout)
+        if self.testing:
+            # in testing mode need to "fake" the activation of the home pin
+            time.sleep(0.5)
+            self.__home_sensor_pin.drive_high()
 
-            self._stop_moving()
-            self.dome_az = self.home_az
-            self.encoder_count = 0
+        self._stop_moving()
 
 ###############################################################################
 # Private Methods
@@ -440,6 +424,9 @@ class Dome(object):
         Update home status to at home and debug LEDs (if enabled).
         """
         self._turn_led_on(leds=['input_2'])
+        # don't want to zero encoder while calibrating
+        if not self.calibrating:
+            self.__encoder_count = 0
         self._at_home = True
 
     def _set_not_home(self):
@@ -469,9 +456,9 @@ class Dome(object):
             self.current_direction = self.last_direction
 
         if self.current_direction == "CW":
-            self.encoder_count += 1
+            self.__encoder_count += 1
         elif self.current_direction == "CCW":
-            self.encoder_count -= 1
+            self.__encoder_count -= 1
         # TODO what is last_direction is also None?
 
     def _az_to_ticks(self, az):
@@ -483,16 +470,17 @@ class Dome(object):
 
         Parameters
         ----------
-        az : int
+        az : astropy.coordinates.Longitude
             Dome azimuth position in degrees.
 
         Returns
         -------
-        int
-            Returns azimuth position to corresponding encoder tick count.
+        float
+            Returns encoder tick count corresponding to dome azimuth.
 
         """
-        return int((az - self.home_az) % 360 / self.az_per_tick)
+        az_relative_to_home = (az - self.home_az).wrap_at(360 * u.degree)
+        return az_relative_to_home.degree / self.az_per_tick
 
     def _ticks_to_az(self, ticks):
         """
@@ -505,11 +493,12 @@ class Dome(object):
 
         Returns
         -------
-        float
+        astropy.coordinates.longitude
             The corresponding dome azimuth position in degrees.
 
         """
-        return ticks * self.az_per_tick
+        tick_to_deg = Longitude(ticks * self.az_per_tick * u.deg)
+        return (self.home_az + tick_to_deg).wrap_at(360 * u.degree)
 
     def _move_cw(self):
         """
@@ -523,20 +512,19 @@ class Dome(object):
         """
         # if testing, deactivate the home_sernsor_pin to simulate leaving home
         if self.testing and self._at_home:
-            self.home_sensor_pin.drive_low()
+            self.__home_sensor_pin.drive_low()
         # update the last_direction instance variable
         self.last_direction = self.current_direction
         # now update the current_direction variable to CW
         self.current_direction = "CW"
         # set the direction relay switch to CW position
-        self.direction_CW_relay.on()
+        self._direction_relay.on()
         # update the debug LEDs
         if self.last_direction == "CCW":
             self._turn_led_off(leds=['relay_2_normally_closed'])
         self._turn_led_on(leds=['relay_2_normally_open'])
         # turn on rotation
-        self.rotation_relay.on()
-        self._dome_moving = True
+        self._rotation_relay.on()
         # update the rotation relay debug LEDs
         self._turn_led_on(leds=['relay_1_normally_open'])
         self._turn_led_off(leds=['relay_1_normally_closed'])
@@ -555,20 +543,19 @@ class Dome(object):
         """
         # if testing, deactivate the home_sernsor_pin to simulate leaving home
         if self.testing and self._at_home:
-            self.home_sensor_pin.drive_low()
+            self.__home_sensor_pin.drive_low()
         # update the last_direction instance variable
         self.last_direction = self.current_direction
         # now update the current_direction variable to CCW
         self.current_direction = "CCW"
         # set the direction relay switch to CCW position
-        self.direction_CW_relay.off()
-        self._dome_moving = False
+        self._direction_relay.off()
         # update the debug LEDs
         if self.last_direction == "CW":
             self._turn_led_off(leds=['relay_2_normally_open'])
         self._turn_led_on(leds=['relay_2_normally_closed'])
         # turn on rotation
-        self.rotation_relay.on()
+        self._rotation_relay.on()
         # update the rotation relay debug LEDs
         self._turn_led_on(leds=['relay_1_normally_open'])
         self._turn_led_off(leds=['relay_1_normally_closed'])
@@ -579,8 +566,7 @@ class Dome(object):
         """
         Stop dome movement by switching the dome rotation relay off.
         """
-        self.rotation_relay.off()
-        self._dome_moving = False
+        self._rotation_relay.off()
         # update the debug LEDs
         self._turn_led_off(leds=['relay_1_normally_open'])
         self._turn_led_on(leds=['relay_1_normally_closed'])
@@ -595,12 +581,12 @@ class Dome(object):
         # repeat this loop of driving the mock pins low then high to simulate
         # an encoder tick. Continue until desired number of ticks is reached.
         while tick_count < num_ticks:
-            self.encoder_pin.drive_low()
+            self.__encoder_pin.drive_low()
             # test_mode_delay_duration is set so that it will always exceed
             # the set bounce_time
             # of the pins
             time.sleep(self.test_mode_delay_duration)
-            self.encoder_pin.drive_high()
+            self.__encoder_pin.drive_high()
             time.sleep(self.test_mode_delay_duration)
             tick_count += 1
 
