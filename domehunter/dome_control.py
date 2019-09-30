@@ -6,6 +6,7 @@ import sys
 import time
 import warnings
 
+from enum import Enum
 import astropy.units as u
 from astropy.coordinates import Longitude
 from gpiozero import Device, DigitalInputDevice, DigitalOutputDevice
@@ -36,6 +37,27 @@ except Exception:  # pragma: no cover
 class DomeCommandError(Exception):  # pragma: no cover
     # generic dome command error, placeholder for now
     pass
+
+
+class LED_light(Flag):
+    POWER = 0b100000000000000000
+    COMMS = 0b010000000000000000
+    WARN = 0b001000000000000000
+    INPUT_1 = 0b000100000000000000
+    INPUT_2 = 0b000010000000000000
+    INPUT_3 = 0b000001000000000000
+    RELAY_3_NC = 0b000000100000000000
+    RELAY_3_NO = 0b000000010000000000
+    RELAY_2_NC = 0b000000001000000000
+    RELAY_2_NO = 0b000000000100000000
+    RELAY_1_NC = 0b000000000010000000
+    RELAY_1_NO = 0b000000000001000000
+    OUTPUT_3 = 0b000000000000100000
+    OUTPUT_2 = 0b000000000000010000
+    OUTPUT_1 = 0b000000000000001000
+    ADC_3 = 0b000000000000000100
+    ADC_2 = 0b000000000000000010
+    ADC_1 = 0b000000000000000001
 
 
 class Dome(object):
@@ -145,7 +167,6 @@ class Dome(object):
             # in case a previous instance has been initialised, tell the
             # pin factory to release all the pins
             Device.pin_factory.reset()
-
             # set a timeout length in seconds for wait_for_active() calls
             WAIT_TIMEOUT = 1
 
@@ -163,42 +184,6 @@ class Dome(object):
         # set the timeout for wait_for_active()
         self.wait_timeout = WAIT_TIMEOUT
 
-        # led_status is set with binary number, each zero/position sets the
-        # state of an LED, where 0 is off and 1 is on
-        self.led_status = 0b000000000000000000
-        # create a dictionary of the LED name as the key and the digit of
-        # the self.led_status binary integer it corresponds to. This means
-        # we can convert the binary integer to a string and use the index
-        # to change a 0 to 1 and vice versa and then convert back to a
-        # binary integer. The updated self.led_status can then be sent to
-        # the LED controller.
-        self.led_lights_ind = {
-            'power': 2,
-            'comms': 3,
-            'warn': 4,
-            'input_1': 5,
-            'input_2': 6,
-            'input_3': 7,
-            'relay_3_normally_closed': 8,
-            'relay_3_normally_open': 9,
-            'relay_2_normally_closed': 10,
-            'relay_2_normally_open': 11,
-            'relay_1_normally_closed': 12,
-            'relay_1_normally_open': 13,
-            'output_3': 14,
-            'output_2': 15,
-            'output_1': 16,
-            'adc_3': 17,
-            'adc_2': 18,
-            'adc_1': 19
-        }
-        if debug_lights:  # pragma: no cover
-            # if we are actually using the debug lights we can enable them now
-            sn3218.output([0x10] * 18)
-            sn3218.enable_leds(self.led_status)
-            sn3218.enable()
-
-        # initialize az as unknown, to ensure we have properly calibrated az
         self.testing = testing
         self.debug_lights = debug_lights
         # set the desired home_az
@@ -216,6 +201,8 @@ class Dome(object):
             encoder_pin_number, bounce_time=bounce_time)
         # _increment_count function to run when encoder is triggered
         self.__encoder.when_activated = self._increment_count
+        self.__encoder.when_deactivated = self._turn_led_off(
+            leds=[LED_light.INPUT_1])
         # set dummy value initially to force a rotation calibration run
         self.__az_per_tick = None
 
@@ -241,9 +228,21 @@ class Dome(object):
         self.current_direction = "CCW"
 
         # turn on the relay LEDs if we are debugging
+        # led_status is set with binary number, each zero/position sets the
+        # state of an LED, where 0 is off and 1 is on
+        self.led_status = 0b000000001010000000
+        # the initial led_status is set to indicate the positions the relays
+        # are initialised in (normally closed)
+        # use the LED_lights enum.Flag class to pass binary integers masks to
+        # the _change_led_state() method.
         if debug_lights:  # pragma: no cover
-            self._turn_led_on(leds=['relay_2_normally_closed'])
-            self._turn_led_on(leds=['relay_1_normally_closed'])
+            # if we are actually using the debug lights we can enable them now
+            self._change_led_state(1,
+                                   leds=[LED_light.RELAY_1_NC,
+                                         LED_light.RELAY_2_NC])
+            sn3218.enable_leds(self.led_status)
+            sn3218.enable()
+
 
 ###############################################################################
 # Properties
@@ -423,7 +422,7 @@ class Dome(object):
         """
         Update home status to at home and debug LEDs (if enabled).
         """
-        self._turn_led_on(leds=['input_2'])
+        self._change_led_stateon(leds=[LED_light.INPUT_2])
         # don't want to zero encoder while calibrating
         if not self.calibrating:
             self.__encoder_count = 0
@@ -433,7 +432,7 @@ class Dome(object):
         """
         Update home status to not at home and debug LEDs (if enabled).
         """
-        self._turn_led_off(leds=['input_2'])
+        self._change_led_state(0, leds=[LED_light.INPUT_2])
         self._at_home = False
 
     def _increment_count(self):
@@ -448,9 +447,7 @@ class Dome(object):
         direction is adopted.
         """
         print(f"Encoder activated _increment_count")
-        self._turn_led_on(leds=['input_1'])
-        time.sleep(0.01)
-        self._turn_led_off(leds=['input_1'])
+        self._change_led_state(1, leds=[LED_light.INPUT_1])
 
         if self.current_direction is None:
             self.current_direction = self.last_direction
@@ -519,15 +516,18 @@ class Dome(object):
         self.current_direction = "CW"
         # set the direction relay switch to CW position
         self._direction_relay.on()
-        # update the debug LEDs
-        if self.last_direction == "CCW":
-            self._turn_led_off(leds=['relay_2_normally_closed'])
-        self._turn_led_on(leds=['relay_2_normally_open'])
+        # update the debug LEDs LED_light.RELAY_1_NC
+        if self.last_direction.value:
+            self._change_led_state(0, leds=[LED_light.RELAY_2_NC])
+        if not self.last_direction.value:
+            self._change_led_state(0, leds=[LED_light.RELAY_2_NO])
+        if self.current_direction.value:
+            self._change_led_state(1, leds=[LED_light.RELAY_2_NO])
+        if not self.current_direction.value:
+            self._change_led_state(1, leds=[LED_light.RELAY_2_NC])
         # turn on rotation
         self._rotation_relay.on()
         # update the rotation relay debug LEDs
-        self._turn_led_on(leds=['relay_1_normally_open'])
-        self._turn_led_off(leds=['relay_1_normally_closed'])
         cmd_status = True
         return cmd_status
 
@@ -557,8 +557,8 @@ class Dome(object):
         # turn on rotation
         self._rotation_relay.on()
         # update the rotation relay debug LEDs
-        self._turn_led_on(leds=['relay_1_normally_open'])
-        self._turn_led_off(leds=['relay_1_normally_closed'])
+        self._change_led_state(1, leds=[LED_light.RELAY_1_NO])
+        self._change_led_state(0, leds=[LED_light.RELAY_1_NC])
         cmd_status = True
         return cmd_status
 
@@ -568,8 +568,8 @@ class Dome(object):
         """
         self._rotation_relay.off()
         # update the debug LEDs
-        self._turn_led_off(leds=['relay_1_normally_open'])
-        self._turn_led_on(leds=['relay_1_normally_closed'])
+        self._change_led_state(0, leds=[LED_light.RELAY_1_NO])
+        self._change_led_state(1, leds=[LED_light.RELAY_1_NC])
         # update last_direction with current_direction at time of method call
         self.last_direction = self.current_direction
 
@@ -590,12 +590,15 @@ class Dome(object):
             time.sleep(self.test_mode_delay_duration)
             tick_count += 1
 
-    def _turn_led_on(self, leds=[]):  # pragma: no cover
+    def _change_led_state(self, desired_state, leds=[]):  # pragma: no cover
         """
         Method of turning a set of debugging LEDs on
 
         Parameters
         ----------
+        desired_state : bool
+            Parameter to indicate whether leds are being turned on (1 or True)
+            or if they are being turned off (0 or False).
         leds : list
             List of LED name string to indicate which LEDs to turn on.
 
@@ -605,23 +608,13 @@ class Dome(object):
             return None
         if leds == []:
             # if leds is an empty list do nothing
-            pass
-        # this function needs a bunch of checks at some point
-        # like length of the binary number, whether things have the right
-        # type at the end (binary int vs string vs list) etc etc
-        #
-        # take the current led_status and convert to a string in binary
-        # format (18bit)
-        new_state = format(self.led_status, '#020b')
-        # from that string create a list of characters
-        # use the keys in the leds list and the led_lights_ind
-        new_state = list(new_state)
+            return None
+
         for led in leds:
-            ind = self.led_lights_ind[led]
-            new_state[ind] = '1'
-        # convert the updated list to a string and then to a binary int
-        new_state = ''.join(new_state)
-        self.led_status = int(new_state, 2)
+            if desired_state is 1:
+                self.led_status |= led
+            elif desired_state is 0:
+                self.led_status &= ~led
         # pass the new binary int to LED controller
         sn3218.enable_leds(self.led_status)
 
@@ -635,23 +628,14 @@ class Dome(object):
             List of LED name string to indicate which LEDs to turn off.
 
         """
-        # pass a list of strings of the leds to turn off
+        # pass a list of strings of the leds to turn on
         if not(self.debug_lights):
             return None
         if leds == []:
             # if leds is an empty list do nothing
-            pass
-        # take the current led_status and convert to a string in binary
-        # format (18bit)
-        new_state = format(self.led_status, '#020b')
-        # from that string create a list of characters
-        # use the keys in the leds list and the led_lights_ind
-        new_state = list(new_state)
+            return None
+
         for led in leds:
-            ind = self.led_lights_ind[led]
-            new_state[ind] = '0'
-        # convert the updated list to a string and then to a binary int
-        new_state = ''.join(new_state)
-        self.led_status = int(new_state, 2)
+            self.led_status &= ~led
         # pass the new binary int to LED controller
         sn3218.enable_leds(self.led_status)
