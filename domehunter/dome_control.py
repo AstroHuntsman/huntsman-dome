@@ -5,8 +5,8 @@ import math
 import sys
 import time
 import warnings
-from enum import Flag
 
+from domehunter.enumerations import Direction, Flag, ReturnCode
 import astropy.units as u
 from astropy.coordinates import Longitude
 from gpiozero import Device, DigitalInputDevice, DigitalOutputDevice
@@ -325,9 +325,9 @@ class Dome(object):
 
         """
         if self.dome_az is None:
-            print("Dome Azimuth unknown, finding Home position, \
-                  - then will go to requested Azimuth position.")
-            self.find_home()
+            print("Dome Azimuth unknown, please manually trigger, \
+                  calibration from TheSkyX.")
+            return
 
         target_az = Longitude(az * u.deg)
         # calculate delta_az, wrapping at 180 to ensure we take shortest route
@@ -419,6 +419,10 @@ class Dome(object):
             self.__home_sensor_pin.drive_high()
 
         self._stop_moving()
+
+    def sync(self, az):
+        self.__encoder_count = self._az_to_ticks(Longitude(az))
+        return
 
 ###############################################################################
 # Private Methods

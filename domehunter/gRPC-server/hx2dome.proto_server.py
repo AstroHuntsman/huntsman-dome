@@ -506,10 +506,8 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
         else:
             return_code = 0
             try:
-                # First re calibrate dome encoder
-                self.dome.calibrate_dome_encoder_counts()
-                # after calibrating send dome to requested azimuth
-                self.dome.GotoAz(request.az)
+                # First sync TheSkyX azimuth with dome encoder counts
+                self.dome.sync(request.az)
             except Exception:
                 # TODO: proper error handling
                 return_code = 1
