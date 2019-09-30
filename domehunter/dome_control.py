@@ -39,6 +39,12 @@ class DomeCommandError(Exception):  # pragma: no cover
     pass
 
 
+class Direction(Enum):
+    CW = True
+    CCW = False
+    none = None
+
+
 class LED_light(Flag):
     POWER = 0b100000000000000000
     COMMS = 0b010000000000000000
@@ -225,7 +231,7 @@ class Dome(object):
         self._direction_relay = DigitalOutputDevice(
             direction_relay_pin_number, initial_value=False)
         # because we initialiase the relay in the normally closed position
-        self.current_direction = "CCW"
+        self.current_direction = Direction.CCW
 
         # turn on the relay LEDs if we are debugging
         # led_status is set with binary number, each zero/position sets the
@@ -319,21 +325,21 @@ class Dome(object):
 
         """
         if self.dome_az is None:
-            print('Dome Azimuth unknown, finding Home position,'
-                  '- then will go to requested Azimuth position.')
+            print("Dome Azimuth unknown, finding Home position, \
+                  - then will go to requested Azimuth position.")
             self.find_home()
 
         target_az = Longitude(az * u.deg)
         # calculate delta_az, wrapping at 180 to ensure we take shortest route
         delta_az = (target_az - self.dome_az).wrap_at(180 * u.degree)
-        # converte delta_az to equivilant in encoder ticks
+        # convert delta_az to equivilant in encoder ticks
         ticks = self._az_to_ticks(delta_az)
         target_position = self._ticks_to_az(self.encoder_count + ticks)
 
         if delta_az > 0:
-            self._move_cw()
+            self._rotate_dome(Direction.CW)
         else:
-            self._move_ccw()
+            self._rotate_dome(Direction.CCW)
         # if the requested tolerance is less than az_per_tick use az_per_tick
         # for the tolerance
         tolerance = max(self.az_position_tolerance, self.az_per_tick)
@@ -370,7 +376,7 @@ class Dome(object):
         # now set dome to rotate num_cal_rotations times so we can determine
         # the number of ticks per revolution
         while rotation_count < num_cal_rotations:
-            self._move_cw()
+            self._rotate_dome(Direction.CW)
             if self.testing:
                 # tell the fake home sensor that we have left home
                 self.__home_sensor_pin.drive_low()
@@ -404,7 +410,7 @@ class Dome(object):
         Move Dome to home position.
 
         """
-        self._move_cw()
+        self._rotate_dome(Direction.CW)
         time.sleep(0.1)
         self.__home_sensor.wait_for_active(timeout=self.wait_timeout)
         if self.testing:
@@ -449,12 +455,12 @@ class Dome(object):
         print(f"Encoder activated _increment_count")
         self._change_led_state(1, leds=[LED_light.INPUT_1])
 
-        if self.current_direction is None:
+        if self.current_direction.value is None:
             self.current_direction = self.last_direction
 
-        if self.current_direction == "CW":
+        if self.current_direction.name == "CW":
             self.__encoder_count += 1
-        elif self.current_direction == "CCW":
+        elif self.current_direction.name == "CCW":
             self.__encoder_count -= 1
         # TODO what is last_direction is also None?
 
@@ -497,7 +503,7 @@ class Dome(object):
         tick_to_deg = Longitude(ticks * self.az_per_tick * u.deg)
         return (self.home_az + tick_to_deg).wrap_at(360 * u.degree)
 
-    def _move_cw(self):
+    def _rotate_dome(self, direction):
         """
         Set dome to move clockwise.
 
@@ -513,7 +519,7 @@ class Dome(object):
         # update the last_direction instance variable
         self.last_direction = self.current_direction
         # now update the current_direction variable to CW
-        self.current_direction = "CW"
+        self.current_direction = direction
         # set the direction relay switch to CW position
         self._direction_relay.on()
         # update the debug LEDs LED_light.RELAY_1_NC
@@ -525,35 +531,6 @@ class Dome(object):
             self._change_led_state(1, leds=[LED_light.RELAY_2_NO])
         if not self.current_direction.value:
             self._change_led_state(1, leds=[LED_light.RELAY_2_NC])
-        # turn on rotation
-        self._rotation_relay.on()
-        # update the rotation relay debug LEDs
-        cmd_status = True
-        return cmd_status
-
-    def _move_ccw(self):
-        """
-        Set dome to move counter-clockwise.
-
-        Returns
-        -------
-        integer
-            Command status return code (tbd).
-
-        """
-        # if testing, deactivate the home_sernsor_pin to simulate leaving home
-        if self.testing and self._at_home:
-            self.__home_sensor_pin.drive_low()
-        # update the last_direction instance variable
-        self.last_direction = self.current_direction
-        # now update the current_direction variable to CCW
-        self.current_direction = "CCW"
-        # set the direction relay switch to CCW position
-        self._direction_relay.off()
-        # update the debug LEDs
-        if self.last_direction == "CW":
-            self._turn_led_off(leds=['relay_2_normally_open'])
-        self._turn_led_on(leds=['relay_2_normally_closed'])
         # turn on rotation
         self._rotation_relay.on()
         # update the rotation relay debug LEDs
