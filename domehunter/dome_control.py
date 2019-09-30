@@ -5,8 +5,8 @@ import math
 import sys
 import time
 import warnings
+from enum import Flag
 
-from enum import Enum
 import astropy.units as u
 from astropy.coordinates import Longitude
 from gpiozero import Device, DigitalInputDevice, DigitalOutputDevice
@@ -39,7 +39,7 @@ class DomeCommandError(Exception):  # pragma: no cover
     pass
 
 
-class Direction(Enum):
+class Direction(Flag):
     CW = True
     CCW = False
     none = None
@@ -207,8 +207,8 @@ class Dome(object):
             encoder_pin_number, bounce_time=bounce_time)
         # _increment_count function to run when encoder is triggered
         self.__encoder.when_activated = self._increment_count
-        self.__encoder.when_deactivated = self._turn_led_off(
-            leds=[LED_light.INPUT_1])
+        self.__encoder.when_deactivated = self._change_led_state(
+            0, leds=[LED_light.INPUT_1])
         # set dummy value initially to force a rotation calibration run
         self.__az_per_tick = None
 
@@ -428,7 +428,7 @@ class Dome(object):
         """
         Update home status to at home and debug LEDs (if enabled).
         """
-        self._change_led_stateon(leds=[LED_light.INPUT_2])
+        self._change_led_state(1, leds=[LED_light.INPUT_2])
         # don't want to zero encoder while calibrating
         if not self.calibrating:
             self.__encoder_count = 0
@@ -592,27 +592,5 @@ class Dome(object):
                 self.led_status |= led
             elif desired_state is 0:
                 self.led_status &= ~led
-        # pass the new binary int to LED controller
-        sn3218.enable_leds(self.led_status)
-
-    def _turn_led_off(self, leds=[]):  # pragma: no cover
-        """
-        Method of turning a set of debugging LEDs off.
-
-        Parameters
-        ----------
-        leds : list
-            List of LED name string to indicate which LEDs to turn off.
-
-        """
-        # pass a list of strings of the leds to turn on
-        if not(self.debug_lights):
-            return None
-        if leds == []:
-            # if leds is an empty list do nothing
-            return None
-
-        for led in leds:
-            self.led_status &= ~led
         # pass the new binary int to LED controller
         sn3218.enable_leds(self.led_status)
