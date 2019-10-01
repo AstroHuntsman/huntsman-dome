@@ -6,7 +6,7 @@ import sys
 import time
 import warnings
 
-from domehunter.enumerations import Direction, Flag, ReturnCode
+from domehunter.enumerations import Direction, LED_light, ReturnCode
 import astropy.units as u
 from astropy.coordinates import Longitude
 from gpiozero import Device, DigitalInputDevice, DigitalOutputDevice
@@ -39,33 +39,6 @@ class DomeCommandError(Exception):  # pragma: no cover
     pass
 
 
-class Direction(Flag):
-    CW = True
-    CCW = False
-    none = None
-
-
-class LED_light(Flag):
-    POWER = 0b100000000000000000
-    COMMS = 0b010000000000000000
-    WARN = 0b001000000000000000
-    INPUT_1 = 0b000100000000000000
-    INPUT_2 = 0b000010000000000000
-    INPUT_3 = 0b000001000000000000
-    RELAY_3_NC = 0b000000100000000000
-    RELAY_3_NO = 0b000000010000000000
-    RELAY_2_NC = 0b000000001000000000
-    RELAY_2_NO = 0b000000000100000000
-    RELAY_1_NC = 0b000000000010000000
-    RELAY_1_NO = 0b000000000001000000
-    OUTPUT_3 = 0b000000000000100000
-    OUTPUT_2 = 0b000000000000010000
-    OUTPUT_1 = 0b000000000000001000
-    ADC_3 = 0b000000000000000100
-    ADC_2 = 0b000000000000000010
-    ADC_1 = 0b000000000000000001
-
-
 class Dome(object):
     """
     Interface to dome control raspberry pi GPIO.
@@ -90,6 +63,7 @@ class Dome(object):
                  debug_lights=False,
                  home_azimuth=0,
                  az_position_tolerance=1.0,
+                 az_per_tick=1.0,
                  encoder_pin_number=26,
                  home_sensor_pin_number=20,
                  rotation_relay_pin_number=13,
@@ -156,7 +130,7 @@ class Dome(object):
             automationHAT (relay 1). The normally open terminal on the
             rotation relay is connected to the common terminal of the direction
             relay.
-        direction_cw_relay_pin_number : int
+        direction_relay_pin_number : int
             The GPIO pin that corresponds to the direction relay on the
             automationHAT (relay 2). The Normally Open (NO) relay position
             corresponds to clockwise (CW) and the Normally Closed (NC)
@@ -209,8 +183,8 @@ class Dome(object):
         self.__encoder.when_activated = self._increment_count
         self.__encoder.when_deactivated = self._change_led_state(
             0, leds=[LED_light.INPUT_1])
-        # set dummy value initially to force a rotation calibration run
-        self.__az_per_tick = None
+        # TODO: read in default value from yaml(?)
+        self.__az_per_tick = az_per_tick
 
         self._set_not_home()
         self.__home_sensor = DigitalInputDevice(
@@ -226,9 +200,9 @@ class Dome(object):
         # (using both the normally open and normally close relay terminals)
         # so when moving the dome, first set the direction relay position
         # then activate the rotation relay
-        self._rotation_relay = DigitalOutputDevice(
+        self.__rotation_relay = DigitalOutputDevice(
             rotation_relay_pin_number, initial_value=False)
-        self._direction_relay = DigitalOutputDevice(
+        self.__direction_relay = DigitalOutputDevice(
             direction_relay_pin_number, initial_value=False)
         # because we initialiase the relay in the normally closed position
         self.current_direction = Direction.CCW
@@ -249,7 +223,6 @@ class Dome(object):
             sn3218.enable_leds(self.led_status)
             sn3218.enable()
 
-
 ###############################################################################
 # Properties
 ###############################################################################
@@ -260,14 +233,14 @@ class Dome(object):
         return self._ticks_to_az(self.__encoder_count)
 
     @property
-    def is_home(self):
+    def at_home(self):
         """Send True if the dome is at home."""
-        return self._at_home
+        return bool(self.__home_sensor.value)
 
     @property
     def dome_in_motion(self):
         """Send True if dome is in motion."""
-        return bool(self._rotation_relay.value)
+        return bool(self.__rotation_relay.value)
 
     @property
     def encoder_count(self):
@@ -421,7 +394,7 @@ class Dome(object):
         self._stop_moving()
 
     def sync(self, az):
-        self.__encoder_count = self._az_to_ticks(Longitude(az))
+        self.__encoder_count = self._az_to_ticks(Longitude(az * u.deg))
         return
 
 ###############################################################################
@@ -436,14 +409,12 @@ class Dome(object):
         # don't want to zero encoder while calibrating
         if not self.calibrating:
             self.__encoder_count = 0
-        self._at_home = True
 
     def _set_not_home(self):
         """
         Update home status to not at home and debug LEDs (if enabled).
         """
         self._change_led_state(0, leds=[LED_light.INPUT_2])
-        self._at_home = False
 
     def _increment_count(self):
         """
@@ -518,25 +489,23 @@ class Dome(object):
 
         """
         # if testing, deactivate the home_sernsor_pin to simulate leaving home
-        if self.testing and self._at_home:
+        if self.testing and self.at_home:
             self.__home_sensor_pin.drive_low()
         # update the last_direction instance variable
         self.last_direction = self.current_direction
         # now update the current_direction variable to CW
         self.current_direction = direction
         # set the direction relay switch to CW position
-        self._direction_relay.on()
-        # update the debug LEDs LED_light.RELAY_1_NC
-        if self.last_direction.value:
-            self._change_led_state(0, leds=[LED_light.RELAY_2_NC])
-        if not self.last_direction.value:
-            self._change_led_state(0, leds=[LED_light.RELAY_2_NO])
-        if self.current_direction.value:
+        if self.current_direction.name == "CW":
+            self.__direction_relay.on()
             self._change_led_state(1, leds=[LED_light.RELAY_2_NO])
-        if not self.current_direction.value:
+            self._change_led_state(0, leds=[LED_light.RELAY_2_NC])
+        elif self.current_direction.name == "CCW":
+            self.__direction_relay.off()
+            self._change_led_state(0, leds=[LED_light.RELAY_2_NO])
             self._change_led_state(1, leds=[LED_light.RELAY_2_NC])
         # turn on rotation
-        self._rotation_relay.on()
+        self.__rotation_relay.on()
         # update the rotation relay debug LEDs
         self._change_led_state(1, leds=[LED_light.RELAY_1_NO])
         self._change_led_state(0, leds=[LED_light.RELAY_1_NC])
@@ -547,7 +516,7 @@ class Dome(object):
         """
         Stop dome movement by switching the dome rotation relay off.
         """
-        self._rotation_relay.off()
+        self.__rotation_relay.off()
         # update the debug LEDs
         self._change_led_state(0, leds=[LED_light.RELAY_1_NO])
         self._change_led_state(1, leds=[LED_light.RELAY_1_NC])
