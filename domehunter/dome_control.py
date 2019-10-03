@@ -411,8 +411,8 @@ class Dome(object):
         self._change_led_state(1, leds=[LED_light.INPUT_2])
         # don't want to zero encoder while calibrating
         # note: because Direction.CW is +1 and Direction.CCW is -1, need to
-        # add 1 to self.direction in order to get CCW to evaluate to False
-        if not self.calibrating and bool(self.direction + 1):
+        # add 1 to self.current_direction, to get CCW to evaluate to False
+        if not self.calibrating and bool(self.current_direction + 1):
             self._encoder_count = 0
 
     def _set_not_home(self):
