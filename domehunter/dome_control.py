@@ -11,7 +11,7 @@ from astropy.coordinates import Longitude
 from gpiozero import Device, DigitalInputDevice, DigitalOutputDevice
 from gpiozero.pins.mock import MockFactory
 
-from domehunter.enumerations import Direction, LED_light, ReturnCode
+from domehunter.enumerations import Direction, LED_Lights, ReturnCode
 
 from ._astropy_init import *
 
@@ -186,16 +186,16 @@ class Dome(object):
         # turn on the relay LEDs if we are debugging
         # led_status is set with binary number, each zero/position sets the
         # state of an LED, where 0 is off and 1 is on
-        self.led_status = LED_light.RELAY_1_NC | LED_light.RELAY_2_NC
+        self.led_status = LED_Lights.RELAY_1_NC | LED_Lights.RELAY_2_NC
         # the initial led_status is set to indicate the positions the relays
         # are initialised in (normally closed)
-        # use the LED_light enum.Flag class to pass binary integers masks to
+        # use the LED_Lights enum.Flag class to pass binary integers masks to
         # the _change_led_state() method.
         if debug_lights:  # pragma: no cover
             # if we are actually using the debug lights we can enable them now
             self._change_led_state(1,
-                                   leds=[LED_light.RELAY_1_NC,
-                                         LED_light.RELAY_2_NC])
+                                   leds=[LED_Lights.RELAY_1_NC,
+                                         LED_Lights.RELAY_2_NC])
             sn3218.enable_leds(self.led_status.value)
             sn3218.enable()
 
@@ -408,7 +408,7 @@ class Dome(object):
         """
         Update home status to at home and debug LEDs (if enabled).
         """
-        self._change_led_state(1, leds=[LED_light.INPUT_2])
+        self._change_led_state(1, leds=[LED_Lights.INPUT_2])
         # don't want to zero encoder while calibrating
         # note: because Direction.CW is +1 and Direction.CCW is -1, need to
         # add 1 to self.current_direction, to get CCW to evaluate to False
@@ -419,7 +419,7 @@ class Dome(object):
         """
         Update home status to not at home and debug LEDs (if enabled).
         """
-        self._change_led_state(0, leds=[LED_light.INPUT_2])
+        self._change_led_state(0, leds=[LED_Lights.INPUT_2])
 
     def _increment_count(self):
         """
@@ -433,7 +433,7 @@ class Dome(object):
         direction is adopted.
         """
         print(f"Encoder activated _increment_count")
-        self._change_led_state(1, leds=[LED_light.INPUT_1])
+        self._change_led_state(1, leds=[LED_Lights.INPUT_1])
 
         if self.current_direction != Direction.NONE:
             self._encoder_count += self.current_direction
@@ -501,17 +501,17 @@ class Dome(object):
         # set the direction relay switch to CW position
         if self.current_direction == Direction.CW:
             self._direction_relay.on()
-            self._change_led_state(1, leds=[LED_light.RELAY_2_NO])
-            self._change_led_state(0, leds=[LED_light.RELAY_2_NC])
+            self._change_led_state(1, leds=[LED_Lights.RELAY_2_NO])
+            self._change_led_state(0, leds=[LED_Lights.RELAY_2_NC])
         elif self.current_direction.name == Direction.CCW:
             self._direction_relay.off()
-            self._change_led_state(0, leds=[LED_light.RELAY_2_NO])
-            self._change_led_state(1, leds=[LED_light.RELAY_2_NC])
+            self._change_led_state(0, leds=[LED_Lights.RELAY_2_NO])
+            self._change_led_state(1, leds=[LED_Lights.RELAY_2_NC])
         # turn on rotation
         self._rotation_relay.on()
         # update the rotation relay debug LEDs
-        self._change_led_state(1, leds=[LED_light.RELAY_1_NO])
-        self._change_led_state(0, leds=[LED_light.RELAY_1_NC])
+        self._change_led_state(1, leds=[LED_Lights.RELAY_1_NO])
+        self._change_led_state(0, leds=[LED_Lights.RELAY_1_NC])
         cmd_status = True
         return cmd_status
 
@@ -521,8 +521,8 @@ class Dome(object):
         """
         self._rotation_relay.off()
         # update the debug LEDs
-        self._change_led_state(0, leds=[LED_light.RELAY_1_NO])
-        self._change_led_state(1, leds=[LED_light.RELAY_1_NC])
+        self._change_led_state(0, leds=[LED_Lights.RELAY_1_NO])
+        self._change_led_state(1, leds=[LED_Lights.RELAY_1_NC])
         # update last_direction with current_direction at time of method call
         self.last_direction = self.current_direction
         self.current_direction = Direction.NONE
@@ -552,7 +552,7 @@ class Dome(object):
             Parameter to indicate whether leds are being turned on (1 or True)
             or if they are being turned off (0 or False).
         leds : list
-            List of LED_light enums to indicate which LEDs to turn on.
+            List of LED_Lights enums to indicate which LEDs to turn on.
 
         """
         # pass a list of strings of the leds to turn on
@@ -575,4 +575,4 @@ class Dome(object):
         Call back function for encoder pin, turns the status led off when
         encoder pin is deactivated.
         """
-        self._change_led_state(0, leds=[LED_light.INPUT_1])
+        self._change_led_state(0, leds=[LED_Lights.INPUT_1])
