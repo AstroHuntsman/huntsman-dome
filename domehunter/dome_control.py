@@ -570,5 +570,9 @@ class Dome(object):
         # pass the new binary int to LED controller
         sn3218.enable_leds(self.led_status)
 
-    def self._turn_off_input_1_led(self):
+    def _turn_off_input_1_led(self):
+        """
+        Call back function for encoder pin, turns the status led off when
+        encoder pin is deactivated.
+        """
         self._change_led_state(0, leds=[LED_light.INPUT_1])
