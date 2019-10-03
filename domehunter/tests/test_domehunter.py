@@ -27,7 +27,7 @@ def test_dome_initialisation(testing_dome):
     assert testing_dome.degrees_per_tick == 1
     assert testing_dome.at_home is False
     assert testing_dome.current_direction.name == "CCW"
-    assert testing_dome.current_direction.value is False
+    assert bool(testing_dome.current_direction.value+1) is False
 
 
 def test_at_home(testing_dome):
@@ -60,7 +60,7 @@ def test_getAz(dome_az_90):
 def test_GotoAz(dome_az_90):
     # test fixture has degrees_per_tick attribute of 10
     dome_az_90.GotoAz(300)
-    assert dome_az_90._encoder_count == -5
+    assert dome_az_90.encoder_count == -6
     dome_az_90.GotoAz(2)
     assert dome_az_90.dome_az.degree == 0
     assert dome_az_90.encoder_count == 0
@@ -80,15 +80,15 @@ def test_sync(dome_az_90):
 
 @pytest.mark.parametrize("current_dir", [Direction.CW,
                                          Direction.CCW,
-                                         Direction.none])
+                                         Direction.NONE])
 @pytest.mark.parametrize("last_dir", [Direction.CW,
                                       Direction.CCW])
 def test_increment_count(dome_az_90, current_dir, last_dir):
     dname = current_dir.name
     ldname = last_dir.name
-    if dname == "CW" or dname is "none" and ldname == "CW":
+    if dname == "CW" or dname is "NONE" and ldname == "CW":
         expected = 10
-    elif dname == "CCW" or dname is "none" and ldname == "CCW":
+    elif dname == "CCW" or dname is "NONE" and ldname == "CCW":
         expected = 8
     dome_az_90.current_direction = current_dir
     dome_az_90.last_direction = last_dir

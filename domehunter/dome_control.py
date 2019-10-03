@@ -175,7 +175,7 @@ class Dome(object):
         # if the requested tolerance is less than degrees_per_tick use
         # degrees_per_tick for the tolerance
         self.az_position_tolerance = max(
-            self.az_position_tolerance, self.degrees_per_tick)
+            self.az_position_tolerance, 2*self.degrees_per_tick)
         self.home_az = Longitude(home_azimuth * u.deg)
         # need something to let us know when dome is calibrating so home sensor
         # activation doesnt zero encoder counts
@@ -322,7 +322,8 @@ class Dome(object):
         else:
             self._rotate_dome(Direction.CCW)
         # wait until encoder count matches desired delta az
-        while (target_az - self.dome_az).wrap_at(180 * u.degree) > self.az_position_tolerance:
+        # TODO: make this next line less ugly
+        while abs((target_az - self.dome_az).wrap_at(180 * u.degree).degree) > self.az_position_tolerance:
             if self.testing:
                 # if testing simulate a tick for every cycle of while loop
                 self._simulate_ticks(num_ticks=1)
@@ -378,7 +379,7 @@ class Dome(object):
         self._degrees_per_tick = 360 / (self.encoder_count / rotation_count)
         # update the az_position_tolerance
         self.az_position_tolerance = max(
-            self.az_position_tolerance, self.degrees_per_tick)
+            self.az_position_tolerance, 2*self.degrees_per_tick)
         self.calibrating = False
 
     def find_home(self):
