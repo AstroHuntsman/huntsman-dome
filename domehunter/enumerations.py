@@ -1,4 +1,4 @@
-from enum import Flag, IntEnum, Enum
+from enum import IntFlag, IntEnum, Enum
 
 
 class Direction(IntEnum):
@@ -7,7 +7,7 @@ class Direction(IntEnum):
     NONE = 0
 
 
-class LED_light(Flag):
+class LED_light(IntFlag):
     POWER = 0b100000000000000000
     COMMS = 0b010000000000000000
     WARN = 0b001000000000000000
