@@ -11,19 +11,19 @@ Overview
 --------
 
 The Huntsman Telescope dome control software has two components,
-one written in c++ the other in python.
+one written in C++ the other in python.
 
 The C++ component is a X2Dome driver that interfaces with TheSkyX
 and passes commands through to the python component. This is done
-using the `gRPC <https://grpc.io/>`_ framework, allowing the c++
+using the `gRPC <https://grpc.io/>`_ framework, allowing the C++
 component to pass information to the python component.
 
 The python component is implemented on a raspberry pi that controls
 the dome rotation motor. It controls the activation of the motor
 and tracks the dome position using an encoder. It returns information
-(such as dome position) to the c++ component using gRPC as well.
+(such as dome position) to the C++ component using gRPC as well.
 
-The c++ code is built around Software Bisque's X2 standard. For more
+The C++ code is built around Software Bisque's X2 standard. For more
 infomation on this `see here <https://www.bisque.com/x2standard/class_x2_dome.html#a7ffd792950cdd0abe1b022e7a8caff9e>`.
 
 HOW TO RUN THE STUPID THING
@@ -37,8 +37,8 @@ correctly, this is how you would set up the dome control system.
 * ``$ cd huntsman-dome/domehunter/gRPC-server/``
 * Use the -h flag to get information on the available command line flags
 * ``$ python hx2dome.proto_server.py -h``
-* To run server in simulated hardware mode run with the -sh flag
-* ``$ python hx2dome.proto_server.py -sh``
+* To run server in simulated hardware mode run with the -s flag
+* ``$ python hx2dome.proto_server.py -s``
 * Now the server is running, you may start TheSkyX
 * Within TheSkyX go to the Dome Setup menu and select the Huntsman Telescope
 * Open TheSkyX log window and place by the python server window to watch for activity/status messages
@@ -61,7 +61,7 @@ To install (on MacOS or Linux) the required grpc python packages run the followi
   $ python -m pip install grpcio-tools
 
 
-``grpc c++`` For reference see `here <https://grpc.io/docs/quickstart/cpp/>`_.
+``grpc C++`` For reference see `here <https://grpc.io/docs/quickstart/cpp/>`_.
 ------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Detailed instructions to install from source on any OS can be found `here <https://github.com/grpc/grpc/blob/master/BUILDING.md>`_.
@@ -119,7 +119,7 @@ The files for compilation and installation are found in the
 * ``TheSkyX_plugin_[MAC,LINUX]_install.sh``
 * ``Makefile_[MAC,LINUX]``
 
-The first two are files are used to install the compiled c++
+The first two are files are used to install the compiled C++
 driver into TheSkyX application directory.
 
 |
@@ -143,7 +143,7 @@ Replace `LINUX` with `MAC` if installing on a MacOS system and vice versa.
 Once the driver is installed in TheSkyX, it can be selected from
 the dome selection menu. Before issuing any commands, start the
 ``domehunter/gRPC-server/hx2dome.proto_server.py`` in a new terminal.
-When you issue a command through TheSkyX, the c++ driver will send
+When you issue a command through TheSkyX, the C++ driver will send
 a remote procedure call through to the gRPC python server.
 
 The gRPC python server can be run in a communication test mode that doesn't

@@ -1,10 +1,10 @@
-from enum import Flag
+from enum import Flag, IntEnum, Enum
 
 
-class Direction(Flag):
-    CW = True
-    CCW = False
-    none = None
+class Direction(IntEnum):
+    CW = +1
+    CCW = -1
+    NONE = 0
 
 
 class LED_light(Flag):
@@ -28,7 +28,7 @@ class LED_light(Flag):
     ADC_1 = 0b000000000000000001
 
 
-class ReturnCode(Flag):
+class ReturnCode(Enum):
     # No error.
     SB_OK = 0
 

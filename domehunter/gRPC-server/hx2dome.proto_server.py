@@ -545,26 +545,26 @@ if __name__ == '__main__':
 
     group = parser.add_mutually_exclusive_group()
 
-    group.add_argument('-rh', '--run-with-real-hardware',
+    group.add_argument('-r', '--real',
                        dest='testing',
                        action='store_false',
                        help="Run server with real hardware.")
 
-    group.add_argument('-sh', '--run-with-simulated-hardware',
+    group.add_argument('-s', '--simulated',
                        dest='testing',
                        action='store_true',
                        help="Run server with simulated hardware.")
 
     parser.set_defaults(testing=True)
 
-    parser.add_argument('-rdbl', '--run-with-debug-lights',
+    parser.add_argument('-l', '--lights',
                         dest='debug_lights',
                         action='store_true',
                         help="Enable debug lights on automationHAT")
 
     parser.set_defaults(debug_lights=False)
 
-    parser.add_argument('-rst', '--run-in-server-test-mode',
+    parser.add_argument('-c', '--commtest',
                         dest='server_testing',
                         action='store_true',
                         help="Mode for testing TheSkyX driver to server \

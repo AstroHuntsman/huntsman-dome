@@ -6,11 +6,12 @@ import sys
 import time
 import warnings
 
-from domehunter.enumerations import Direction, LED_light, ReturnCode
 import astropy.units as u
 from astropy.coordinates import Longitude
 from gpiozero import Device, DigitalInputDevice, DigitalOutputDevice
 from gpiozero.pins.mock import MockFactory
+
+from domehunter.enumerations import Direction, LED_light, ReturnCode
 
 from ._astropy_init import *
 
@@ -61,9 +62,9 @@ class Dome(object):
     def __init__(self,
                  testing=True,
                  debug_lights=False,
-                 home_azimuth=0,
+                 home_azimuth=0.0,
                  az_position_tolerance=1.0,
-                 az_per_tick=1.0,
+                 degrees_per_tick=1.0,
                  encoder_pin_number=26,
                  home_sensor_pin_number=20,
                  rotation_relay_pin_number=13,
@@ -111,14 +112,16 @@ class Dome(object):
             Toggle to enable a simulated hardware testing mode.
         debug_lights : boolean
             Toggle to enable the status LEDs on the automationHAT.
-        home_azimuth: int
+        home_azimuth: float
             The home azimuth position in degrees (integer between 0 and 360).
             Defaults to 0.
-        az_position_tolerance: int
+        az_position_tolerance: float
             The tolerance used during GotoAz() calls. Dome will move to
             requested position to within this tolerance. If the calibrated
-            az_per_tick is greater than az_position_tolerance, az_per_tick will
-            be used as the tolerance instead.
+            degrees_per_tick is greater than az_position_tolerance,
+            degrees_per_tick will be used as the tolerance instead.
+        degrees_per_tick: float
+            The calibrated number of degrees (azimuth) per encoder tick.
         encoder_pin_number : int
             The GPIO pin that corresponds to the encoder input on the
             automationHAT (input 1).
@@ -152,8 +155,8 @@ class Dome(object):
 
             # in testing mode we need to create a seperate pin object so we can
             # simulate the activation of our fake DIDs and DODs
-            self.__encoder_pin = Device.pin_factory.pin(encoder_pin_number)
-            self.__home_sensor_pin = Device.pin_factory.pin(
+            self._encoder_pin = Device.pin_factory.pin(encoder_pin_number)
+            self._home_sensor_pin = Device.pin_factory.pin(
                 home_sensor_pin_number)
         else:
             # set the timeout length variable to 5 minutes (units of seconds)
@@ -166,51 +169,24 @@ class Dome(object):
 
         self.testing = testing
         self.debug_lights = debug_lights
-        # set the desired home_az
+        # TODO: read in default value from yaml(?)
+        self._degrees_per_tick = degrees_per_tick
         self.az_position_tolerance = az_position_tolerance
+        # if the requested tolerance is less than degrees_per_tick use
+        # degrees_per_tick for the tolerance
+        self.az_position_tolerance = max(
+            self.az_position_tolerance, self.degrees_per_tick)
         self.home_az = Longitude(home_azimuth * u.deg)
         # need something to let us know when dome is calibrating so home sensor
         # activation doesnt zero encoder counts
         self.calibrating = False
 
-        # create a instance variable to track the dome motor encoder ticks
-        self.__encoder_count = 0
-        # bounce_time settings gives the time in seconds that the device will
-        # ignore additional activation signals
-        self.__encoder = DigitalInputDevice(
-            encoder_pin_number, bounce_time=bounce_time)
-        # _increment_count function to run when encoder is triggered
-        self.__encoder.when_activated = self._increment_count
-        self.__encoder.when_deactivated = self._change_led_state(
-            0, leds=[LED_light.INPUT_1])
-        # TODO: read in default value from yaml(?)
-        self.__az_per_tick = az_per_tick
-
-        self._set_not_home()
-        self.__home_sensor = DigitalInputDevice(
-            home_sensor_pin_number, bounce_time=bounce_time)
-        # _set_not_home function is run when upon home senser deactivation
-        self.__home_sensor.when_deactivated = self._set_not_home
-        # _set_at_home function is run when home sensor is activated
-        self.__home_sensor.when_activated = self._set_at_home
-
-        # these two DODs control the relays that control the dome motor
-        # the rotation relay is the on/off switch for dome rotation
-        # the direction relay will toggle either the CW or CCW direction
-        # (using both the normally open and normally close relay terminals)
-        # so when moving the dome, first set the direction relay position
-        # then activate the rotation relay
-        self.__rotation_relay = DigitalOutputDevice(
-            rotation_relay_pin_number, initial_value=False)
-        self.__direction_relay = DigitalOutputDevice(
-            direction_relay_pin_number, initial_value=False)
-        # because we initialiase the relay in the normally closed position
-        self.current_direction = Direction.CCW
-
+        # NOTE: this led setup needs to be done before setting any callback
+        # functions
         # turn on the relay LEDs if we are debugging
         # led_status is set with binary number, each zero/position sets the
         # state of an LED, where 0 is off and 1 is on
-        self.led_status = 0b000000001010000000
+        self.led_status = LED_Lights.RELAY_1_NO | LED_Lights.RELAY_2_NO
         # the initial led_status is set to indicate the positions the relays
         # are initialised in (normally closed)
         # use the LED_lights enum.Flag class to pass binary integers masks to
@@ -223,6 +199,41 @@ class Dome(object):
             sn3218.enable_leds(self.led_status)
             sn3218.enable()
 
+        # create a instance variable to track the dome motor encoder ticks
+        self._encoder_count = 0
+        # bounce_time settings gives the time in seconds that the device will
+        # ignore additional activation signals
+        self._encoder = DigitalInputDevice(
+            encoder_pin_number, bounce_time=bounce_time)
+        # _increment_count function to run when encoder is triggered
+        self._encoder.when_activated = self._increment_count
+        self._encoder.when_deactivated = self.self._turn_off_input_1_led
+
+        self._home_sensor = DigitalInputDevice(
+            home_sensor_pin_number, bounce_time=bounce_time)
+        if self._home_sensor.is_active:
+            self._set_at_home()
+        else:
+            self._set_not_home()
+        # _set_not_home function is run when upon home senser deactivation
+        self._home_sensor.when_deactivated = self._set_not_home
+        # _set_at_home function is run when home sensor is activated
+        self._home_sensor.when_activated = self._set_at_home
+
+        # these two DODs control the relays that control the dome motor
+        # the rotation relay is the on/off switch for dome rotation
+        # the direction relay will toggle either the CW or CCW direction
+        # (using both the normally open and normally close relay terminals)
+        # so when moving the dome, first set the direction relay position
+        # then activate the rotation relay
+        self._rotation_relay = DigitalOutputDevice(
+            rotation_relay_pin_number, initial_value=False)
+        self._direction_relay = DigitalOutputDevice(
+            direction_relay_pin_number, initial_value=False)
+        # because we initialiase the relay in the normally closed position
+        self.current_direction = Direction.CCW
+
+
 ###############################################################################
 # Properties
 ###############################################################################
@@ -230,27 +241,27 @@ class Dome(object):
     @property
     def dome_az(self):
         """ """
-        return self._ticks_to_az(self.__encoder_count)
+        return self._ticks_to_az(self._encoder_count)
 
     @property
     def at_home(self):
         """Send True if the dome is at home."""
-        return bool(self.__home_sensor.value)
+        return self._home_sensor.is_active
 
     @property
     def dome_in_motion(self):
         """Send True if dome is in motion."""
-        return bool(self.__rotation_relay.value)
+        return self._rotation_relay.is_active
 
     @property
     def encoder_count(self):
         """Returns the current encoder count."""
-        return self.__encoder_count
+        return self._encoder_count
 
     @property
-    def az_per_tick(self):
+    def degrees_per_tick(self):
         """Returns the calibrated azimuth (in degrees) per encoder tick."""
-        return self.__az_per_tick
+        return self._degrees_per_tick
 ###############################################################################
 # Methods
 ###############################################################################
@@ -278,7 +289,7 @@ class Dome(object):
 
         """
         # TODO: Now that dome_az is a property calculated from encoder_count
-        # it is no longer initialised a None, so instead probably need some
+        # it is no longer initialised as None, so instead probably need some
         # other form of error/exception handling here (if encoder_count is
         # None?)
         if self.dome_az is None:
@@ -305,21 +316,13 @@ class Dome(object):
         target_az = Longitude(az * u.deg)
         # calculate delta_az, wrapping at 180 to ensure we take shortest route
         delta_az = (target_az - self.dome_az).wrap_at(180 * u.degree)
-        # convert delta_az to equivilant in encoder ticks
-        ticks = self._az_to_ticks(delta_az)
-        target_position = self._ticks_to_az(self.encoder_count + ticks)
 
         if delta_az > 0:
             self._rotate_dome(Direction.CW)
         else:
             self._rotate_dome(Direction.CCW)
-        # if the requested tolerance is less than az_per_tick use az_per_tick
-        # for the tolerance
-        tolerance = max(self.az_position_tolerance, self.az_per_tick)
         # wait until encoder count matches desired delta az
-        while not math.isclose(self.dome_az.degree,
-                               target_position.degree,
-                               abs_tol=tolerance):
+        while (target_az - self.dome_az).wrap_at(180 * u.degree) > self.az_position_tolerance:
             if self.testing:
                 # if testing simulate a tick for every cycle of while loop
                 self._simulate_ticks(num_ticks=1)
@@ -352,18 +355,15 @@ class Dome(object):
             self._rotate_dome(Direction.CW)
             if self.testing:
                 # tell the fake home sensor that we have left home
-                self.__home_sensor_pin.drive_low()
+                self._home_sensor_pin.drive_low()
                 self._simulate_ticks(num_ticks=10)
-            # need to introduce a small pause before wait_for_active as we
-            # start from home position and want to make sure we clear the
-            # sensor before we start waiting for it to come around again
-            time.sleep(2)
-            self.__home_sensor.wait_for_active(timeout=self.wait_timeout)
+            self._home_sensor.wait_for_inactive(timeout=self.wait_timeout)
+            self._home_sensor.wait_for_active(timeout=self.wait_timeout)
 
             if self.testing:
                 # tell the fake home sensor that we have come back to home
                 time.sleep(0.1)
-                self.__home_sensor_pin.drive_high()
+                self._home_sensor_pin.drive_high()
                 time.sleep(0.1)
 
             # without this pause the wait_for_active wasn't waiting (???)
@@ -375,7 +375,10 @@ class Dome(object):
 
         # set the azimuth per encoder tick factor based on how many ticks we
         # counted over n rotations
-        self.__az_per_tick = 360 / (self.encoder_count / rotation_count)
+        self._degrees_per_tick = 360 / (self.encoder_count / rotation_count)
+        # update the az_position_tolerance
+        self.az_position_tolerance = max(
+            self.az_position_tolerance, self.degrees_per_tick)
         self.calibrating = False
 
     def find_home(self):
@@ -385,16 +388,16 @@ class Dome(object):
         """
         self._rotate_dome(Direction.CW)
         time.sleep(0.1)
-        self.__home_sensor.wait_for_active(timeout=self.wait_timeout)
+        self._home_sensor.wait_for_active(timeout=self.wait_timeout)
         if self.testing:
             # in testing mode need to "fake" the activation of the home pin
             time.sleep(0.5)
-            self.__home_sensor_pin.drive_high()
+            self._home_sensor_pin.drive_high()
 
         self._stop_moving()
 
     def sync(self, az):
-        self.__encoder_count = self._az_to_ticks(Longitude(az * u.deg))
+        self._encoder_count = self._az_to_ticks(Longitude(az * u.deg))
         return
 
 ###############################################################################
@@ -407,8 +410,10 @@ class Dome(object):
         """
         self._change_led_state(1, leds=[LED_light.INPUT_2])
         # don't want to zero encoder while calibrating
-        if not self.calibrating:
-            self.__encoder_count = 0
+        # note: because Direction.CW is +1 and Direction.CCW is -1, need to
+        # add 1 to self.direction in order to get CCW to evaluate to False
+        if not self.calibrating and bool(self.direction + 1):
+            self._encoder_count = 0
 
     def _set_not_home(self):
         """
@@ -430,14 +435,12 @@ class Dome(object):
         print(f"Encoder activated _increment_count")
         self._change_led_state(1, leds=[LED_light.INPUT_1])
 
-        if self.current_direction.value is None:
-            self.current_direction = self.last_direction
-
-        if self.current_direction.name == "CW":
-            self.__encoder_count += 1
-        elif self.current_direction.name == "CCW":
-            self.__encoder_count -= 1
-        # TODO what is last_direction is also None?
+        if self.current_direction != Direction.NONE:
+            self._encoder_count += self.current_direction
+        elif self.last_direction != Direction.NONE:
+            self._encoder_count += self.last_direction
+        else:
+            raise RuntimeError("Oh no.")
 
     def _az_to_ticks(self, az):
         """
@@ -458,7 +461,7 @@ class Dome(object):
 
         """
         az_relative_to_home = (az - self.home_az).wrap_at(360 * u.degree)
-        return az_relative_to_home.degree / self.az_per_tick
+        return az_relative_to_home.degree / self.degrees_per_tick
 
     def _ticks_to_az(self, ticks):
         """
@@ -475,8 +478,8 @@ class Dome(object):
             The corresponding dome azimuth position in degrees.
 
         """
-        tick_to_deg = Longitude(ticks * self.az_per_tick * u.deg)
-        return (self.home_az + tick_to_deg).wrap_at(360 * u.degree)
+        tick_to_deg = Longitude(ticks * self.degrees_per_tick * u.deg)
+        return Longitude(self.home_az + tick_to_deg)
 
     def _rotate_dome(self, direction):
         """
@@ -490,22 +493,22 @@ class Dome(object):
         """
         # if testing, deactivate the home_sernsor_pin to simulate leaving home
         if self.testing and self.at_home:
-            self.__home_sensor_pin.drive_low()
+            self._home_sensor_pin.drive_low()
         # update the last_direction instance variable
         self.last_direction = self.current_direction
         # now update the current_direction variable to CW
         self.current_direction = direction
         # set the direction relay switch to CW position
-        if self.current_direction.name == "CW":
-            self.__direction_relay.on()
+        if self.current_direction == Direction.CW:
+            self._direction_relay.on()
             self._change_led_state(1, leds=[LED_light.RELAY_2_NO])
             self._change_led_state(0, leds=[LED_light.RELAY_2_NC])
-        elif self.current_direction.name == "CCW":
-            self.__direction_relay.off()
+        elif self.current_direction.name == Direction.CCW:
+            self._direction_relay.off()
             self._change_led_state(0, leds=[LED_light.RELAY_2_NO])
             self._change_led_state(1, leds=[LED_light.RELAY_2_NC])
         # turn on rotation
-        self.__rotation_relay.on()
+        self._rotation_relay.on()
         # update the rotation relay debug LEDs
         self._change_led_state(1, leds=[LED_light.RELAY_1_NO])
         self._change_led_state(0, leds=[LED_light.RELAY_1_NC])
@@ -516,29 +519,28 @@ class Dome(object):
         """
         Stop dome movement by switching the dome rotation relay off.
         """
-        self.__rotation_relay.off()
+        self._rotation_relay.off()
         # update the debug LEDs
         self._change_led_state(0, leds=[LED_light.RELAY_1_NO])
         self._change_led_state(1, leds=[LED_light.RELAY_1_NC])
         # update last_direction with current_direction at time of method call
         self.last_direction = self.current_direction
+        self.current_direction = Direction.NONE
 
     def _simulate_ticks(self, num_ticks):
         """
         Method to simulate encoder ticks while in testing mode.
         """
-        tick_count = 0
         # repeat this loop of driving the mock pins low then high to simulate
         # an encoder tick. Continue until desired number of ticks is reached.
-        while tick_count < num_ticks:
-            self.__encoder_pin.drive_low()
+        for tick_count in range(num_ticks):
+            self._encoder_pin.drive_low()
             # test_mode_delay_duration is set so that it will always exceed
             # the set bounce_time
             # of the pins
             time.sleep(self.test_mode_delay_duration)
-            self.__encoder_pin.drive_high()
+            self._encoder_pin.drive_high()
             time.sleep(self.test_mode_delay_duration)
-            tick_count += 1
 
     def _change_led_state(self, desired_state, leds=[]):  # pragma: no cover
         """
@@ -550,12 +552,12 @@ class Dome(object):
             Parameter to indicate whether leds are being turned on (1 or True)
             or if they are being turned off (0 or False).
         leds : list
-            List of LED name string to indicate which LEDs to turn on.
+            List of LED_light enums to indicate which LEDs to turn on.
 
         """
         # pass a list of strings of the leds to turn on
         if not(self.debug_lights):
-            return None
+            return
         if leds == []:
             # if leds is an empty list do nothing
             return None
@@ -567,3 +569,6 @@ class Dome(object):
                 self.led_status &= ~led
         # pass the new binary int to LED controller
         sn3218.enable_leds(self.led_status)
+
+    def self._turn_off_input_1_led(self):
+        self._change_led_state(0, leds=[LED_light.INPUT_1])
