@@ -196,7 +196,7 @@ class Dome(object):
             self._change_led_state(1,
                                    leds=[LED_light.RELAY_1_NC,
                                          LED_light.RELAY_2_NC])
-            sn3218.enable_leds(self.led_status)
+            sn3218.enable_leds(self.led_status.value)
             sn3218.enable()
 
         # create a instance variable to track the dome motor encoder ticks
@@ -568,7 +568,7 @@ class Dome(object):
             elif desired_state is 0:
                 self.led_status &= ~led
         # pass the new binary int to LED controller
-        sn3218.enable_leds(self.led_status)
+        sn3218.enable_leds(self.led_status.value)
 
     def _turn_off_input_1_led(self):
         """
