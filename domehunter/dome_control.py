@@ -186,10 +186,10 @@ class Dome(object):
         # turn on the relay LEDs if we are debugging
         # led_status is set with binary number, each zero/position sets the
         # state of an LED, where 0 is off and 1 is on
-        self.led_status = LED_Lights.RELAY_1_NO | LED_Lights.RELAY_2_NO
+        self.led_status = LED_light.RELAY_1_NO | LED_light.RELAY_2_NO
         # the initial led_status is set to indicate the positions the relays
         # are initialised in (normally closed)
-        # use the LED_lights enum.Flag class to pass binary integers masks to
+        # use the LED_light enum.Flag class to pass binary integers masks to
         # the _change_led_state() method.
         if debug_lights:  # pragma: no cover
             # if we are actually using the debug lights we can enable them now
