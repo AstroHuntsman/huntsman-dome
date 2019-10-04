@@ -12,8 +12,8 @@ def testing_dome(scope='function'):
 @pytest.fixture
 def dome_az_90(scope='function'):
     dome = Dome(testing=True, debug_lights=False)
-    dome._dome_az = 90
-    dome._degrees_per_tick = 10
+    dome._dome_az = Longitude(90 * u.deg)
+    dome._degrees_per_tick = Angle(10 * u.deg)
     dome._home_sensor_pin.drive_low()
     dome._encoder_count = 9
     return dome
@@ -24,7 +24,7 @@ def test_dome_initialisation(testing_dome):
     assert testing_dome.dome_in_motion is False
     assert testing_dome.dome_az.degree == 0
     assert testing_dome.encoder_count == 0
-    assert testing_dome.degrees_per_tick == 1
+    assert testing_dome.degrees_per_tick == Angle(1 * u.deg)
     assert testing_dome.at_home is False
     assert testing_dome.current_direction.name == "CCW"
     assert bool(testing_dome.current_direction.value+1) is False
@@ -60,10 +60,11 @@ def test_getAz(dome_az_90):
 def test_GotoAz(dome_az_90):
     # test fixture has degrees_per_tick attribute of 10
     dome_az_90.GotoAz(300)
+    assert dome_az_90.dome_az == Angle(300 * u.deg)
     assert dome_az_90.encoder_count == -6
     dome_az_90.GotoAz(2)
-    assert dome_az_90.dome_az.degree == 0
-    assert dome_az_90.encoder_count == 0
+    assert dome_az_90.dome_az == Angle(10 * u.deg)
+    assert dome_az_90.encoder_count == 1
 
 
 @pytest.mark.calibrate
@@ -71,7 +72,8 @@ def test_calibrate_dome_encoder_counts(testing_dome):
     testing_dome.calibrate_dome_encoder_counts()
     assert testing_dome.dome_az == 0
     assert testing_dome.encoder_count == 20
-    assert testing_dome.degrees_per_tick == 36
+    assert testing_dome.degrees_per_tick == Angle(36 * u.deg)
+
 
 def test_sync(dome_az_90):
     dome_az_90.sync(30)

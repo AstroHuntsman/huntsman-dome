@@ -7,7 +7,7 @@ import time
 import warnings
 
 import astropy.units as u
-from astropy.coordinates import Longitude
+from astropy.coordinates import Angle, Longitude
 from gpiozero import Device, DigitalInputDevice, DigitalOutputDevice
 from gpiozero.pins.mock import MockFactory
 
@@ -116,10 +116,11 @@ class Dome(object):
             The home azimuth position in degrees (integer between 0 and 360).
             Defaults to 0.
         az_position_tolerance: float
-            The tolerance used during GotoAz() calls. Dome will move to
-            requested position to within this tolerance. If the calibrated
-            degrees_per_tick is greater than az_position_tolerance,
-            degrees_per_tick will be used as the tolerance instead.
+            The tolerance, in units of degrees, used during GotoAz() calls.
+            Dome will move to requested position to within this tolerance. If
+            the calibrated degrees_per_tick is greater than
+            az_position_tolerance, degrees_per_tick will be used as the
+            tolerance instead.
         degrees_per_tick: float
             The calibrated number of degrees (azimuth) per encoder tick.
         encoder_pin_number : int
@@ -170,12 +171,12 @@ class Dome(object):
         self.testing = testing
         self.debug_lights = debug_lights
         # TODO: read in default value from yaml(?)
-        self._degrees_per_tick = degrees_per_tick
-        self.az_position_tolerance = az_position_tolerance
+        self._degrees_per_tick = Angle(degrees_per_tick * u.deg)
+        self.az_position_tolerance = Angle(az_position_tolerance * u.deg)
         # if the requested tolerance is less than degrees_per_tick use
         # degrees_per_tick for the tolerance
         self.az_position_tolerance = max(
-            self.az_position_tolerance, 2*self.degrees_per_tick)
+            self.az_position_tolerance, self.degrees_per_tick)
         self.home_az = Longitude(home_azimuth * u.deg)
         # need something to let us know when dome is calibrating so home sensor
         # activation doesnt zero encoder counts
@@ -323,7 +324,7 @@ class Dome(object):
             self._rotate_dome(Direction.CCW)
         # wait until encoder count matches desired delta az
         # TODO: make this next line less ugly
-        while abs((target_az - self.dome_az).wrap_at(180 * u.degree).degree) > self.az_position_tolerance:
+        while self.current_direction * (target_az - self.dome_az).wrap_at('180d') > self.az_position_tolerance:
             if self.testing:
                 # if testing simulate a tick for every cycle of while loop
                 self._simulate_ticks(num_ticks=1)
@@ -376,10 +377,11 @@ class Dome(object):
 
         # set the azimuth per encoder tick factor based on how many ticks we
         # counted over n rotations
-        self._degrees_per_tick = 360 / (self.encoder_count / rotation_count)
+        self._degrees_per_tick = Angle(
+            360 / (self.encoder_count / rotation_count) * u.deg)
         # update the az_position_tolerance
         self.az_position_tolerance = max(
-            self.az_position_tolerance, 2*self.degrees_per_tick)
+            self.az_position_tolerance, 2 * self.degrees_per_tick)
         self.calibrating = False
 
     def find_home(self):
@@ -462,7 +464,7 @@ class Dome(object):
 
         """
         az_relative_to_home = (az - self.home_az).wrap_at(360 * u.degree)
-        return az_relative_to_home.degree / self.degrees_per_tick
+        return az_relative_to_home.degree / self.degrees_per_tick.degree
 
     def _ticks_to_az(self, ticks):
         """
@@ -479,7 +481,7 @@ class Dome(object):
             The corresponding dome azimuth position in degrees.
 
         """
-        tick_to_deg = Longitude(ticks * self.degrees_per_tick * u.deg)
+        tick_to_deg = Longitude(ticks * self.degrees_per_tick)
         return Longitude(self.home_az + tick_to_deg)
 
     def _rotate_dome(self, direction):
