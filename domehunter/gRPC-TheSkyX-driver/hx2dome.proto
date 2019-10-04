@@ -16,12 +16,12 @@ service HX2Dome {
   rpc dapiPark (Empty) returns (ReturnCode) {};
   rpc dapiUnpark (Empty) returns (ReturnCode) {};
   rpc dapiFindHome (Empty) returns (ReturnCode) {};
-  rpc dapiGotoComplete (Empty) returns (IsComplete) {};
-  rpc dapiOpenComplete (Empty) returns (IsComplete) {};
-  rpc dapiCloseComplete (Empty) returns (IsComplete) {};
-  rpc dapiParkComplete (Empty) returns (IsComplete) {};
-  rpc dapiUnparkComplete (Empty) returns (IsComplete) {};
-  rpc dapiFindHomeComplete (Empty) returns (IsComplete) {};
+  rpc dapiIsGotoComplete (Empty) returns (IsComplete) {};
+  rpc dapiIsOpenComplete (Empty) returns (IsComplete) {};
+  rpc dapiIsCloseComplete (Empty) returns (IsComplete) {};
+  rpc dapiIsParkComplete (Empty) returns (IsComplete) {};
+  rpc dapiIsUnparkComplete (Empty) returns (IsComplete) {};
+  rpc dapiIsFindHomeComplete (Empty) returns (IsComplete) {};
   rpc dapiSync (AzEl) returns (ReturnCode) {};
   // Hardware Info Interface
   rpc deviceInfoNameShort (Empty) returns (BasicString) {};

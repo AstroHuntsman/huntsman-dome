@@ -35,6 +35,10 @@ extern "C" PlugInExport int sbPlugInFactory2(	const char* pszSelection,
 	X2Dome* gpMyImpl=NULL;
 
 	if (NULL == gpMyImpl)
+		// In order to connect to the appropriate gRPC server, update the
+		// first grpc::CreateChannel() parameter to "serverip:port"
+		// where the port is 50051 by default. If you are running the server
+		// on a local machine you would use "localhost:50051"
 		gpMyImpl = new X2Dome(	pszSelection,
 									nInstanceIndex,
 									pSerXIn,

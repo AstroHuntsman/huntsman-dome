@@ -2,7 +2,7 @@
 
 CXX = g++
 
-CFLAGS = -fPIC -O2 -g -DSB_MAC_BUILD -arch i386 -I. -I./src/licensedinterfaces/\
+CFLAGS = -fPIC -O2 -g -DSB_MAC_BUILD -I. -I./src/licensedinterfaces/\
          -L/usr/local/lib -lprotobuf -pthread -lgrpc++ -I/usr/local/include\
 
 CPPFLAGS = -fPIC -O2 -g -DSB_MAC_BUILD -I. -I./src/licensedinterfaces/\
@@ -25,12 +25,12 @@ OBJS = $(SRCS:.cpp=.o)
 all: ${TARGET_LIB}
 
 $(TARGET_LIB): $(OBJS)
-    $(CXX) $^ ${LDFLAGS} -o $@
-    $(STRIP) $@ >/dev/null 2>&1  || true
+  $(CXX) $^ ${LDFLAGS} -o $@
+  $(STRIP) $@ >/dev/null 2>&1  || true
 
 $(SRCS:.cpp=.d):%.d:%.cpp
-    $(CXX) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -MM $< >$@
+  $(CXX) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -MM $< >$@
 
 .PHONY: clean
 clean:
-    ${RM} ${TARGET_LIB} ${OBJS}
+  ${RM} ${TARGET_LIB} ${OBJS}
