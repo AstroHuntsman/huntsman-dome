@@ -181,6 +181,14 @@ class Dome(object):
         # need something to let us know when dome is calibrating so home sensor
         # activation doesnt zero encoder counts
         self.calibrating = False
+        
+        # Pin mappings, see https://pinout.xyz/pinout/automation_hat
+        # Used to look up which LED to flash for each input
+        self._input_lookup = {
+            26: LED_Lights.INPUT_1,
+            20: LED_Lights.INPUT_2,
+            21: LED_Lights.INPUT_3,            
+        }
 
         # NOTE: this led setup needs to be done before setting any callback
         # functions
@@ -208,7 +216,7 @@ class Dome(object):
             encoder_pin_number, bounce_time=bounce_time)
         # _increment_count function to run when encoder is triggered
         self._encoder.when_activated = self._increment_count
-        self._encoder.when_deactivated = self._turn_off_input_1_led
+        self._encoder.when_deactivated = self._turn_off_encoder_led
 
         self._home_sensor = DigitalInputDevice(
             home_sensor_pin_number, bounce_time=bounce_time)
@@ -411,7 +419,7 @@ class Dome(object):
         """
         Update home status to at home and debug LEDs (if enabled).
         """
-        self._change_led_state(1, leds=[LED_Lights.INPUT_2])
+        self._change_led_state(1, leds=[self._input_lookup[self._home_sensor.pin.number]])
         # don't want to zero encoder while calibrating
         # note: because Direction.CW is +1 and Direction.CCW is -1, need to
         # add 1 to self.current_direction, to get CCW to evaluate to False
@@ -422,7 +430,7 @@ class Dome(object):
         """
         Update home status to not at home and debug LEDs (if enabled).
         """
-        self._change_led_state(0, leds=[LED_Lights.INPUT_2])
+        self._change_led_state(0, leds=[self._input_lookup[self._home_sensor.pin.number]])
 
     def _increment_count(self):
         """
@@ -436,8 +444,8 @@ class Dome(object):
         direction is adopted.
         """
         print(f"Encoder activated _increment_count")
-        self._change_led_state(1, leds=[LED_Lights.INPUT_1])
-
+        self._change_led_state(1, leds=[self._input_lookup[self._encoder.pin.number]])
+        
         if self.current_direction != Direction.NONE:
             self._encoder_count += self.current_direction
         elif self.last_direction != Direction.NONE:
@@ -573,9 +581,10 @@ class Dome(object):
         # pass the new binary int to LED controller
         sn3218.enable_leds(self.led_status.value)
 
-    def _turn_off_input_1_led(self):
+    def _turn_off_encoder_led(self):
         """
         Call back function for encoder pin, turns the status led off when
         encoder pin is deactivated.
         """
-        self._change_led_state(0, leds=[LED_Lights.INPUT_1])
+        self._change_led_state(1, leds=[self._input_lookup[self._encoder.pin.number]])
+        
