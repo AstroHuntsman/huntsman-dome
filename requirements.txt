@@ -1,3 +1,4 @@
+astropy
 astropy_helpers
 grpcio
 grpcio-tools
@@ -5,3 +6,6 @@ pytest-astropy
 gpiozero
 smbus # optional for LED use
 sn3218 # optional for LED use
+RPi.GPIO
+RPIO
+pigpio
