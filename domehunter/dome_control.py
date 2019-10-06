@@ -205,13 +205,21 @@ class Dome(object):
         # bounce_time settings gives the time in seconds that the device will
         # ignore additional activation signals
         self._encoder = DigitalInputDevice(
-            encoder_pin_number, bounce_time=bounce_time)
+            encoder_pin_number,
+            bounce_time=bounce_time,
+            pull_up=None,
+            active_state=False
+        )
         # _increment_count function to run when encoder is triggered
         self._encoder.when_activated = self._increment_count
         self._encoder.when_deactivated = self._turn_off_input_1_led
 
         self._home_sensor = DigitalInputDevice(
-            home_sensor_pin_number, bounce_time=bounce_time)
+            home_sensor_pin_number,
+            bounce_time=bounce_time,
+            pull_up=None,
+            active_state=True
+        )
         if self._home_sensor.is_active:
             self._set_at_home()
         else:
