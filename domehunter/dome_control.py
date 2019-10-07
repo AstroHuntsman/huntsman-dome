@@ -209,8 +209,6 @@ class Dome(object):
         self._encoder = DigitalInputDevice(
             encoder_pin_number,
             bounce_time=bounce_time,
-            pull_up=None,
-            active_state=False
         )
         # _increment_count function to run when encoder is triggered
         self._encoder.when_activated = self._increment_count
@@ -233,8 +231,6 @@ class Dome(object):
         self._home_sensor = DigitalInputDevice(
             home_sensor_pin_number,
             bounce_time=bounce_time,
-            pull_up=None,
-            active_state=True
         )
         if self._home_sensor.is_active:
             self._set_at_home()
