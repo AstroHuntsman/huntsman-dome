@@ -204,6 +204,7 @@ class Dome(object):
 
         # create a instance variable to track the dome motor encoder ticks
         self._encoder_count = 0
+        self._dome_az = None  # Unknown
         # bounce_time settings gives the time in seconds that the device will
         # ignore additional activation signals
         self._encoder = DigitalInputDevice(
@@ -245,7 +246,11 @@ class Dome(object):
     @property
     def dome_az(self):
         """ """
-        return self._ticks_to_az(self._encoder_count)
+        if self._dome_az is None:
+            print("Cannot return Azimuth as Dome is not yet calibrated.\
+                   Run calibration loop")
+            return None
+        return self._dome_az
 
     @property
     def at_home(self):
@@ -282,26 +287,6 @@ class Dome(object):
         # will receive no voltage even if the relay is in the open position?
         self._stop_moving()
 
-    def getAz(self):
-        """
-        Return current Azimuth of the Dome.
-
-        Returns
-        -------
-        float
-            The Dome azimuth in degrees.
-
-        """
-        # TODO: Now that dome_az is a property calculated from encoder_count
-        # it is no longer initialised as None, so instead probably need some
-        # other form of error/exception handling here (if encoder_count is
-        # None?)
-        if self.dome_az is None:
-            print("Cannot return Azimuth as Dome is not yet calibrated.\
-                   Run calibration loop")
-            return self.dome_az
-        return self.dome_az.degree
-
     def GotoAz(self, az):
         """
         Send Dome to a requested Azimuth position.
@@ -326,14 +311,16 @@ class Dome(object):
         else:
             self._rotate_dome(Direction.CCW)
         # wait until encoder count matches desired delta az
-        # TODO: make this next line less ugly
-        while self.current_direction * (target_az - self.dome_az).wrap_at('180d') > self.az_position_tolerance:
+        while True:
+            distance_to_target = self.current_direction * (target_az - self.dome_az).wrap_at('180d')
+            if distance_to_target <= self.az_position_tolerance:
+                break
             if self.testing:
                 # if testing simulate a tick for every cycle of while loop
                 self._simulate_ticks(num_ticks=1)
-            else:
-                # micro break to spare the little rpi cpu
-                time.sleep(0.1)
+
+            time.sleep(0.1)
+
         self._stop_moving()
 
     def calibrate_dome_encoder_counts(self, num_cal_rotations=2):
@@ -446,7 +433,10 @@ class Dome(object):
         elif self.last_direction != Direction.NONE:
             self._encoder_count += self.last_direction
         else:
-            raise RuntimeError("Oh no.")
+            raise RuntimeError("No current or last direction, can't increment count")
+
+        # Set new dome azimuth
+        self._dome_az = self._ticks_to_az(self._encoder_count)
 
     def _az_to_ticks(self, az):
         """
