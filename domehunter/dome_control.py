@@ -212,17 +212,6 @@ class Dome(object):
         self._encoder.when_activated = self._increment_count
         self._encoder.when_deactivated = self._turn_off_input_1_led
 
-        self._home_sensor = DigitalInputDevice(
-            home_sensor_pin_number, bounce_time=bounce_time)
-        if self._home_sensor.is_active:
-            self._set_at_home()
-        else:
-            self._set_not_home()
-        # _set_not_home function is run when upon home senser deactivation
-        self._home_sensor.when_deactivated = self._set_not_home
-        # _set_at_home function is run when home sensor is activated
-        self._home_sensor.when_activated = self._set_at_home
-
         # these two DODs control the relays that control the dome motor
         # the rotation relay is the on/off switch for dome rotation
         # the direction relay will toggle either the CW or CCW direction
@@ -235,6 +224,18 @@ class Dome(object):
             direction_relay_pin_number, initial_value=False)
         # because we initialiase the relay in the normally closed position
         self.current_direction = Direction.CCW
+
+        # Home Sensor
+        self._home_sensor = DigitalInputDevice(
+            home_sensor_pin_number, bounce_time=bounce_time)
+        # _set_not_home function is run when upon home senser deactivation
+        self._home_sensor.when_deactivated = self._set_not_home
+        # _set_at_home function is run when home sensor is activated
+        self._home_sensor.when_activated = self._set_at_home
+        if self._home_sensor.is_active:
+            self._set_at_home()
+        else:
+            self._set_not_home()
 
 
 ###############################################################################
