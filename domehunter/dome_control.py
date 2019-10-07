@@ -312,8 +312,8 @@ class Dome(object):
             self._rotate_dome(Direction.CCW)
         # wait until encoder count matches desired delta az
         while True:
-            distance_to_target = self.current_direction * (target_az - self.dome_az).wrap_at('180d')
-            if distance_to_target <= self.az_position_tolerance:
+            delta_az = self.current_direction * (target_az - self.dome_az).wrap_at('180d')
+            if delta_az <= self.az_position_tolerance:
                 break
             if self.testing:
                 # if testing simulate a tick for every cycle of while loop
