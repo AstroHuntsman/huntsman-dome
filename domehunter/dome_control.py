@@ -116,7 +116,7 @@ class Dome(object):
             The home azimuth position in degrees (integer between 0 and 360).
             Defaults to 0.
         az_position_tolerance: float
-            The tolerance, in units of degrees, used during GotoAz() calls.
+            The tolerance, in units of degrees, used during goto_az() calls.
             Dome will move to requested position to within this tolerance. If
             the calibrated degrees_per_tick is greater than
             az_position_tolerance, degrees_per_tick will be used as the
@@ -287,7 +287,7 @@ class Dome(object):
         # will receive no voltage even if the relay is in the open position?
         self._stop_moving()
 
-    def GotoAz(self, az):
+    def goto_az(self, az):
         """
         Send Dome to a requested Azimuth position.
 
