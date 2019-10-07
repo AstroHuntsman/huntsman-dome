@@ -193,6 +193,8 @@ class Dome(object):
         # use the LED_Lights enum.Flag class to pass binary integers masks to
         # the _change_led_state() method.
         if debug_lights:  # pragma: no cover
+            # Make sure LED brightness is turned up
+            sn3218.output([0x10] * 18)
             # if we are actually using the debug lights we can enable them now
             self._change_led_state(1,
                                    leds=[LED_Lights.RELAY_1_NC,
