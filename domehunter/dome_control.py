@@ -509,7 +509,7 @@ class Dome(object):
             self._direction_relay.on()
             self._change_led_state(1, leds=[LED_Lights.RELAY_2_NO])
             self._change_led_state(0, leds=[LED_Lights.RELAY_2_NC])
-        elif self.current_direction.name == Direction.CCW:
+        elif self.current_direction == Direction.CCW:
             self._direction_relay.off()
             self._change_led_state(0, leds=[LED_Lights.RELAY_2_NO])
             self._change_led_state(1, leds=[LED_Lights.RELAY_2_NC])
