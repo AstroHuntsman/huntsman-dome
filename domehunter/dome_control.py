@@ -296,8 +296,6 @@ class Dome(object):
 
         """
         if self.dome_az is None:
-            print("Dome Azimuth unknown, please manually trigger, \
-                  calibration from TheSkyX.")
             return
 
         target_az = Longitude(az * u.deg)
