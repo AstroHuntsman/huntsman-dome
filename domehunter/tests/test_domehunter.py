@@ -27,7 +27,7 @@ def test_dome_initialisation(testing_dome):
     assert testing_dome.degrees_per_tick == Angle(1 * u.deg)
     assert testing_dome.at_home is False
     assert testing_dome.current_direction.name == "CCW"
-    assert bool(testing_dome.current_direction.value+1) is False
+    assert bool(testing_dome.current_direction.value + 1) is False
 
 
 def test_at_home(testing_dome):
@@ -52,9 +52,9 @@ def test_abort(testing_dome):
     assert testing_dome.dome_in_motion is False
 
 
-def test_getAz(dome_az_90):
-    assert dome_az_90.getAz() == 90
-    assert dome_az_90.getAz() == dome_az_90.dome_az.degree
+def test_dome_az(dome_az_90):
+    assert dome_az_90.dome_az == 90
+    assert dome_az_90.dome_az == dome_az_90.dome_az.degree
 
 
 def test_GotoAz(dome_az_90):

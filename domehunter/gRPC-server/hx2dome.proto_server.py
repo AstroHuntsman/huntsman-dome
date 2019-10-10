@@ -1,6 +1,5 @@
 import argparse
 import logging
-import sys
 import time
 from concurrent import futures
 
@@ -88,7 +87,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
         else:
             return_code = 0
             try:
-                dome_az = self.dome.getAz()
+                dome_az = self.dome.dome_az
             except Exception:
                 # TODO: proper exception handling
                 dome_az = None
