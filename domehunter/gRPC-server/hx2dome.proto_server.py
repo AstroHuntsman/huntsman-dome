@@ -129,7 +129,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
         else:
             return_code = 0
             try:
-                self.dome.GotoAz(request.az)
+                self.dome.goto_az(request.az)
             except Exception:
                 # TODO: proper error handling
                 return_code = 1
@@ -471,10 +471,10 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             return response
         else:
             is_dome_moving = self.dome.dome_in_motion
-            # if dome is not moving and dome.is_home returns True
+            # if dome is not moving and dome.at_home returns True
             # lets just consider the command complete
             # TODO: better method of determine command completion
-            is_complete = not is_dome_moving and self.dome.is_home
+            is_complete = not is_dome_moving and self.dome.at_home
             response = hx2dome_pb2.IsComplete(
                 return_code=0, is_complete=is_complete)
             return response
