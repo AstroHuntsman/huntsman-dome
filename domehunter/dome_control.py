@@ -247,9 +247,7 @@ class Dome(object):
     def dome_az(self):
         """ """
         if self._dome_az is None:
-            print("Cannot return Azimuth as Dome is not yet calibrated.\
-                   Run calibration loop")
-            return None
+            print("Cannot return Azimuth as Dome is not yet calibrated. Run calibration loop")
         return self._dome_az
 
     @property
