@@ -119,7 +119,7 @@ class Dome(object):
             The home azimuth position in degrees (integer between 0 and 360).
             Defaults to 0.
         az_position_tolerance: float
-            The tolerance, in units of degrees, used during GotoAz() calls.
+            The tolerance, in units of degrees, used during goto_az() calls.
             Dome will move to requested position to within this tolerance. If
             the calibrated degrees_per_tick is greater than
             az_position_tolerance, degrees_per_tick will be used as the
@@ -213,6 +213,7 @@ class Dome(object):
 
         # create a instance variable to track the dome motor encoder ticks
         self._encoder_count = 0
+        self._dome_az = None  # Unknown
         # bounce_time settings gives the time in seconds that the device will
         # ignore additional activation signals
         logger.info(f'Connecting encoder on pin {encoder_pin_number}')
@@ -259,9 +260,10 @@ class Dome(object):
     @property
     def dome_az(self):
         """ """
-        dome_az = self._ticks_to_az(self._encoder_count)
-        logger.debug(f'Dome azimuth: {dome_az}')
-        return dome_az
+        if self._dome_az is None:
+            print("Cannot return Azimuth as Dome is not yet calibrated. Run calibration loop")
+        logger.debug(f'Dome azimuth: {self._dome_az}')
+        return self._dome_az
 
     @property
     def at_home(self):
@@ -305,27 +307,7 @@ class Dome(object):
         logger.warning(f'Aborting dome movement')
         self._stop_moving()
 
-    def getAz(self):
-        """
-        Return current Azimuth of the Dome.
-
-        Returns
-        -------
-        float
-            The Dome azimuth in degrees.
-
-        """
-        # TODO: Now that dome_az is a property calculated from encoder_count
-        # it is no longer initialised as None, so instead probably need some
-        # other form of error/exception handling here (if encoder_count is
-        # None?)
-        if self.dome_az is None:
-            print("Cannot return Azimuth as Dome is not yet calibrated.\
-                   Run calibration loop")
-            return self.dome_az
-        return self.dome_az.degree
-
-    def GotoAz(self, az):
+    def goto_az(self, az):
         """
         Send Dome to a requested Azimuth position.
 
@@ -336,8 +318,6 @@ class Dome(object):
 
         """
         if self.dome_az is None:
-            logger.warning("Dome Azimuth unknown, please manually trigger, \
-                  calibration from TheSkyX.")
             return
 
         target_az = Longitude(az * u.deg)
@@ -352,14 +332,16 @@ class Dome(object):
         else:
             self._rotate_dome(Direction.CCW)
         # wait until encoder count matches desired delta az
-        # TODO: make this next line less ugly
-        while self.current_direction * (target_az - self.dome_az).wrap_at('180d') > self.az_position_tolerance:
+        while True:
+            delta_az = self.current_direction * (target_az - self.dome_az).wrap_at('180d')
+            if delta_az <= self.az_position_tolerance:
+                break
             if self.testing:
                 # if testing simulate a tick for every cycle of while loop
                 self._simulate_ticks(num_ticks=1)
-            else:
-                # micro break to spare the little rpi cpu
-                time.sleep(0.1)
+
+            time.sleep(0.1)
+
         logger.debug('Stopping dome movement')
         self._stop_moving()
 
@@ -470,15 +452,18 @@ class Dome(object):
         logger.debug(f"Encoder activated _increment_count")
         self._change_led_state(1, leds=[LED_Lights.INPUT_1])
 
-        logger.debug(f'Increment direction: Current {self.current_direction} Last {self.last_direction}')
+        logger.debug(f'Direction: Current {self.current_direction} Last {self.last_direction}')
         logger.debug(f'Encoder count before: {self._encoder_count}')
         if self.current_direction != Direction.NONE:
             self._encoder_count += self.current_direction
         elif self.last_direction != Direction.NONE:
             self._encoder_count += self.last_direction
         else:
-            raise RuntimeError("Oh no.")
+            raise RuntimeError("No current or last direction, can't increment count")
+
+        # Set new dome azimuth
         logger.debug(f'Encoder: {self._encoder_count} Azimuth: {self._dome_az}')
+        self._dome_az = self._ticks_to_az(self._encoder_count)
 
     def _az_to_ticks(self, az):
         """
