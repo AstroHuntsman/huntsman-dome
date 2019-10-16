@@ -184,7 +184,7 @@ class Dome(object):
         self.home_az = Longitude(home_azimuth * u.deg)
         # need something to let us know when dome is calibrating so home sensor
         # activation doesnt zero encoder counts
-        self.calibrating = False
+        self._calibrating = False
         # instance variable to track rotations during calibration
         self.rotation_count = 0
         # instance variable that is over written in calibrate routine
@@ -407,10 +407,12 @@ class Dome(object):
         logger.debug(f'calibrate_dome_encoder_counts: Starting calibration rotations.')
         self._move_event.set()
         self._rotate_dome(Direction.CW)
-        self.calibrating = True
-        calibrate = threading.Thread(target=self._thread_condition,
-                                       args=(self._calibration_condition,))
+        self._calibrating = True
+        calibrate = threading.Thread(target=self._calibrate)
+        cal_monitor = threading.Thread(target=self._thread_condition,
+                                       args=(self._calibration_completed,))
         calibrate.start()
+        cal_monitor.start()
 
     def find_home(self):
         """
@@ -483,7 +485,7 @@ class Dome(object):
         self._stop_moving()
         # reset various dome state variables/events
         self._move_event.clear()
-        self.calibrating = False
+        self._calibrating = False
         self.rotation_count = 0
         return
 
@@ -501,12 +503,17 @@ class Dome(object):
         return delta_az <= self.az_position_tolerance
 
     def _find_home_condition(self):
-        """Send True if the dome is at home."""
+        """Return True if the dome is at home."""
         # need a callable method for _thread_condition
         return self._home_sensor.is_active
 
-    def _calibration_condition(self):
-        """Send True once dome completes desired number of rotations"""
+    def _calibration_completed(self):
+        """Return True if both calibrating and move_event flags are True"""
+        cal_in_progress = self._calibrating and self._move_event.is_set()
+        return not cal_in_progress
+
+    def _calibrate(self):
+        """Calibration method to be called from within a non-blocking thread"""
         start = time.time()
         # if self.testing:
         #     for i in range(self.num_cal_rotations):
@@ -516,18 +523,9 @@ class Dome(object):
 
         while True:
             logger.debug(f'Loop {time.time() - start}: rot_count [{self.rotation_count}], encoder_count [{self.encoder_count}]')
-
-            # for testing, we want to simulate the home activation/inactivation
-            # as well as ticks in a rotation. We only want this once per
-            # rotation but need a continuous polling condition to allow for
-            # immediate aborts.
-            # so here we check for a difference in the last loops rot count
-            # and the current one, so that the clause is only triggered
-            # once after each triggering of the home switch.
             logger.debug(f'Simulated rotation underway {self._simulated_rotation_event.is_set()}')
             if self.testing and not self._simulated_rotation_event.is_set():
                 logger.debug(f'Calibration monitor thread: Completion of simulated rotation detected, simulating next rotation.')
-
                 simulated_rotation = threading.Thread(target=self._simulate_rotation)
                 if self.rotation_count >= self.num_cal_rotations:
                     # if we have completed the number of calibration rotations,
@@ -541,7 +539,6 @@ class Dome(object):
         # counted over n rotations
         self._degrees_per_tick = Angle(
             360 / (self.encoder_count / self.rotation_count) * u.deg)
-        return True
 
     def _set_at_home(self):
         """
@@ -552,11 +549,11 @@ class Dome(object):
         # don't want to zero encoder while calibrating
         # note: because Direction.CW is +1 and Direction.CCW is -1, need to
         # add 1 to self.current_direction, to get CCW to evaluate to False
-        if not self.calibrating and bool(self.current_direction + 1):
+        if not self._calibrating and bool(self.current_direction + 1):
             logger.debug(f'_set_at_home: Passing home clockwise, zeroing encoder counts.')
             self._encoder_count = 0
         # if we are calibrating, increment the rotation count
-        if self.calibrating:
+        if self._calibrating:
             logger.debug(f'_set_at_home: Home triggered during calibration, incrementing calibration rotation count.')
             self.rotation_count += 1
 
