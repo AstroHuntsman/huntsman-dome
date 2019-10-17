@@ -3,6 +3,7 @@
 
 import math
 import sys
+import threading
 import time
 import warnings
 import logging
@@ -157,7 +158,7 @@ class Dome(object):
             # pin factory to release all the pins
             Device.pin_factory.reset()
             # set a timeout length in seconds for wait_for_active() calls
-            WAIT_TIMEOUT = 1
+            WAIT_TIMEOUT = 2*60
 
             # in testing mode we need to create a seperate pin object so we can
             # simulate the activation of our fake DIDs and DODs
@@ -179,15 +180,11 @@ class Dome(object):
 
         # TODO: read in default value from yaml(?)
         self._degrees_per_tick = Angle(degrees_per_tick * u.deg)
-        self.az_position_tolerance = Angle(az_position_tolerance * u.deg)
-        # if the requested tolerance is less than degrees_per_tick use
-        # degrees_per_tick for the tolerance
-        self.az_position_tolerance = max(
-            self.az_position_tolerance, self.degrees_per_tick)
+        self._az_position_tolerance = Angle(az_position_tolerance * u.deg)
         self.home_az = Longitude(home_azimuth * u.deg)
         # need something to let us know when dome is calibrating so home sensor
         # activation doesnt zero encoder counts
-        self.calibrating = False
+        self._calibrating = False
 
         # NOTE: this led setup needs to be done before setting any callback
         # functions
@@ -214,6 +211,14 @@ class Dome(object):
         # create a instance variable to track the dome motor encoder ticks
         self._encoder_count = 0
         self._dome_az = None  # Unknown
+        # create a threading abort event, to use for aborting movement commands
+        self._abort_event = threading.Event()
+        # creating a threading move event, to indicate when a move thread
+        # is active
+        self._move_event = threading.Event()
+        # creating a threading simulated_rotation event, to indicate when a
+        # simulated rotation thread is running for testing mode calibration
+        self._simulated_rotation_event = threading.Event()
         # bounce_time settings gives the time in seconds that the device will
         # ignore additional activation signals
         logger.info(f'Connecting encoder on pin {encoder_pin_number}')
@@ -238,6 +243,8 @@ class Dome(object):
         # because we initialiase the relay in the normally closed position
         logger.info(f'Setting start direction to CCW')
         self.current_direction = Direction.CCW
+        # need to set something for last direction now
+        self.last_direction = Direction.NONE
 
         # Home Sensor
         logger.info(f'Connecting home sensor on pin {home_sensor_pin_number}')
@@ -252,14 +259,13 @@ class Dome(object):
         else:
             self._set_not_home()
 
-
 ###############################################################################
 # Properties
 ###############################################################################
 
     @property
     def dome_az(self):
-        """ """
+        """Returns the dome azimuth in degrees."""
         if self._dome_az is None:
             print("Cannot return Azimuth as Dome is not yet calibrated. Run calibration loop")
         logger.debug(f'Dome azimuth: {self._dome_az}')
@@ -267,7 +273,7 @@ class Dome(object):
 
     @property
     def at_home(self):
-        """Send True if the dome is at home."""
+        """Return True if the dome is at home."""
         home_active = self._home_sensor.is_active
         logger.debug(f'Home active: {home_active}')
         return home_active
@@ -280,6 +286,11 @@ class Dome(object):
         return dome_motion
 
     @property
+    def movement_thread_active(self):
+        """Return true if a movement thread is running"""
+        return self._move_event.is_set()
+
+    @property
     def encoder_count(self):
         """Returns the current encoder count."""
         logger.debug(f'Encoder count: {self._encoder_count}')
@@ -290,11 +301,25 @@ class Dome(object):
         """Returns the calibrated azimuth (in degrees) per encoder tick."""
         logger.debug(f'Degrees per tick: {self._degrees_per_tick}')
         return self._degrees_per_tick
+
+    @property
+    def az_position_tolerance(self):
+        """
+        Returns the azimuth position tolerance (in degrees).
+
+        If the tolerance set at initialisation is less than degrees_per_tick
+        use 1.5 * degrees_per_tick as the tolerance.
+        """
+        if self._az_position_tolerance < 1.5 * self.degrees_per_tick:
+            logger.warning(f'az_position_tolerance [{self._az_position_tolerance}] is less than 1.5 times degrees_per_tick. Setting tolerance to 1.5 * degrees_per_tick')
+        tolerance = max(self._az_position_tolerance,
+                        1.5 * self.degrees_per_tick)
+        return tolerance
 ###############################################################################
 # Methods
 ###############################################################################
 
-    """These map directly onto the AbstractMethods created by RPC."""
+    """These correspond to the AbstractMethods created by RPC."""
 
     def abort(self):
         """
@@ -305,7 +330,12 @@ class Dome(object):
         # one way might be cut power to the automationHAT so the motor relays
         # will receive no voltage even if the relay is in the open position?
         logger.warning(f'Aborting dome movement')
-        self._stop_moving()
+        # set the abort event thread flag
+        self._abort_event.set()
+        # wait for threads to abort
+        while self.movement_thread_active:
+            time.sleep(0.1)
+        self._abort_event.clear()
 
     def goto_az(self, az):
         """
@@ -319,31 +349,27 @@ class Dome(object):
         """
         if self.dome_az is None:
             return
+        if self.movement_thread_active:
+            logger.warning('Movement command in progress')
+            return
 
         target_az = Longitude(az * u.deg)
-        logger.debug(f'Goto target azimuth: {target_az}')
+        logger.debug(f'goto_az: Goto target azimuth [{target_az}]')
 
         # calculate delta_az, wrapping at 180 to ensure we take shortest route
         delta_az = (target_az - self.dome_az).wrap_at(180 * u.degree)
-        logger.debug(f'Delta azimuth: {delta_az}')
+        logger.debug(f'goto_az: Delta azimuth [{delta_az}]')
 
+        self._move_event.set()
         if delta_az > 0:
             self._rotate_dome(Direction.CW)
         else:
             self._rotate_dome(Direction.CCW)
         # wait until encoder count matches desired delta az
-        while True:
-            delta_az = self.current_direction * (target_az - self.dome_az).wrap_at('180d')
-            if delta_az <= self.az_position_tolerance:
-                break
-            if self.testing:
-                # if testing simulate a tick for every cycle of while loop
-                self._simulate_ticks(num_ticks=1)
-
-            time.sleep(0.1)
-
-        logger.debug('Stopping dome movement')
-        self._stop_moving()
+        goingto_az = threading.Thread(target=self._thread_condition,
+                                      args=(self._goto_az_complete,
+                                            target_az))
+        goingto_az.start()
 
     def calibrate_dome_encoder_counts(self, num_cal_rotations=2):
         """
@@ -355,63 +381,68 @@ class Dome(object):
             Number of rotations to perform to calibrate encoder.
 
         """
+        if self.movement_thread_active:
+            logger.warning('Movement command in progress')
+            return
         # rotate the dome until we hit home, to give reference point
+        logger.debug(f'calibrate_dome_encoder_counts: Finding Home')
         self.find_home()
-
+        while self.movement_thread_active:
+            # wait for find_home() to finish
+            time.sleep(0.1)
+        logger.debug(f'calibrate_dome_encoder_counts: Found Home')
         # pause to let things settle/get a noticeable blink of debug_lights
         time.sleep(0.5)
 
-        rotation_count = 0
-        self.calibrating = True
+        # instance variable to track rotations during calibration
+        self._rotation_count = 0
+        # instance variable that is over written in calibrate routine
+        self._num_cal_rotations = num_cal_rotations
         # now set dome to rotate num_cal_rotations times so we can determine
         # the number of ticks per revolution
-        while rotation_count < num_cal_rotations:
-            self._rotate_dome(Direction.CW)
-            if self.testing:
-                # tell the fake home sensor that we have left home
-                self._home_sensor_pin.drive_low()
-                self._simulate_ticks(num_ticks=10)
-            self._home_sensor.wait_for_inactive(timeout=self.wait_timeout)
-            self._home_sensor.wait_for_active(timeout=self.wait_timeout)
-
-            if self.testing:
-                # tell the fake home sensor that we have come back to home
-                time.sleep(0.1)
-                self._home_sensor_pin.drive_high()
-                time.sleep(0.1)
-
-            # without this pause the wait_for_active wasn't waiting (???)
-            time.sleep(0.1)
-
-            rotation_count += 1
-
-        self._stop_moving()
-
-        # set the azimuth per encoder tick factor based on how many ticks we
-        # counted over n rotations
-        self._degrees_per_tick = Angle(
-            360 / (self.encoder_count / rotation_count) * u.deg)
-        # update the az_position_tolerance
-        self.az_position_tolerance = max(
-            self.az_position_tolerance, 2 * self.degrees_per_tick)
-        self.calibrating = False
+        logger.debug(f'calibrate_dome_encoder_counts: Starting calibration rotations.')
+        self._move_event.set()
+        self._rotate_dome(Direction.CW)
+        self._calibrating = True
+        calibrate = threading.Thread(target=self._simulate_calibration)
+        cal_monitor = threading.Thread(target=self._thread_condition,
+                                       args=(self._calibration_complete,))
+        calibrate.start()
+        cal_monitor.start()
 
     def find_home(self):
         """
         Move Dome to home position.
 
         """
+        if self.movement_thread_active:
+            logger.warning('Movement command in progress')
+            return
+        # iniate the movement and set the _move_event flag
+        logger.debug(f'find_home: Finding Home')
+        self._move_event.set()
         self._rotate_dome(Direction.CW)
         time.sleep(0.1)
-        self._home_sensor.wait_for_active(timeout=self.wait_timeout)
+        homing = threading.Thread(target=self._thread_condition,
+                                  args=(self._find_home_complete,))
+        homing.start()
         if self.testing:
             # in testing mode need to "fake" the activation of the home pin
-            time.sleep(0.5)
-            self._home_sensor_pin.drive_high()
-
-        self._stop_moving()
+            home_pin_high = threading.Timer(0.5,
+                                            self._home_sensor_pin.drive_high)
+            home_pin_high.start()
 
     def sync(self, az):
+        """
+        Sync encoder count to azimuth position.
+
+        Parameters
+        ----------
+        az : float
+            Current dome azimuth position in degrees.
+
+        """
+        logger.debug(f'sync: syncing encoder counts to azimuth [{az}]')
         self._encoder_count = self._az_to_ticks(Longitude(az * u.deg))
         return
 
@@ -419,17 +450,116 @@ class Dome(object):
 # Private Methods
 ###############################################################################
 
+    def _thread_condition(self, trigger_condition, *args, **kwargs):
+        """Condition monitoring thread for movement commands.
+
+        Will return when:
+            - trigger_condition is true
+            - abort event is triggered
+            - thread running time exceeds self.wait_timeout
+
+        Parameters
+        ----------
+        trigger_condition : callable method
+            Callable method that returns a boolean value.
+
+        """
+        calibration_success = False
+        # This will update to false, if while loop is terminated by
+        # trigger_condition()
+        # TODO: better system for flagging success/abort/timeout
+        goingtoaz = False
+        if trigger_condition.__name__ == '_goto_az_complete':
+            goingtoaz = True
+        start = time.monotonic()
+
+        while True:
+            wait_time = time.monotonic() - start
+            if trigger_condition(*args, **kwargs):
+                logger.debug(f'Monitoring thread triggered by {trigger_condition.__name__}')
+                calibration_success = True
+                break
+            elif self._abort_event.is_set():
+                logger.debug(f'Monitoring thread triggered by abort event')
+                break
+            elif wait_time > self.wait_timeout:
+                logger.debug(f'Monitoring thread triggered by timeout [{self.wait_timeout}s]')
+                break
+            elif goingtoaz and self.testing is True:
+                # if testing simulate a tick for every cycle of while loop
+                self._simulate_ticks(num_ticks=1)
+            time.sleep(0.1)
+
+        logger.debug('Monitor Thread: Stopping dome movement')
+        self._stop_moving()
+
+        if trigger_condition.__name__ == '_calibration_complete':
+            # set the azimuth per encoder tick factor based on
+            # how many ticks we counted over n rotations
+            self._degrees_per_tick = Angle(360 / (self.encoder_count /
+                                                  self._rotation_count) * u.deg)
+        # reset various dome state variables/events
+        self._move_event.clear()
+        self._calibrating = False
+        return
+
+    def _goto_az_complete(self, target_az):
+        """Determines if current azimuth is within tolerance of target azimuth.
+
+        Returns
+        -------
+        bool
+            Returns true if self.dome_az is within tolerance of target azimuth.
+
+        """
+        raw_delta_az = (target_az - self.dome_az).wrap_at('180d')
+        delta_az = self.current_direction * raw_delta_az
+        logger.debug(f'Delta_az is {delta_az}, tolerance window is {self.az_position_tolerance}')
+        return delta_az <= self.az_position_tolerance
+
+    def _find_home_complete(self):
+        """Return True if the dome is at home."""
+        return self._home_sensor.is_active
+
+    def _calibration_complete(self):
+        """Return True if desired number of calibration rotations completed."""
+        logger.debug(f'cc Rotation count is [{self._rotation_count}], rotations to go [{self._num_cal_rotations - self._rotation_count}].')
+        return self._rotation_count >= self._num_cal_rotations
+
+    def _simulate_calibration(self):
+        """Calibration method to be called from within a non-blocking thread"""
+        start = time.monotonic()
+        first_rotation = threading.Thread(target=self._simulate_rotation)
+        first_rotation.start()
+
+        while True:
+            logger.debug(f'Loop {time.monotonic() - start}: rot_count [{self._rotation_count}], encoder_count [{self.encoder_count}]')
+            if not self._simulated_rotation_event.is_set():
+                time.sleep(1)
+                logger.debug(f'Calibration monitor thread: Completion of simulated rotation detected, simulating next rotation.')
+                simulated_rotation = threading.Thread(target=self._simulate_rotation)
+                if self._calibration_complete():
+                    logger.debug(f'Calibration monitor thread: calibration rotations completed, ending calibration.')
+                    break
+                simulated_rotation.start()
+            time.sleep(1)
+
     def _set_at_home(self):
         """
         Update home status to at home and debug LEDs (if enabled).
         """
-        logger.debug('Stopping dome movement')
+        logger.info('Home sensor activated')
         self._change_led_state(1, leds=[LED_Lights.INPUT_2])
         # don't want to zero encoder while calibrating
         # note: because Direction.CW is +1 and Direction.CCW is -1, need to
         # add 1 to self.current_direction, to get CCW to evaluate to False
-        if not self.calibrating and bool(self.current_direction + 1):
+        if not self._calibrating and bool(self.current_direction + 1):
+            logger.debug(f'_set_at_home: Passing home clockwise, zeroing encoder counts.')
             self._encoder_count = 0
+        # if we are calibrating, increment the rotation count
+        if self._calibrating:
+            logger.debug(f'_set_at_home: Home triggered during calibration, incrementing calibration rotation count.')
+            self._rotation_count += 1
 
     def _set_not_home(self):
         """
@@ -558,6 +688,7 @@ class Dome(object):
         """
         logger.debug(f'Turning off rotation relay')
         self._rotation_relay.off()
+        self._move_event.clear()
         # update the debug LEDs
         self._change_led_state(0, leds=[LED_Lights.RELAY_1_NO])
         self._change_led_state(1, leds=[LED_Lights.RELAY_1_NC])
@@ -581,6 +712,16 @@ class Dome(object):
             time.sleep(self.test_mode_delay_duration)
             self._encoder_pin.drive_high()
             time.sleep(self.test_mode_delay_duration)
+
+    def _simulate_rotation(self, ticks_per_rotation=10):
+        """
+        Method to simulate a complete dome rotation while in testing mode.
+        """
+        self._simulated_rotation_event.set()
+        self._home_sensor_pin.drive_low()
+        self._simulate_ticks(ticks_per_rotation)
+        self._home_sensor_pin.drive_high()
+        self._simulated_rotation_event.clear()
 
     def _change_led_state(self, desired_state, leds=[]):  # pragma: no cover
         """

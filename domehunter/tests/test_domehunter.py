@@ -1,5 +1,5 @@
 import pytest
-
+import time
 from domehunter.dome_control import *
 
 
@@ -22,7 +22,7 @@ def dome_az_90(scope='function'):
 def test_dome_initialisation(testing_dome):
     assert testing_dome.testing is True
     assert testing_dome.dome_in_motion is False
-    assert testing_dome.dome_az.degree == 0
+    assert testing_dome.dome_az is None
     assert testing_dome.encoder_count == 0
     assert testing_dome.degrees_per_tick == Angle(1 * u.deg)
     assert testing_dome.at_home is False
@@ -43,34 +43,42 @@ def test_status(testing_dome):
     assert testing_dome.dome_in_motion is False
 
 
-def test_abort(testing_dome):
-    # This test should test that GotoAz() is non-blocking
-    # but haven't implemented that yet
-    testing_dome._rotation_relay.on()
-    assert testing_dome.dome_in_motion is True
-    testing_dome.abort()
-    assert testing_dome.dome_in_motion is False
+def test_abort(dome_az_90):
+    dome_az_90.goto_az(300)
+    time.sleep(0.5)
+    assert dome_az_90.movement_thread_active
+    assert dome_az_90.dome_in_motion
+    time.sleep(0.5)
+    dome_az_90.abort()
+    assert not dome_az_90.movement_thread_active
+    assert not dome_az_90.dome_in_motion
 
 
-def test_dome_az(dome_az_90):
-    assert dome_az_90.dome_az == 90
-    assert dome_az_90.dome_az == dome_az_90.dome_az.degree
+def test_dome_az(dome_az_90, testing_dome):
+    assert dome_az_90.dome_az == Longitude(90 * u.deg)
+    assert testing_dome.dome_az is None
 
 
-def test_GotoAz(dome_az_90):
+def test_goto_az(dome_az_90):
     # test fixture has degrees_per_tick attribute of 10
-    dome_az_90.GotoAz(300)
-    assert dome_az_90.dome_az == Angle(300 * u.deg)
-    assert dome_az_90.encoder_count == -6
-    dome_az_90.GotoAz(2)
-    assert dome_az_90.dome_az == Angle(10 * u.deg)
-    assert dome_az_90.encoder_count == 1
+    dome_az_90.goto_az(300)
+    while dome_az_90.movement_thread_active:
+        time.sleep(1)
+    assert dome_az_90.dome_az == Angle(310 * u.deg)
+    assert dome_az_90.encoder_count == -5
+    dome_az_90.goto_az(2)
+    while dome_az_90.movement_thread_active:
+        time.sleep(1)
+    assert dome_az_90.dome_az == Angle(350 * u.deg)
+    assert dome_az_90.encoder_count == -1
 
 
 @pytest.mark.calibrate
 def test_calibrate_dome_encoder_counts(testing_dome):
     testing_dome.calibrate_dome_encoder_counts()
-    assert testing_dome.dome_az == 0
+    assert testing_dome.dome_az is None
+    while testing_dome.movement_thread_active:
+        time.sleep(1)
     assert testing_dome.encoder_count == 20
     assert testing_dome.degrees_per_tick == Angle(36 * u.deg)
 
