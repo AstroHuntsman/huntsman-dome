@@ -408,8 +408,8 @@ class Dome(object):
         cal_monitor = threading.Thread(target=self._thread_condition,
                                        args=(self._calibration_complete,))
         if self.testing:
-            calibrate = threading.Thread(target=self._simulate_calibration)
-            calibrate.start()
+            calibrate_sim = threading.Thread(target=self._simulate_calibration)
+            calibrate_sim.start()
         cal_monitor.start()
 
     def find_home(self):
