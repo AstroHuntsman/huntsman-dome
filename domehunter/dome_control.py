@@ -335,7 +335,6 @@ class Dome(object):
         # wait for threads to abort
         while self.movement_thread_active:
             time.sleep(0.1)
-            pass
         self._abort_event.clear()
 
     def goto_az(self, az):
@@ -436,6 +435,7 @@ class Dome(object):
     def sync(self, az):
         """
         Sync encoder count to azimuth position.
+
         Parameters
         ----------
         az : float
@@ -457,6 +457,11 @@ class Dome(object):
             - trigger_condition is true
             - abort event is triggered
             - thread running time exceeds self.wait_timeout
+
+        Parameters
+        ----------
+        trigger_condition : callable method
+            Callable method that returns a boolean value.
 
         """
         calibration_success = False
