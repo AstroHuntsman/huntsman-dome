@@ -404,10 +404,12 @@ class Dome(object):
         self._move_event.set()
         self._rotate_dome(Direction.CW)
         self._calibrating = True
-        calibrate = threading.Thread(target=self._simulate_calibration)
+
         cal_monitor = threading.Thread(target=self._thread_condition,
                                        args=(self._calibration_complete,))
-        calibrate.start()
+        if self.testing:
+            calibrate_sim = threading.Thread(target=self._simulate_calibration)
+            calibrate_sim.start()
         cal_monitor.start()
 
     def find_home(self):
