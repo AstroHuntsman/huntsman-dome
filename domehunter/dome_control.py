@@ -44,6 +44,32 @@ class DomeCommandError(Exception):  # pragma: no cover
     pass
 
 
+def load_dome_config(config_path=None):
+    """Load dome configuration infomation from a yaml file.
+
+    Parameters
+    ----------
+    config_path : str
+        File path of desired configuration yaml file.
+
+    Returns
+    -------
+    type dict
+        Dictionary of keyword args to pass through to dome instance.
+
+    """
+    if config_path is None:
+        directory = os.path.abspath(os.path.dirname(__file__))
+        rel_path = '/gRPC-server/dome_controller_config.yml'
+        config_path = os.path.join(directory, rel_path)
+    try:
+        with open(config_path, 'rb') as f:
+            config = yaml.load(f.read())
+    except Exception as e:
+        logger.warning(f'Error loading yaml config, {e}')
+    return config
+
+
 class Dome(object):
     """
     Interface to dome control raspberry pi GPIO.
@@ -64,16 +90,16 @@ class Dome(object):
     """
 
     def __init__(self,
+                 home_azimuth,
                  testing=True,
                  debug_lights=False,
-                 home_azimuth=0.0,
                  az_position_tolerance=1.0,
-                 degrees_per_tick=1.0,
+                 degrees_per_tick=None,
                  encoder_pin_number=26,
                  home_sensor_pin_number=20,
                  rotation_relay_pin_number=13,
                  direction_relay_pin_number=19,
-                 bounce_time=0.1,
+                 bounce_time=0.001,
                  *args,
                  **kwargs):
         """
@@ -112,13 +138,12 @@ class Dome(object):
 
         Parameters
         ----------
+        home_azimuth: float
+            The home azimuth position in degrees (integer between 0 and 360).
         testing : boolean
             Toggle to enable a simulated hardware testing mode.
         debug_lights : boolean
             Toggle to enable the status LEDs on the automationHAT.
-        home_azimuth: float
-            The home azimuth position in degrees (integer between 0 and 360).
-            Defaults to 0.
         az_position_tolerance: float
             The tolerance, in units of degrees, used during goto_az() calls.
             Dome will move to requested position to within this tolerance. If
@@ -179,7 +204,11 @@ class Dome(object):
         self.debug_lights = debug_lights
 
         # TODO: read in default value from yaml(?)
-        self._degrees_per_tick = Angle(degrees_per_tick * u.deg)
+        if degrees_per_tick is None:
+            logger.warning(f'No value supplied for degrees_per_tick, dome requires calibration.')
+            self._degrees_per_tick = degrees_per_tick
+        else:
+            self._degrees_per_tick = Angle(degrees_per_tick * u.deg)
         self._az_position_tolerance = Angle(az_position_tolerance * u.deg)
         self.home_az = Longitude(home_azimuth * u.deg)
         # need something to let us know when dome is calibrating so home sensor
@@ -210,7 +239,9 @@ class Dome(object):
 
         # create a instance variable to track the dome motor encoder ticks
         self._encoder_count = 0
-        self._dome_az = None  # Unknown
+        # upon initialising, dome is unhomed so dome az is unknown
+        self._unhomed = True
+        self._dome_az = None
         # create a threading abort event, to use for aborting movement commands
         self._abort_event = threading.Event()
         # creating a threading move event, to indicate when a move thread
@@ -266,8 +297,8 @@ class Dome(object):
     @property
     def dome_az(self):
         """Returns the dome azimuth in degrees."""
-        if self._dome_az is None:
-            print("Cannot return Azimuth as Dome is not yet calibrated. Run calibration loop")
+        if self._dome_az is None or self._unhomed:
+            print("Dome az unknown, please home the dome.")
         logger.debug(f'Dome azimuth: {self._dome_az}')
         return self._dome_az
 
@@ -594,8 +625,12 @@ class Dome(object):
             raise RuntimeError("No current or last direction, can't increment count")
 
         # Set new dome azimuth
-        logger.debug(f'Encoder: {self._encoder_count} Azimuth: {self._dome_az}')
-        self._dome_az = self._ticks_to_az(self._encoder_count)
+        # if dome is unhomed, _dome_az should remain as None
+        if self._unhomed:
+            logger.info(f'Dome is unhomed, please home dome.')
+        else:
+            logger.debug(f'Encoder: {self._encoder_count} Azimuth: {self._dome_az}')
+            self._dome_az = self._ticks_to_az(self._encoder_count)
 
     def _az_to_ticks(self, az):
         """

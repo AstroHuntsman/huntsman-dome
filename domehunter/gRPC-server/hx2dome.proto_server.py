@@ -1,13 +1,15 @@
 import argparse
 import logging
 import time
+import yaml
+import os.path
 from concurrent import futures
 
 import grpc
 
 import hx2dome_pb2
 import hx2dome_pb2_grpc
-from domehunter.dome_control import Dome
+from domehunter.dome_control import Dome, load_dome_config
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
@@ -52,11 +54,13 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
 
     """
 
-    def __init__(self, testing, debug_lights, server_testing):
+    def __init__(self, **kwargs):
         super(HX2DomeServer, self).__init__()
         # create the dome object that controls the dome hardware
-        self.dome = Dome(testing=testing, debug_lights=debug_lights)
-        self.server_testing = server_testing
+        self.dome = Dome(**kwargs)
+        print(f'Home az is {self.dome.home_az}')
+        self.server_testing = kwargs['server_testing']
+        print(f'server testing enabled [{self.server_testing}]')
 
     def dapiGetAzEl(self, request, context):
         """TheSkyX RPC to query the dome azimuth and slit position of the
@@ -516,7 +520,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             return response
 
 
-def serve(kwargs_dict):
+def serve(**kwargs):
     """Set up the RPC server to run for a day or until interrupted.
 
     Parameters
@@ -527,7 +531,7 @@ def serve(kwargs_dict):
     """
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     hx2dome_pb2_grpc.add_HX2DomeServicer_to_server(
-        HX2DomeServer(**kwargs_dict), server)
+        HX2DomeServer(**kwargs), server)
     server.add_insecure_port('[::]:50051')
     server.start()
     try:
@@ -571,7 +575,25 @@ if __name__ == '__main__':
                         to the TheSkyX.")
     parser.set_defaults(server_testing=False)
 
-    kwargs_dict = vars(parser.parse_args())
+    parser.add_argument('-y', '--yamlconfig',
+                        dest='yamlconfig',
+                        help="YAML file containing cofiguration details for \
+                        the dome controller.")
+    default_config = os.path.join(os.path.abspath(os.path.dirname(__file__)),
+                                  '/dome_controller_config.yml')
+    parser.set_defaults(yamlconfig=default_config)
+
+    args = parser.parse_args()
+
+    # TODO: have some way of running dome with the defaults defined in the init
+    # rather than running from a specified or default yaml file
+    if args.yamlconfig is None:
+        # if we don't want to use a yaml file, pass an empty dictionary though
+        config = dict()
+    else:
+        config = load_dome_config(config_path=args.yamlconfig)
+
+    kwargs_dict = {**vars(args), **config}
 
     logging.basicConfig()
-    serve(kwargs_dict)
+    serve(**kwargs_dict)
