@@ -7,6 +7,7 @@ import threading
 import time
 import warnings
 import logging
+import yaml
 
 import astropy.units as u
 from astropy.coordinates import Angle, Longitude
@@ -60,7 +61,7 @@ def load_dome_config(config_path=None):
     """
     if config_path is None:
         directory = os.path.abspath(os.path.dirname(__file__))
-        rel_path = '/gRPC-server/dome_controller_config.yml'
+        rel_path = 'gRPC-server/dome_controller_config.yml'
         config_path = os.path.join(directory, rel_path)
     try:
         with open(config_path, 'rb') as f:

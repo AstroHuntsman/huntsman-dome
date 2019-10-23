@@ -58,9 +58,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
         super(HX2DomeServer, self).__init__()
         # create the dome object that controls the dome hardware
         self.dome = Dome(**kwargs)
-        print(f'Home az is {self.dome.home_az}')
         self.server_testing = kwargs['server_testing']
-        print(f'server testing enabled [{self.server_testing}]')
 
     def dapiGetAzEl(self, request, context):
         """TheSkyX RPC to query the dome azimuth and slit position of the
@@ -580,7 +578,7 @@ if __name__ == '__main__':
                         help="YAML file containing cofiguration details for \
                         the dome controller.")
     default_config = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                                  '/dome_controller_config.yml')
+                                  'dome_controller_config.yml')
     parser.set_defaults(yamlconfig=default_config)
 
     args = parser.parse_args()
