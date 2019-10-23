@@ -96,7 +96,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             if dome_az is None:
                 return_code = 1
             response = hx2dome_pb2.AzEl(return_code=return_code,
-                                        az=dome_az,
+                                        az=dome_az.degree,
                                         el=90.0)
             print(f'Sending: Az={response.az}, \
                   El={response.el}, \
