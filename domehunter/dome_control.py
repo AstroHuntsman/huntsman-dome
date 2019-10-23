@@ -194,7 +194,7 @@ class Dome(object):
                 home_sensor_pin_number)
         else:
             # set the timeout length variable to 5 minutes (units of seconds)
-            WAIT_TIMEOUT = 5 * 60
+            WAIT_TIMEOUT = 10 * 60
 
         # set a wait time for testing mode that exceeds bounce_time
         self.test_mode_delay_duration = bounce_time + 0.05
