@@ -293,12 +293,24 @@ class Dome(object):
             self._set_not_home()
 
     def __del__(self):
-        self.abort()
-        self._rotation_relay.off()
+        try:
+            self.abort()
+        except Exception:
+            pass
+        try:
+            self._rotation_relay.off()
+        except Exception:
+            pass
         # turn off all the leds
-        if self.debug_lights:
-            self._change_led_state(0, [led for led in LED_Lights])
-        Device.pin_factory.reset()
+        try:
+            if self.debug_lights:
+                self._change_led_state(0, [led for led in LED_Lights])
+        except Exception:
+            pass
+        try:
+            Device.pin_factory.reset()
+        except Exception:
+            pass
 
 
 ###############################################################################
