@@ -594,6 +594,8 @@ class Dome(object):
         if not self._calibrating and bool(self.current_direction + 1):
             logger.debug(f'_set_at_home: Passing home clockwise, zeroing encoder counts.')
             self._encoder_count = 0
+            self._dome_az = self._ticks_to_az(self._encoder_count)
+            logger.debug(f'Encoder: {self._encoder_count} Azimuth: {self._dome_az}')
         # if we are calibrating, increment the rotation count
         if self._calibrating:
             logger.debug(f'_set_at_home: Home triggered during calibration, incrementing calibration rotation count.')
@@ -634,8 +636,8 @@ class Dome(object):
         if self._unhomed:
             logger.info(f'Dome is unhomed, please home dome.')
         else:
-            logger.debug(f'Encoder: {self._encoder_count} Azimuth: {self._dome_az}')
             self._dome_az = self._ticks_to_az(self._encoder_count)
+            logger.debug(f'Encoder: {self._encoder_count} Azimuth: {self._dome_az}')
 
     def _az_to_ticks(self, az):
         """
