@@ -331,7 +331,7 @@ class Dome(object):
         """Return True if the dome is at home."""
         # dome initialised with ._unhomed as True
         # set this to true after first home.
-        self._unhomed = False
+
         home_active = self._home_sensor.is_active
         logger.debug(f'Home active: {home_active}')
         return home_active
@@ -480,6 +480,7 @@ class Dome(object):
             return
         # iniate the movement and set the _move_event flag
         logger.debug(f'find_home: Finding Home')
+        self._unhomed = True
         self._move_event.set()
         self._rotate_dome(Direction.CW)
         time.sleep(0.1)
@@ -610,6 +611,7 @@ class Dome(object):
         """
         logger.info('Home sensor activated')
         self._change_led_state(1, leds=[LED_Lights.INPUT_2])
+        self._unhomed = False
         # don't want to zero encoder while calibrating
         # note: because Direction.CW is +1 and Direction.CCW is -1, need to
         # add 1 to self.current_direction, to get CCW to evaluate to False

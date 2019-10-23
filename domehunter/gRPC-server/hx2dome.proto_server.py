@@ -476,7 +476,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             # if dome is not moving and dome.at_home returns True
             # lets just consider the command complete
             # TODO: better method of determine command completion
-            is_complete = not is_dome_moving and self.dome.at_home
+            is_complete = not is_dome_moving and not self.dome._unhomed
             response = hx2dome_pb2.IsComplete(
                 return_code=0, is_complete=is_complete)
             return response
