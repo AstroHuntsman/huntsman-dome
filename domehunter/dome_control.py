@@ -312,7 +312,6 @@ class Dome(object):
         except Exception:
             pass
 
-
 ###############################################################################
 # Properties
 ###############################################################################
@@ -581,7 +580,7 @@ class Dome(object):
 
     def _calibration_complete(self):
         """Return True if desired number of calibration rotations completed."""
-        logger.debug(f'cc Rotation count is [{self._rotation_count}], rotations to go [{self._num_cal_rotations - self._rotation_count}].')
+        logger.debug(f'Rotation count is [{self._rotation_count}], rotations to go [{self._num_cal_rotations - self._rotation_count}].')
         return self._rotation_count >= self._num_cal_rotations
 
     def _simulate_calibration(self):
