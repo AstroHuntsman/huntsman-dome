@@ -299,6 +299,7 @@ class Dome(object):
     @property
     def dome_az(self):
         """Returns the dome azimuth in degrees."""
+        self._dome_az = self._ticks_to_az(self.encoder_count)
         if self._dome_az is None or self._unhomed:
             print("Dome az unknown, please home the dome.")
         logger.debug(f'Dome azimuth: {self._dome_az}')
@@ -594,8 +595,7 @@ class Dome(object):
         if not self._calibrating and bool(self.current_direction + 1):
             logger.debug(f'_set_at_home: Passing home clockwise, zeroing encoder counts.')
             self._encoder_count = 0
-            self._dome_az = self._ticks_to_az(self._encoder_count)
-            logger.debug(f'Encoder: {self._encoder_count} Azimuth: {self._dome_az}')
+            logger.debug(f'Encoder: {self.encoder_count} Azimuth: {self.dome_az}')
         # if we are calibrating, increment the rotation count
         if self._calibrating:
             logger.debug(f'_set_at_home: Home triggered during calibration, incrementing calibration rotation count.')
@@ -623,7 +623,7 @@ class Dome(object):
         self._change_led_state(1, leds=[LED_Lights.INPUT_1])
 
         logger.debug(f'Direction: Current {self.current_direction} Last {self.last_direction}')
-        logger.debug(f'Encoder count before: {self._encoder_count}')
+        logger.debug(f'Encoder count before: {self.encoder_count}')
         if self.current_direction != Direction.NONE:
             self._encoder_count += self.current_direction
         elif self.last_direction != Direction.NONE:
@@ -636,8 +636,7 @@ class Dome(object):
         if self._unhomed:
             logger.info(f'Dome is unhomed, please home dome.')
         else:
-            self._dome_az = self._ticks_to_az(self._encoder_count)
-            logger.debug(f'Encoder: {self._encoder_count} Azimuth: {self._dome_az}')
+            logger.debug(f'Encoder: {self.encoder_count} Azimuth: {self.dome_az}')
 
     def _az_to_ticks(self, az):
         """
