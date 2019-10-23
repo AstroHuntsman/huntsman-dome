@@ -306,6 +306,9 @@ class Dome(object):
     @property
     def at_home(self):
         """Return True if the dome is at home."""
+        # dome initialised with ._unhomed as True
+        # set this to true after first home.
+        self._unhomed = False
         home_active = self._home_sensor.is_active
         logger.debug(f'Home active: {home_active}')
         return home_active
