@@ -329,9 +329,6 @@ class Dome(object):
     @property
     def at_home(self):
         """Return True if the dome is at home."""
-        # dome initialised with ._unhomed as True
-        # set this to true after first home.
-
         home_active = self._home_sensor.is_active
         logger.debug(f'Home active: {home_active}')
         return home_active
@@ -657,7 +654,7 @@ class Dome(object):
         # Set new dome azimuth
         # if dome is unhomed, _dome_az should remain as None
         if self._unhomed:
-            logger.info(f'Dome is unhomed, please home dome.')
+            logger.debug(f'Dome is unhomed, please home dome.')
         else:
             logger.debug(f'Encoder: {self.encoder_count} Azimuth: {self.dome_az}')
 
