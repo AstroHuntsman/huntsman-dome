@@ -331,7 +331,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             # TODO: better method of determine command completion
             is_complete = not is_dome_moving
             response = hx2dome_pb2.IsComplete(
-                return_code=0, is_complete=is_dome_moving)
+                return_code=0, is_complete=is_complete)
             return response
 
     def dapiIsOpenComplete(self, request, context):
