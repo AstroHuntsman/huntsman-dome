@@ -54,10 +54,10 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
 
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, home_az, **kwargs):
         super(HX2DomeServer, self).__init__()
         # create the dome object that controls the dome hardware
-        self.dome = Dome(**kwargs)
+        self.dome = Dome(home_az, **kwargs)
         self.server_testing = kwargs['server_testing']
 
     def dapiGetAzEl(self, request, context):
@@ -518,7 +518,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             return response
 
 
-def serve(**kwargs):
+def serve(home_az, **kwargs):
     """Set up the RPC server to run for a day or until interrupted.
 
     Parameters
@@ -529,7 +529,7 @@ def serve(**kwargs):
     """
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     hx2dome_pb2_grpc.add_HX2DomeServicer_to_server(
-        HX2DomeServer(**kwargs), server)
+        HX2DomeServer(home_az, **kwargs), server)
     server.add_insecure_port('[::]:50051')
     server.start()
     try:
@@ -541,8 +541,9 @@ def serve(**kwargs):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description="Remote Procedure Call server \
-        for issuing observatory dome rotation commands.")
+        description=("Remote Procedure Call server for issuing observatory "
+                     "dome rotation commands.")
+        )
 
     group = parser.add_mutually_exclusive_group()
 
@@ -565,33 +566,40 @@ if __name__ == '__main__':
 
     parser.set_defaults(debug_lights=False)
 
-    parser.add_argument('-c', '--commtest',
+    parser.add_argument('-d', '--dummyserver',
                         dest='server_testing',
                         action='store_true',
-                        help="Mode for testing TheSkyX driver to server \
-                        communication. Server will return dummy messages \
-                        to the TheSkyX.")
+                        help=("Mode for testing TheSkyX driver to server "
+                              "communication. Server will return dummy "
+                              "messages to the TheSkyX.")
+                        )
     parser.set_defaults(server_testing=False)
 
-    parser.add_argument('-y', '--yamlconfig',
-                        dest='yamlconfig',
-                        help="YAML file containing cofiguration details for \
-                        the dome controller.")
+    parser.add_argument('-c', '--config',
+                        dest='config',
+                        help=("YAML file containing cofiguration details for "
+                              "the dome controller.")
+                        )
     default_config = os.path.join(os.path.abspath(os.path.dirname(__file__)),
                                   'dome_controller_config.yml')
-    parser.set_defaults(yamlconfig=default_config)
+    parser.set_defaults(config=default_config)
 
-    args = parser.parse_args()
+    flags = parser.parse_args()
 
     # TODO: have some way of running dome with the defaults defined in the init
     # rather than running from a specified or default yaml file
-    if args.yamlconfig is None:
+    if flags.config is None:
         # if we don't want to use a yaml file, pass an empty dictionary though
         config = dict()
     else:
-        config = load_dome_config(config_path=args.yamlconfig)
+        config = load_dome_config(config_path=flags.config)
 
-    kwargs_dict = {**vars(args), **config}
+    kwargs = {**vars(flags), **config}
+
+    home_az = kwargs.pop('home_azimuth', None)
+    if home_az is None:
+        raise ValueError(
+            "Dome instance requires a home azimuth, none provided.")
 
     logging.basicConfig()
-    serve(**kwargs_dict)
+    serve(home_az, **kwargs)
