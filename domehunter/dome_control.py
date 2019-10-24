@@ -65,7 +65,7 @@ def load_dome_config(config_path=None):
         rel_path = 'gRPC-server/dome_controller_config.yml'
         config_path = os.path.join(directory, rel_path)
     try:
-        with open(config_path, 'rb') as f:
+        with open(config_path, 'r') as f:
             config = yaml.load(f.read())
     except Exception as e:
         logger.warning(f'Error loading yaml config, {e}')
