@@ -1,6 +1,6 @@
 ---
 name: Huntsman Dome Controller
-home_azimuth: 0
+home_azimuth: 31.5
 az_position_tolerance: 1.0
 degrees_per_tick: 1.075
 encoder_pin_number: 26
