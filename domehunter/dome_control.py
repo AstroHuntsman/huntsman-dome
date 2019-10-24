@@ -66,7 +66,7 @@ def load_dome_config(config_path=None):
         config_path = os.path.join(directory, rel_path)
     try:
         with open(config_path, 'r') as f:
-            config = yaml.load(f.read())
+            config = yaml.full_load(f.read())
     except Exception as e:
         logger.warning(f'Error loading yaml config, {e}')
     return config
