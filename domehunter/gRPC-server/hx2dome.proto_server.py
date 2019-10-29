@@ -1,13 +1,15 @@
 import argparse
 import logging
 import time
+import yaml
+import os.path
 from concurrent import futures
 
 import grpc
 
 import hx2dome_pb2
 import hx2dome_pb2_grpc
-from domehunter.dome_control import Dome
+from domehunter.dome_control import Dome, load_dome_config
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
@@ -52,11 +54,11 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
 
     """
 
-    def __init__(self, testing, debug_lights, server_testing):
+    def __init__(self, home_az, **kwargs):
         super(HX2DomeServer, self).__init__()
         # create the dome object that controls the dome hardware
-        self.dome = Dome(testing=testing, debug_lights=debug_lights)
-        self.server_testing = server_testing
+        self.dome = Dome(home_az, **kwargs)
+        self.server_testing = kwargs['server_testing']
 
     def dapiGetAzEl(self, request, context):
         """TheSkyX RPC to query the dome azimuth and slit position of the
@@ -87,7 +89,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
         else:
             return_code = 0
             try:
-                dome_az = self.dome.dome_az
+                dome_az = self.dome.dome_az.degree
             except Exception:
                 # TODO: proper exception handling
                 dome_az = None
@@ -329,7 +331,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             # TODO: better method of determine command completion
             is_complete = not is_dome_moving
             response = hx2dome_pb2.IsComplete(
-                return_code=0, is_complete=is_dome_moving)
+                return_code=0, is_complete=is_complete)
             return response
 
     def dapiIsOpenComplete(self, request, context):
@@ -474,7 +476,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             # if dome is not moving and dome.at_home returns True
             # lets just consider the command complete
             # TODO: better method of determine command completion
-            is_complete = not is_dome_moving and self.dome.at_home
+            is_complete = not is_dome_moving and not self.dome._unhomed
             response = hx2dome_pb2.IsComplete(
                 return_code=0, is_complete=is_complete)
             return response
@@ -516,7 +518,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             return response
 
 
-def serve(kwargs_dict):
+def serve(home_az, **kwargs):
     """Set up the RPC server to run for a day or until interrupted.
 
     Parameters
@@ -527,7 +529,7 @@ def serve(kwargs_dict):
     """
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     hx2dome_pb2_grpc.add_HX2DomeServicer_to_server(
-        HX2DomeServer(**kwargs_dict), server)
+        HX2DomeServer(home_az, **kwargs), server)
     server.add_insecure_port('[::]:50051')
     server.start()
     try:
@@ -539,8 +541,9 @@ def serve(kwargs_dict):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description="Remote Procedure Call server \
-        for issuing observatory dome rotation commands.")
+        description=("Remote Procedure Call server for issuing observatory "
+                     "dome rotation commands.")
+        )
 
     group = parser.add_mutually_exclusive_group()
 
@@ -563,15 +566,40 @@ if __name__ == '__main__':
 
     parser.set_defaults(debug_lights=False)
 
-    parser.add_argument('-c', '--commtest',
+    parser.add_argument('-d', '--dummyserver',
                         dest='server_testing',
                         action='store_true',
-                        help="Mode for testing TheSkyX driver to server \
-                        communication. Server will return dummy messages \
-                        to the TheSkyX.")
+                        help=("Mode for testing TheSkyX driver to server "
+                              "communication. Server will return dummy "
+                              "messages to the TheSkyX.")
+                        )
     parser.set_defaults(server_testing=False)
 
-    kwargs_dict = vars(parser.parse_args())
+    parser.add_argument('-c', '--config',
+                        dest='config',
+                        help=("YAML file containing cofiguration details for "
+                              "the dome controller.")
+                        )
+    default_config = os.path.join(os.path.abspath(os.path.dirname(__file__)),
+                                  'dome_controller_config.yml')
+    parser.set_defaults(config=default_config)
+
+    flags = parser.parse_args()
+
+    # TODO: have some way of running dome with the defaults defined in the init
+    # rather than running from a specified or default yaml file
+    if flags.config is None:
+        # if we don't want to use a yaml file, pass an empty dictionary though
+        config = dict()
+    else:
+        config = load_dome_config(config_path=flags.config)
+
+    kwargs = {**vars(flags), **config}
+
+    home_az = kwargs.pop('home_azimuth', None)
+    if home_az is None:
+        raise ValueError(
+            "Dome instance requires a home azimuth, none provided.")
 
     logging.basicConfig()
-    serve(kwargs_dict)
+    serve(home_az, **kwargs)
