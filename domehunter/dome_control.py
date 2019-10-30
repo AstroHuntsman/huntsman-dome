@@ -494,7 +494,7 @@ class Dome(object):
         while self.movement_thread_active:
             # wait for find_home() to finish
             time.sleep(0.1)
-        logger.ntoice(f'Found Home.')
+        logger.notice(f'Found Home.')
         # pause to let things settle/get a noticeable blink of debug_lights
         time.sleep(0.5)
 
