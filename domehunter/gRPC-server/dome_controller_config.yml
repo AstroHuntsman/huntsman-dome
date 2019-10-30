@@ -1,7 +1,7 @@
 ---
 name: Huntsman Dome Controller
-log_file_level: 'debug'
-log_stderr_level: 'notice'
+log_file_level: 'DEBUG'
+log_stderr_level: 'NOTICE'
 home_azimuth: 31.5
 az_position_tolerance: 1.7
 degrees_per_tick: 1.075

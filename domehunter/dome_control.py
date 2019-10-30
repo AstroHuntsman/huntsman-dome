@@ -119,8 +119,8 @@ class Dome(object):
                  home_azimuth,
                  testing=True,
                  debug_lights=False,
-                 log_file_level='notice',
-                 log_stderr_level='notice',
+                 log_file_level='NOTICE',
+                 log_stderr_level='NOTICE',
                  az_position_tolerance=1.0,
                  degrees_per_tick=None,
                  encoder_pin_number=26,
@@ -970,7 +970,7 @@ class Dome(object):
         """
         new_level = self._get_log_level(level)
         handler_to_update = self._get_handler(handler)
-        if new_level or handler_to_update is None:
-            logger.debug(f'Failed to update logger handler log level')
+        if new_level is None or handler_to_update is None:
+            logger.debug(f'Failed to update logger handler level')
             pass
         handler_to_update.level = new_level
