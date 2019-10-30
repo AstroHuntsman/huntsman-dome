@@ -128,6 +128,7 @@ class Dome(object):
                  rotation_relay_pin_number=13,
                  direction_relay_pin_number=19,
                  bounce_time=0.001,
+                 led_brightness=0x10,
                  *args,
                  **kwargs):
         """
@@ -261,7 +262,7 @@ class Dome(object):
         if debug_lights:  # pragma: no cover
             # Make sure LED brightness is turned up
             logger.info(f'Adjusting brightness for leds.')
-            sn3218.output([0x10] * 9)
+            sn3218.output([led_brightness] * 18)
             # if we are actually using the debug lights we can enable them now
             logger.info(f'Setting relay LEDs to reflect initialised state.')
             self._change_led_state(1,
