@@ -914,14 +914,13 @@ class Dome(object):
         level : str
             The name of the desired logging level.
 
+        Returns
+        -------
+        new_level : int
+            An integer corresponding to the requested log level.
+
         """
-        # TODO: set specific levels for different handlers
-        levels = {'critical': logbook.CRITICAL,
-                  'error': logbook.ERROR,
-                  'warning': logbook.WARNING,
-                  'notice': logbook.NOTICE,
-                  'info': logbook.INFO,
-                  'debug': logbook.DEBUG}
+        levels = logbook.base._reverse_level_names
         try:
             new_level = levels[level]
         except KeyError:
@@ -931,6 +930,20 @@ class Dome(object):
         return new_level
 
     def _get_handler(self, handler):
+        """Returns a specific handler from the logger so that log level can
+        be adjusted if required.
+
+        Parameters
+        ----------
+        handler : str
+            The desired handler from the logger.
+
+        Returns
+        -------
+        handler : logbook.handler object
+            The requested handler.
+
+        """
         handlers = {'TRFH': TRFH,
                     'StdH': StdH}
         try:
@@ -944,17 +957,20 @@ class Dome(object):
             if isinstance(handler, requested_handler):
                 return handler
 
-    def _update_handler_level(self, handler_type, level):
-        """Updates the log file logging level.
+    def _update_handler_level(self, handler, level):
+        """Updates a handlers logging level.
 
         Parameters
         ----------
+        handler_type : str
+            The name of the handler you want to update.
         level : str
             The name of the desired logging level.
 
         """
         new_level = self._get_log_level(level)
-        handler_to_update = self._get_handler(handler_type)
+        handler_to_update = self._get_handler(handler)
         if new_level or handler_to_update is None:
+            logger.debug(f'Failed to update logger handler log level')
             pass
         handler_to_update.level = new_level
