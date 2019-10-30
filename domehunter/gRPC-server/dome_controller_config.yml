@@ -1,7 +1,9 @@
 ---
 name: Huntsman Dome Controller
+log_file_level: 'debug'
+log_stderr_level: 'notice'
 home_azimuth: 31.5
-az_position_tolerance: 1.0
+az_position_tolerance: 1.7
 degrees_per_tick: 1.075
 encoder_pin_number: 26
 home_sensor_pin_number: 20
