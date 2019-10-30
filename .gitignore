@@ -62,5 +62,3 @@ distribute-*.tar.gz
 \.pytest_cache/
 
 \.coverage\.subprocess
-
-*.log
