@@ -828,9 +828,6 @@ class Dome(object):
         # update the rotation relay debug LEDs
         self._change_led_state(1, leds=[LED_Lights.RELAY_1_NO])
         self._change_led_state(0, leds=[LED_Lights.RELAY_1_NC])
-        cmd_status = True
-        logger.debug(f'Rotation cmd_status: {cmd_status}')
-        return cmd_status
 
     def _stop_moving(self):
         """
