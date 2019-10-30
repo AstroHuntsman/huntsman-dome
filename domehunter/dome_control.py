@@ -406,6 +406,7 @@ class Dome(object):
                 )
         tolerance = max(self._az_position_tolerance,
                         1.5 * self.degrees_per_tick)
+        self._az_position_tolerance = tolerance
         return tolerance
 
     @property
