@@ -2,43 +2,32 @@
 
 
 import math
-import sys
 import os
+import sys
 import threading
 import time
 import warnings
-import logbook
-from logbook import TimedRotatingFileHandler as TRFH
-from logbook import StderrHandler as StdH
-import yaml
 from contextlib import suppress
 
 import astropy.units as u
+import logbook
+import yaml
 from astropy.coordinates import Angle, Longitude
 from gpiozero import Device, DigitalInputDevice, DigitalOutputDevice
 from gpiozero.pins.mock import MockFactory
 
 from domehunter.enumerations import Direction, LED_Lights, ReturnCode
+from domehunter.logging import (get_handler, get_log_level, set_up_logger,
+                                update_handler_level)
 
 from ._astropy_init import *
 
-logger = logbook.Logger(__name__)
-fmt_str = ('[{record.time:%Y-%m-%d %H:%M:%S}]'
-           ' line {record.lineno:<3} in '
-           '{record.module:<}.{record.func_name:<} of {record.filename}\n    '
-           '[{record.level_name:*^11}] : {record.message:<20}')
-
-logfilename = os.path.join(os.path.dirname(__file__), 'logs/domepi.log')
-logger.handlers.append(TRFH(logfilename,
-                            level='NOTICE',
-                            mode='a+',
-                            date_format='%Y-%m-%d',
-                            bubble=True,
-                            format_string=fmt_str))
-
-logger.handlers.append(StdH(level='NOTICE',
-                            bubble=True,
-                            format_string=fmt_str))
+# set up the logger with no logo to catch the import messages
+logger = set_up_logger(__name__,
+                       'domepi.log',
+                       log_file_level='DEBUG',
+                       log_stderr_level='DEBUG',
+                       logo=False)
 
 # if we want to use the automation hat status lights we need to
 # import the pimoroni led driver
@@ -48,17 +37,11 @@ try:  # pragma: no cover
 except OSError:  # pragma: no cover
     wmsg = ("AutomationHAT hardware not detected, "
             "testing=True and debug_lights=False recommended.")
-    logger.warning(
-        ("AutomationHAT hardware not detected, "
-         "testing=True and debug_lights=False recommended.")
-        )
+    logger.warn(wmsg)
 except Exception:  # pragma: no cover
     wmsg = ("Something went wrong in importing sn3218, "
             "status lights unlikely to work.")
-    logger.warning(
-        ("Something went wrong in importing sn3218, "
-         "status lights unlikely to work.")
-        )
+    logger.warn(wmsg)
 
 # ----------------------------------------------------------------------------
 
@@ -92,7 +75,7 @@ def load_dome_config(config_path=None):
         with open(config_path, 'r') as f:
             config = yaml.load(f.read(), Loader=yaml.FullLoader)
     except Exception as e:
-        logger.warning(f'Error loading yaml config, {e}')
+        warnings.warn(f'Error loading yaml config, {e}')
     return config
 
 
@@ -119,6 +102,7 @@ class Dome(object):
                  home_azimuth,
                  testing=True,
                  debug_lights=False,
+                 logo=False,
                  log_file_level='NOTICE',
                  log_stderr_level='NOTICE',
                  az_position_tolerance=1.0,
@@ -204,6 +188,11 @@ class Dome(object):
             additional (de)activation.
 
         """
+        logger = set_up_logger(__name__,
+                               'domepi.log',
+                               log_file_level='DEBUG',
+                               log_stderr_level='DEBUG',
+                               logo=logo)
         logger.notice(f'Dome testing: {testing} lights: {debug_lights}')
 
         if testing:
@@ -214,7 +203,7 @@ class Dome(object):
             # pin factory to release all the pins
             Device.pin_factory.reset()
             # set a timeout length in seconds for wait_for_active() calls
-            WAIT_TIMEOUT = 2*60
+            WAIT_TIMEOUT = 2 * 60
 
             # in testing mode we need to create a seperate pin object so we can
             # simulate the activation of our fake DIDs and DODs
@@ -239,7 +228,7 @@ class Dome(object):
             logger.warning(
                 (f'No value supplied for degrees_per_tick, '
                  f'dome requires calibration.')
-                )
+            )
             self._degrees_per_tick = degrees_per_tick
         else:
             self._degrees_per_tick = Angle(degrees_per_tick * u.deg)
@@ -304,7 +293,7 @@ class Dome(object):
         self._rotation_relay = DigitalOutputDevice(
             rotation_relay_pin_number, initial_value=False)
         logger.info((f'Connecting direction relay on '
-                    f'pin {direction_relay_pin_number}.'))
+                     f'pin {direction_relay_pin_number}.'))
         self._direction_relay = DigitalOutputDevice(
             direction_relay_pin_number, initial_value=False)
         # because we initialiase the relay in the normally closed position
@@ -328,8 +317,8 @@ class Dome(object):
 
         # After initialising we may want to change the log level
         self.logger = logger
-        self._update_handler_level('TRFH', log_file_level)
-        self._update_handler_level('StdH', log_stderr_level)
+        update_handler_level(self.logger, 'TRFH', log_file_level)
+        update_handler_level(self.logger, 'StdH', log_stderr_level)
 
     def __del__(self):
         """
@@ -403,7 +392,7 @@ class Dome(object):
                 (f'az_position_tolerance [{self._az_position_tolerance}] is '
                  f'less than 1.5 times degrees_per_tick. Setting tolerance '
                  f'to 1.5 * degrees_per_tick')
-                )
+            )
         tolerance = max(self._az_position_tolerance,
                         1.5 * self.degrees_per_tick)
         self._az_position_tolerance = tolerance
@@ -416,8 +405,8 @@ class Dome(object):
         """
         filelvl = self._get_handler('TRFH').level_name
         stderrlvl = self._get_handler('StdH').level_name
-        self.logger.notice((f'Log file handler level is: {filelvl}, '
-                            f'Stderr handler level is: {stderrlvl}'))
+        logger.notice((f'Log file handler level is: {filelvl}, '
+                       f'Stderr handler level is: {stderrlvl}'))
         return
 
 ###############################################################################
@@ -507,7 +496,7 @@ class Dome(object):
         # the number of ticks per revolution
         logger.notice(
             (f'Starting calibration rotations.')
-            )
+        )
         self._move_event.set()
         self._rotate_dome(Direction.CW)
         self._calibrating = True
@@ -589,7 +578,7 @@ class Dome(object):
                 logger.info(
                     (f'Monitoring thread triggered '
                      f'by {trigger_condition.__name__}.')
-                    )
+                )
                 calibration_success = True
                 break
             elif self._abort_event.is_set():
@@ -599,7 +588,7 @@ class Dome(object):
                 logger.info(
                     (f'Monitoring thread triggered '
                      f'by timeout [{self.wait_timeout}s].')
-                    )
+                )
                 break
             elif goingtoaz and self.testing is True:
                 # if testing simulate a tick for every cycle of while loop
@@ -633,7 +622,7 @@ class Dome(object):
         logger.debug(
             (f'Delta_az is {delta_az}, '
              f'tolerance window is {self.az_position_tolerance}.')
-            )
+        )
         return delta_az <= self.az_position_tolerance
 
     def _find_home_complete(self):
@@ -645,7 +634,7 @@ class Dome(object):
         logger.debug(
             (f'Rotation count is [{self._rotation_count}], rotations '
              f'to go [{self._num_cal_rotations - self._rotation_count}].')
-            )
+        )
         return self._rotation_count >= self._num_cal_rotations
 
     def _simulate_calibration(self):
@@ -659,19 +648,19 @@ class Dome(object):
                 (f'Loop runtime is {time.monotonic() - start}: '
                  f'rot_count [{self._rotation_count}], '
                  f'encoder_count [{self.encoder_count}]')
-                )
+            )
             if not self._simulated_rotation_event.is_set():
                 time.sleep(1)
                 logger.debug(
                     (f'Completion of simulated rotation detected, '
                      f'simulating next rotation.')
-                    )
+                )
                 sim_rotation = threading.Thread(target=self._simulate_rotation)
                 if self._calibration_complete():
                     logger.debug(
                         (f'Calibration rotations completed, '
                          f'ending calibration.')
-                        )
+                    )
                     break
                 sim_rotation.start()
             time.sleep(1)
@@ -689,17 +678,17 @@ class Dome(object):
         if not self._calibrating and bool(self.current_direction + 1):
             logger.debug(
                 (f'Passing home clockwise, zeroing encoder counts.')
-                )
+            )
             self._encoder_count = 0
             logger.debug(
                 (f'Encoder: {self.encoder_count} Azimuth: {self.dome_az}')
-                )
+            )
         # if we are calibrating, increment the rotation count
         if self._calibrating:
             logger.debug(
                 (f'Home triggered during calibration, '
                  f'incrementing calibration rotation count.')
-                )
+            )
             self._rotation_count += 1
 
     def _set_not_home(self):
@@ -726,7 +715,7 @@ class Dome(object):
         logger.debug(
             (f'Direction: Current {self.current_direction} '
              f'Last {self.last_direction}.')
-            )
+        )
         logger.debug(f'Encoder count before: {self.encoder_count}.')
         if self.current_direction != Direction.NONE:
             self._encoder_count += self.current_direction
@@ -735,7 +724,7 @@ class Dome(object):
         else:
             raise RuntimeError(
                 ("No current or last direction, can't increment count.")
-                )
+            )
 
         # Set new dome azimuth
         # if dome is unhomed, _dome_az should remain as None
@@ -744,7 +733,7 @@ class Dome(object):
         else:
             logger.debug(
                 (f'Encoder: {self.encoder_count} Azimuth: {self.dome_az}.')
-                )
+            )
 
     def _az_to_ticks(self, az):
         """
@@ -905,72 +894,3 @@ class Dome(object):
         encoder pin is deactivated.
         """
         self._change_led_state(0, leds=[LED_Lights.INPUT_1])
-
-    def _get_log_level(self, level):
-        """Returns the logbook log level corresponding to the supplied string.
-
-        Parameters
-        ----------
-        level : str
-            The name of the desired logging level.
-
-        Returns
-        -------
-        new_level : int
-            An integer corresponding to the requested log level.
-
-        """
-        levels = logbook.base._reverse_level_names
-        try:
-            new_level = levels[level]
-        except KeyError:
-            logger.error((f'Requested level [\'{level}\'] is not valid.'
-                          f' Valid levels are {list(levels.keys())}.'))
-            return
-        return new_level
-
-    def _get_handler(self, handler):
-        """Returns a specific handler from the logger so that log level can
-        be adjusted if required.
-
-        Parameters
-        ----------
-        handler : str
-            The desired handler from the logger.
-
-        Returns
-        -------
-        handler : logbook.handler object
-            The requested handler.
-
-        """
-        handlers = {'TRFH': TRFH,
-                    'StdH': StdH}
-        try:
-            requested_handler = handlers[handler]
-        except KeyError:
-            logger.error((f'Desired Handler [\'{requested_handler}\'] is not'
-                          f' a valid handler type.'
-                          f' Valid types are {list(levels.keys())}.'))
-            return
-        for handler in self.logger.handlers:
-            if isinstance(handler, requested_handler):
-                return handler
-
-    def _update_handler_level(self, handler, level):
-        """Updates a handlers logging level.
-
-        Parameters
-        ----------
-        handler_type : str
-            The name of the handler you want to update.
-        level : str
-            The name of the desired logging level.
-
-        """
-        new_level = self._get_log_level(level)
-        handler_to_update = self._get_handler(handler)
-        if new_level is None or handler_to_update is None:
-            logger.debug(f'Failed to update logger handler level')
-            pass
-        handler_to_update.level = new_level
