@@ -1,5 +1,7 @@
 import argparse
-import logging
+import logbook
+from logbook import TimedRotatingFileHandler as TRFH
+from logbook import StderrHandler as StdH
 import time
 import yaml
 import os.path
@@ -10,6 +12,7 @@ import grpc
 import hx2dome_pb2
 import hx2dome_pb2_grpc
 from domehunter.dome_control import Dome, load_dome_config
+from domehunter.logging import set_up_logger
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
@@ -54,11 +57,13 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
 
     """
 
-    def __init__(self, home_az, **kwargs):
+    def __init__(self, home_az, logger, **kwargs):
         super(HX2DomeServer, self).__init__()
         # create the dome object that controls the dome hardware
         self.dome = Dome(home_az, **kwargs)
+        self.logger = logger
         self.server_testing = kwargs['server_testing']
+        self.logger.notice(f'Dome server initialised.')
 
     def dapiGetAzEl(self, request, context):
         """TheSkyX RPC to query the dome azimuth and slit position of the
@@ -84,7 +89,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             # if we just want to test communication between driver and server
             # we can just send back a dummy response
             response = hx2dome_pb2.AzEl(return_code=0, az=10.0, el=20.0)
-            print(f'Sending: Az={response.az}, El={response.el}')
+            self.logger.info(f'Sending: Az={response.az}, El={response.el}')
             return response
         else:
             return_code = 0
@@ -98,9 +103,9 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             response = hx2dome_pb2.AzEl(return_code=return_code,
                                         az=dome_az,
                                         el=90.0)
-            print(f'Sending: Az={response.az}, \
-                  El={response.el}, \
-                  ReturnCode={response.return_code}')
+            self.logger.info((f'Sending: Az={response.az}, '
+                              f'El={response.el}, '
+                              f'ReturnCode={response.return_code}'))
             return response
 
     def dapiGotoAzEl(self, request, context):
@@ -122,11 +127,15 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             success/failure of the rpc request.
 
         """
-        print(f'Receiving: GotoAzEl Az={request.az}, El={request.el}')
+        self.logger.notice(
+            f'Receiving: GotoAzEl Az={request.az}, El={request.el}'
+            )
         if self.server_testing:
             response = hx2dome_pb2.ReturnCode(return_code=0)
-            print(f'Sending: GotoAzEl complete,'
-                  f' return code={response.return_code}\n')
+            self.logger.notice(
+                (f'Sending: GotoAzEl complete,'
+                 f' return code={response.return_code}\n')
+                )
             return response
         else:
             return_code = 0
@@ -136,8 +145,10 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
                 # TODO: proper error handling
                 return_code = 1
             response = hx2dome_pb2.ReturnCode(return_code=return_code)
-            print(f'Sending: GotoAzEl complete,'
-                  f' return code={response.return_code}\n')
+            self.logger.notice(
+                (f'Sending: GotoAzEl complete,'
+                 f' return code={response.return_code}\n')
+                )
             return response
 
     def dapiAbort(self, request, context):
@@ -321,7 +332,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             has been completed.
 
         """
-        print("      ITS DOING IT, ITS DOING IT    ")
+        self.logger.info("ITS DOING IT, ITS DOING IT")
         if self.server_testing:
             response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
             return response
@@ -467,7 +478,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             has been completed.
 
         """
-        print("      PHONING HOME    ")
+        self.logger.info("PHONING HOME")
         if self.server_testing:
             response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
             return response
@@ -500,7 +511,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             success/failure of the rpc request.
 
         """
-        print("      IM SINKINGGGGGGGGG    ")
+        self.logger.info("IM SINKINGGGG")
         if self.server_testing:
             response = hx2dome_pb2.ReturnCode(return_code=0)
             return response
@@ -513,12 +524,14 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
                 # TODO: proper error handling
                 return_code = 1
             response = hx2dome_pb2.ReturnCode(return_code=return_code)
-            print(f'Sending: dapiSync complete,'
-                  f' return code={response.return_code}\n')
+            self.logger.notice(
+                (f'Sending: dapiSync complete,'
+                 f' return code={response.return_code}\n')
+                )
             return response
 
 
-def serve(home_az, **kwargs):
+def serve(home_az, logger, **kwargs):
     """Set up the RPC server to run for a day or until interrupted.
 
     Parameters
@@ -529,13 +542,14 @@ def serve(home_az, **kwargs):
     """
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     hx2dome_pb2_grpc.add_HX2DomeServicer_to_server(
-        HX2DomeServer(home_az, **kwargs), server)
+        HX2DomeServer(home_az, logger, **kwargs), server)
     server.add_insecure_port('[::]:50051')
     server.start()
     try:
         while True:
             time.sleep(_ONE_DAY_IN_SECONDS)
     except KeyboardInterrupt:
+        self.logger.notice(f'Keyboard Interrupt, closing up shop.')
         server.stop(0)
 
 
@@ -596,10 +610,19 @@ if __name__ == '__main__':
 
     kwargs = {**vars(flags), **config}
 
+    # extract home_az from dictionary to pass it through to serve as an arg
     home_az = kwargs.pop('home_azimuth', None)
+    # extract the logfile and stderr log levels from kwargs, default to 'DEBUG'
+    server_log_file_level = kwargs.pop('server_log_file_level', 'DEBUG')
+    server_log_stderr_level = kwargs.pop('server_log_stderr_level', 'DEBUG')
     if home_az is None:
         raise ValueError(
             "Dome instance requires a home azimuth, none provided.")
 
-    logging.basicConfig()
-    serve(home_az, **kwargs)
+    logger = set_up_logger(__name__,
+                           'server_log.log',
+                           log_file_level=server_log_file_level,
+                           log_stderr_level=server_log_stderr_level,
+                           logo=False)
+    logger.notice(f'Serving up some dome pi.')
+    serve(home_az, logger, **kwargs)
