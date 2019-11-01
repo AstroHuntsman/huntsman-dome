@@ -83,13 +83,13 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             azimuth and slit elevation postions.
 
         """
-        print(f'Receiving: GetAzEl request')
+        self.logger.notice(f'Receiving: GetAzEl request')
         # our cpp TheSkyX driver uses the dapiGetAzEl rpc to check link
         if self.server_testing:
             # if we just want to test communication between driver and server
             # we can just send back a dummy response
             response = hx2dome_pb2.AzEl(return_code=0, az=10.0, el=20.0)
-            self.logger.info(f'Sending: Az={response.az}, El={response.el}')
+            self.logger.notice(f'Sending: Az={response.az}, El={response.el}')
             return response
         else:
             return_code = 0
@@ -103,9 +103,9 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             response = hx2dome_pb2.AzEl(return_code=return_code,
                                         az=dome_az,
                                         el=90.0)
-            self.logger.info((f'Sending: Az={response.az}, '
-                              f'El={response.el}, '
-                              f'ReturnCode={response.return_code}'))
+            self.logger.notice((f'Sending: Az={response.az}, '
+                                f'El={response.el}, '
+                                f'ReturnCode={response.return_code}'))
             return response
 
     def dapiGotoAzEl(self, request, context):
