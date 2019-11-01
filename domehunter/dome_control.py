@@ -399,17 +399,6 @@ class Dome(object):
         self._az_position_tolerance = tolerance
         return tolerance
 
-    @property
-    def log_levels(self):
-        """
-        Returns the current log level of the logger for this module.
-        """
-        filelvl = self._get_handler('TRFH').level_name
-        stderrlvl = self._get_handler('StdH').level_name
-        self.logger.notice((f'Log file handler level is: {filelvl}, '
-                            f'Stderr handler level is: {stderrlvl}'))
-        return
-
 ###############################################################################
 # Methods
 ###############################################################################
