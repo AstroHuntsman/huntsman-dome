@@ -1,8 +1,22 @@
 ---
 name: Huntsman Dome Controller
+######################
+# LOGGING PARAMETERS #
+######################
+# critical – for errors that lead to termination
+# error – for errors that occur, but are handled
+# warning – for exceptional circumstances that might not be errors
+# notice – for non-error messages you usually want to see
+# info – for messages you usually don’t want to see
+# debug – for debug messages
 logo: True
 log_file_level: 'DEBUG'
 log_stderr_level: 'DEBUG'
+server_log_file_level: 'DEBUG'
+server_log_stderr_level: 'NOTICE'
+###################
+# DOME PARAMETERS #
+###################
 home_azimuth: 31.5
 az_position_tolerance: 1.7
 degrees_per_tick: 1.075
@@ -13,5 +27,3 @@ direction_relay_pin_number: 19
 bounce_time: 0.001
 num_cal_rotations: 2
 led_brightness: 0x01
-server_log_file_level: 'DEBUG'
-server_log_stderr_level: 'NOTICE'

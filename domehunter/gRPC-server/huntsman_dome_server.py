@@ -332,7 +332,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             has been completed.
 
         """
-        self.logger.info("ITS DOING IT, ITS DOING IT")
+        self.logger.info("GotoAzEl successfully completed.")
         if self.server_testing:
             response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
             return response
@@ -478,7 +478,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             has been completed.
 
         """
-        self.logger.info("PHONING HOME")
+        self.logger.info("FindHome successfully completed.")
         if self.server_testing:
             response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
             return response
@@ -511,7 +511,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             success/failure of the rpc request.
 
         """
-        self.logger.info("IM SINKINGGGG")
+        self.logger.info("Sync successfully completed.")
         if self.server_testing:
             response = hx2dome_pb2.ReturnCode(return_code=0)
             return response
