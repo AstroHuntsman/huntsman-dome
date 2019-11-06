@@ -188,15 +188,15 @@ class Dome(object):
             additional (de)activation.
 
         """
-        logger = set_up_logger(__name__,
-                               'domepi.log',
-                               log_file_level='DEBUG',
-                               log_stderr_level='DEBUG',
-                               logo=logo)
-        logger.notice(f'Dome testing: {testing} lights: {debug_lights}')
+        self.logger = set_up_logger(__name__,
+                                    'domepi.log',
+                                    log_file_level='DEBUG',
+                                    log_stderr_level='DEBUG',
+                                    logo=logo)
+        self.logger.notice(f'Dome testing: {testing} lights: {debug_lights}')
 
         if testing:
-            logger.info(f'Creating Dome in testing mode')
+            self.logger.info(f'Creating Dome in testing mode')
             # Set the default pin factory to a mock factory
             Device.pin_factory = MockFactory()
             # in case a previous instance has been initialised, tell the
@@ -218,14 +218,14 @@ class Dome(object):
         self.test_mode_delay_duration = bounce_time + 0.05
         # set the timeout for wait_for_active()
         self.wait_timeout = WAIT_TIMEOUT
-        logger.info(f'wait_timeout: {self.wait_timeout}')
+        self.logger.info(f'wait_timeout: {self.wait_timeout}')
 
         self.testing = testing
         self.debug_lights = debug_lights
 
         # TODO: read in default value from yaml(?)
         if degrees_per_tick is None:
-            logger.warning(
+            self.logger.warning(
                 (f'No value supplied for degrees_per_tick, '
                  f'dome requires calibration.')
             )
@@ -250,10 +250,10 @@ class Dome(object):
         # the _change_led_state() method.
         if debug_lights:  # pragma: no cover
             # Make sure LED brightness is turned up
-            logger.info(f'Adjusting brightness for leds.')
+            self.logger.info(f'Adjusting brightness for leds.')
             sn3218.output([led_brightness] * 18)
             # if we are actually using the debug lights we can enable them now
-            logger.info(f'Setting relay LEDs to reflect initialised state.')
+            self.logger.info(f'Setting relay LEDs to match initialised state.')
             self._change_led_state(1,
                                    leds=[LED_Lights.RELAY_1_NC,
                                          LED_Lights.RELAY_2_NC])
@@ -275,7 +275,7 @@ class Dome(object):
         self._simulated_rotation_event = threading.Event()
         # bounce_time settings gives the time in seconds that the device will
         # ignore additional activation signals
-        logger.info(f'Connecting encoder on pin {encoder_pin_number}.')
+        self.logger.info(f'Connecting encoder on pin {encoder_pin_number}.')
         self._encoder = DigitalInputDevice(
             encoder_pin_number, bounce_time=bounce_time)
         # _increment_count function to run when encoder is triggered
@@ -288,22 +288,23 @@ class Dome(object):
         # (using both the normally open and normally close relay terminals)
         # so when moving the dome, first set the direction relay position
         # then activate the rotation relay
-        logger.info((f'Connecting rotation relay on '
-                     f'pin {rotation_relay_pin_number}.'))
+        self.logger.info((f'Connecting rotation relay on '
+                          f'pin {rotation_relay_pin_number}.'))
         self._rotation_relay = DigitalOutputDevice(
             rotation_relay_pin_number, initial_value=False)
-        logger.info((f'Connecting direction relay on '
-                     f'pin {direction_relay_pin_number}.'))
+        self.logger.info((f'Connecting direction relay on '
+                          f'pin {direction_relay_pin_number}.'))
         self._direction_relay = DigitalOutputDevice(
             direction_relay_pin_number, initial_value=False)
         # because we initialiase the relay in the normally closed position
-        logger.info(f'Setting start direction to CCW.')
+        self.logger.info(f'Setting start direction to CCW.')
         self.current_direction = Direction.CCW
         # need to set something for last direction now
         self.last_direction = Direction.NONE
 
         # Home Sensor
-        logger.info(f'Connecting home sensor on pin {home_sensor_pin_number}.')
+        self.logger.info(
+            (f'Connecting home sensor on pin {home_sensor_pin_number}.'))
         self._home_sensor = DigitalInputDevice(
             home_sensor_pin_number, bounce_time=bounce_time)
         # _set_not_home function is run when upon home senser deactivation
@@ -316,7 +317,6 @@ class Dome(object):
             self._set_not_home()
 
         # After initialising we may want to change the log level
-        self.logger = logger
         update_handler_level(self.logger, 'TRFH', log_file_level)
         update_handler_level(self.logger, 'StdH', log_stderr_level)
 
