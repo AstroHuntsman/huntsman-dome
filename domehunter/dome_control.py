@@ -253,7 +253,7 @@ class Dome(object):
             self.logger.info(f'Adjusting brightness for leds.')
             sn3218.output([led_brightness] * 18)
             # if we are actually using the debug lights we can enable them now
-            self.logger.info(f'Setting relay LEDs to match initialised state.')
+            self.logger.info(f'Setting relay LEDs to match initial state.')
             self._change_led_state(1,
                                    leds=[LED_Lights.RELAY_1_NC,
                                          LED_Lights.RELAY_2_NC])
@@ -377,7 +377,7 @@ class Dome(object):
     @property
     def degrees_per_tick(self):
         """Returns the calibrated azimuth (in degrees) per encoder tick."""
-        self.logger.debug(f'Degrees per tick: {self._degrees_per_tick}.')
+        self.logger.debug(f'Degrees per tick: {self._degrees_per_tick:.2f}.')
         return self._degrees_per_tick
 
     @property
@@ -390,8 +390,8 @@ class Dome(object):
         """
         if self._az_position_tolerance < 1.5 * self.degrees_per_tick:
             self.logger.warning(
-                (f'az_position_tolerance [{self._az_position_tolerance}] is '
-                 f'less than 1.5 times degrees_per_tick. Setting tolerance '
+                (f'az_position_tolerance [{self._az_position_tolerance:.2f}] '
+                 f'is less than 1.5 times degrees_per_tick. Setting tolerance '
                  f'to 1.5 * degrees_per_tick')
             )
         tolerance = max(self._az_position_tolerance,
@@ -438,11 +438,11 @@ class Dome(object):
             return
 
         target_az = Longitude(az * u.deg)
-        self.logger.notice(f'Go to target azimuth [{target_az}].')
+        self.logger.notice(f'Go to target azimuth [{target_az:.2f}].')
 
         # calculate delta_az, wrapping at 180 to ensure we take shortest route
         delta_az = (target_az - self.dome_az).wrap_at(180 * u.degree)
-        self.logger.info(f'Delta azimuth [{delta_az}].')
+        self.logger.info(f'Delta azimuth [{delta_az:.2f}].')
 
         self._move_event.set()
         if delta_az > 0:
@@ -531,7 +531,8 @@ class Dome(object):
             Current dome azimuth position in degrees.
 
         """
-        self.logger.notice(f'sync: syncing encoder counts to azimuth [{az}]')
+        self.logger.notice(
+            f'sync: syncing encoder counts to azimuth [{az:.2f}]')
         self._encoder_count = self._az_to_ticks(Longitude(az * u.deg))
         return
 
@@ -610,8 +611,8 @@ class Dome(object):
         raw_delta_az = (target_az - self.dome_az).wrap_at('180d')
         delta_az = self.current_direction * raw_delta_az
         self.logger.debug(
-            (f'Delta_az is {delta_az}, '
-             f'tolerance window is {self.az_position_tolerance}.')
+            (f'Delta_az is {delta_az:.2f}, '
+             f'tolerance window is {self.az_position_tolerance:.2f}.')
         )
         return delta_az <= self.az_position_tolerance
 
@@ -671,7 +672,7 @@ class Dome(object):
             )
             self._encoder_count = 0
             self.logger.debug(
-                (f'Encoder: {self.encoder_count} Azimuth: {self.dome_az}')
+                (f'Encoder: {self.encoder_count} Azimuth: {self.dome_az:.2f}')
             )
         # if we are calibrating, increment the rotation count
         if self._calibrating:
@@ -722,7 +723,7 @@ class Dome(object):
             self.logger.warning(f'Dome is unhomed, please home dome.')
         else:
             self.logger.debug(
-                (f'Encoder: {self.encoder_count} Azimuth: {self.dome_az}.')
+                (f'Encoder: {self.encoder_count} Azimuth: {self.dome_az:.2f}.')
             )
 
     def _az_to_ticks(self, az):
@@ -743,7 +744,7 @@ class Dome(object):
             Returns encoder tick count corresponding to dome azimuth.
 
         """
-        self.logger.debug(f'Home Az: {self.home_az} Convert Az: {az}')
+        self.logger.debug(f'Home Az: {self.home_az} Convert Az: {az:.2f}')
         az_rel_to_home = (az - self.home_az).wrap_at(360 * u.degree)
         self.logger.debug(f'Az relative to home: {az_rel_to_home}')
         encoder_ticks = az_rel_to_home.degree / self.degrees_per_tick.degree
@@ -767,9 +768,9 @@ class Dome(object):
         """
         self.logger.debug(f'Home Az: {self.home_az} Convert ticks: {ticks}')
         tick_to_deg = Longitude(ticks * self.degrees_per_tick)
-        self.logger.debug(f'Ticks to degrees: {tick_to_deg}')
+        self.logger.debug(f'Ticks to degrees: {tick_to_deg:.2f}')
         az = Longitude(self.home_az + tick_to_deg)
-        self.logger.debug(f'Az for requested ticks: {az}')
+        self.logger.debug(f'Az for requested ticks: {az:.2f}')
         return az
 
     def _rotate_dome(self, direction):

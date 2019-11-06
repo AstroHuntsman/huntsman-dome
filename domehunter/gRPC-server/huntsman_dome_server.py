@@ -89,7 +89,9 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             # if we just want to test communication between driver and server
             # we can just send back a dummy response
             response = hx2dome_pb2.AzEl(return_code=0, az=10.0, el=20.0)
-            self.logger.notice(f'Sending: Az={response.az}, El={response.el}')
+            self.logger.notice(
+                (f'Sending: Az={response.az:.2f}'
+                 f', El={response.el:.2f}'))
             return response
         else:
             return_code = 0
@@ -103,8 +105,8 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             response = hx2dome_pb2.AzEl(return_code=return_code,
                                         az=dome_az,
                                         el=90.0)
-            self.logger.notice((f'Sending: Az={response.az}, '
-                                f'El={response.el}, '
+            self.logger.notice((f'Sending: Az={response.az:.2f}, '
+                                f'El={response.el:.2f}, '
                                 f'ReturnCode={response.return_code}'))
             return response
 
@@ -128,7 +130,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
 
         """
         self.logger.notice(
-            f'Receiving: GotoAzEl Az={request.az}, El={request.el}'
+            f'Receiving: GotoAzEl Az={request.az:.2f}, El={request.el:.2f}'
             )
         if self.server_testing:
             response = hx2dome_pb2.ReturnCode(return_code=0)
