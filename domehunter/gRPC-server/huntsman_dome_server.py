@@ -549,7 +549,7 @@ def serve(home_az, logger, **kwargs):
         while True:
             time.sleep(_ONE_DAY_IN_SECONDS)
     except KeyboardInterrupt:
-        self.logger.notice(f'Keyboard Interrupt, closing up shop.')
+        self.logger.critical(f'Keyboard Interrupt, closing up shop.')
         server.stop(0)
 
 

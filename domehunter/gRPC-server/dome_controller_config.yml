@@ -11,9 +11,9 @@ name: Huntsman Dome Controller
 # debug – for debug messages
 logo: True
 log_file_level: 'DEBUG'
-log_stderr_level: 'DEBUG'
+log_stderr_level: 'NOTICE'
 server_log_file_level: 'DEBUG'
-server_log_stderr_level: 'NOTICE'
+server_log_stderr_level: 'WARNING'
 ###################
 # DOME PARAMETERS #
 ###################
