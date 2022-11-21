@@ -242,13 +242,20 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             success/failure of the rpc request.
 
         """
+        self.logger.notice('Receiving: Park Dome.')
         if self.server_testing:
             response = hx2dome_pb2.ReturnCode(return_code=0)
             self.logger.notice(f'Sending: Park Dome complete,'
+                               f' return code={response.return_code}\n')
         else:
-            # TODO: unsure what action to trigger in automationHAT for "Park"
-            response = hx2dome_pb2.ReturnCode(return_code=0)
-            return response
+            try:
+                return_code = self.dome.park()
+            except Exception:
+                # TODO: proper error handling
+                return_code = 1
+            response = hx2dome_pb2.ReturnCode(return_code=return_code)
+            self.logger.notice(f'Sending: Park Dome complete,'
+                               f' return code={response.return_code}\n')
         return response
 
     def dapiUnpark(self, request, context):
@@ -269,13 +276,20 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             success/failure of the rpc request.
 
         """
+        self.logger.notice('Receiving: Unpark Dome.')
         if self.server_testing:
             response = hx2dome_pb2.ReturnCode(return_code=0)
             self.logger.notice(f'Sending: Unpark Dome complete,'
+                               f' return code={response.return_code}\n')
         else:
-            # TODO: unsure what action to trigger in automationHAT for "UnPark"
-            response = hx2dome_pb2.ReturnCode(return_code=0)
-            return response
+            try:
+                return_code = self.dome.unpark()
+            except Exception:
+                # TODO: proper error handling
+                return_code = 1
+            response = hx2dome_pb2.ReturnCode(return_code=return_code)
+            self.logger.notice(f'Sending: Unpark Dome complete,'
+                               f' return code={response.return_code}\n')
         return response
 
     def dapiFindHome(self, request, context):
@@ -415,10 +429,9 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
         if self.server_testing:
             response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
         else:
-            # TODO: unsure what action to trigger in automationHAT for "Park"
-            # not really doing anything with park yet
+            is_complete = self.dome.is_parked
+            response = hx2dome_pb2.IsComplete(return_code=0, is_complete=is_complete)
         return response
-            return response
 
     def dapiIsUnparkComplete(self, request, context):
         """TheSkyX RPC to request the completetion status of dapiUnpark.
@@ -443,10 +456,9 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
         if self.server_testing:
             response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
         else:
-            # TODO: unsure what action to trigger in automationHAT for "Park"
-            # not really doing anything with park yet
+            is_complete = not self.dome.is_parked
+            response = hx2dome_pb2.IsComplete(return_code=0, is_complete=is_complete)
         return response
-            return response
 
     def dapiIsFindHomeComplete(self, request, context):
         """TheSkyX RPC to request the completetion status of dapiFindHome.
