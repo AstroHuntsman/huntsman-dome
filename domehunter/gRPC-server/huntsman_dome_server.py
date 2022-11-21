@@ -1,9 +1,5 @@
 import argparse
-import logbook
-from logbook import TimedRotatingFileHandler as TRFH
-from logbook import StderrHandler as StdH
 import time
-import yaml
 import os.path
 from concurrent import futures
 
@@ -63,7 +59,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
         self.dome = Dome(home_az, **kwargs)
         self.logger = logger
         self.server_testing = kwargs['server_testing']
-        self.logger.notice(f'Dome server initialised.')
+        self.logger.notice('Dome server initialised.')
 
     def dapiGetAzEl(self, request, context):
         """TheSkyX RPC to query the dome azimuth and slit position of the
@@ -83,7 +79,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             azimuth and slit elevation postions.
 
         """
-        self.logger.notice(f'Receiving: GetAzEl request')
+        self.logger.notice('Receiving: GetAzEl request')
         # our cpp TheSkyX driver uses the dapiGetAzEl rpc to check link
         if self.server_testing:
             # if we just want to test communication between driver and server
@@ -92,7 +88,6 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             self.logger.notice(
                 (f'Sending: Az={response.az:.2f}'
                  f', El={response.el:.2f}'))
-            return response
         else:
             return_code = 0
             try:
@@ -108,7 +103,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             self.logger.notice((f'Sending: Az={response.az:.2f}, '
                                 f'El={response.el:.2f}, '
                                 f'ReturnCode={response.return_code}'))
-            return response
+        return response
 
     def dapiGotoAzEl(self, request, context):
         """TheSkyX RPC to request a new dome azimuth and slit position for the
@@ -131,14 +126,13 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
         """
         self.logger.notice(
             f'Receiving: GotoAzEl Az={request.az:.2f}, El={request.el:.2f}'
-            )
+        )
         if self.server_testing:
             response = hx2dome_pb2.ReturnCode(return_code=0)
             self.logger.notice(
                 (f'Sending: GotoAzEl complete,'
                  f' return code={response.return_code}\n')
-                )
-            return response
+            )
         else:
             return_code = 0
             try:
@@ -150,8 +144,8 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             self.logger.notice(
                 (f'Sending: GotoAzEl complete,'
                  f' return code={response.return_code}\n')
-                )
-            return response
+            )
+        return response
 
     def dapiAbort(self, request, context):
         """TheSkyX RPC to abort any current dome movement.
@@ -172,7 +166,6 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
         """
         if self.server_testing:
             response = hx2dome_pb2.ReturnCode(return_code=0)
-            return response
         else:
             return_code = 0
             try:
@@ -181,7 +174,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
                 # TODO: proper error handling
                 return_code = 1
             response = hx2dome_pb2.ReturnCode(return_code=return_code)
-            return response
+        return response
 
     def dapiOpen(self, request, context):
         """TheSkyX RPC to open dome slit.
@@ -203,10 +196,9 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
         """
         if self.server_testing:
             response = hx2dome_pb2.ReturnCode(return_code=0)
-            return response
         else:
             response = hx2dome_pb2.ReturnCode(return_code=0)
-            return response
+        return response
 
     def dapiClose(self, request, context):
         """TheSkyX RPC to close dome slit.
@@ -228,10 +220,9 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
         """
         if self.server_testing:
             response = hx2dome_pb2.ReturnCode(return_code=0)
-            return response
         else:
             response = hx2dome_pb2.ReturnCode(return_code=0)
-            return response
+        return response
 
     def dapiPark(self, request, context):
         """TheSkyX RPC to park the dome.
@@ -253,11 +244,12 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
         """
         if self.server_testing:
             response = hx2dome_pb2.ReturnCode(return_code=0)
-            return response
+            self.logger.notice(f'Sending: Park Dome complete,'
         else:
             # TODO: unsure what action to trigger in automationHAT for "Park"
             response = hx2dome_pb2.ReturnCode(return_code=0)
             return response
+        return response
 
     def dapiUnpark(self, request, context):
         """TheSkyX RPC to unpark the dome.
@@ -279,11 +271,12 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
         """
         if self.server_testing:
             response = hx2dome_pb2.ReturnCode(return_code=0)
-            return response
+            self.logger.notice(f'Sending: Unpark Dome complete,'
         else:
             # TODO: unsure what action to trigger in automationHAT for "UnPark"
             response = hx2dome_pb2.ReturnCode(return_code=0)
             return response
+        return response
 
     def dapiFindHome(self, request, context):
         """TheSkyX RPC to return dome to the home position.
@@ -304,7 +297,6 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
         """
         if self.server_testing:
             response = hx2dome_pb2.ReturnCode(return_code=0)
-            return response
         else:
             return_code = 0
             try:
@@ -313,7 +305,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
                 # TODO: proper error handling
                 return_code = 1
             response = hx2dome_pb2.ReturnCode(return_code=return_code)
-            return response
+        return response
 
     def dapiIsGotoComplete(self, request, context):
         """TheSkyX RPC to request the completetion status of dapiGotoAzEl.
@@ -337,7 +329,6 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
         self.logger.info("GotoAzEl successfully completed.")
         if self.server_testing:
             response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
-            return response
         else:
             is_dome_moving = self.dome.dome_in_motion
             # if dome is not moving lets just consider the command complete
@@ -345,7 +336,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             is_complete = not is_dome_moving
             response = hx2dome_pb2.IsComplete(
                 return_code=0, is_complete=is_complete)
-            return response
+        return response
 
     def dapiIsOpenComplete(self, request, context):
         """TheSkyX RPC to request the completetion status of dapiOpen.
@@ -369,11 +360,10 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
         """
         if self.server_testing:
             response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
-            return response
         else:
             # Shutter control is not implemented yet so no rpi code yet
             response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
-            return response
+        return response
 
     def dapiIsCloseComplete(self, request, context):
         """TheSkyX RPC to request the completetion status of dapiClose.
@@ -397,11 +387,10 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
         """
         if self.server_testing:
             response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
-            return response
         else:
             # Shutter control is not implemented yet so no rpi code yet
             response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
-            return response
+        return response
 
     def dapiIsParkComplete(self, request, context):
         """TheSkyX RPC to request the completetion status of dapiPark.
@@ -425,11 +414,10 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
         """
         if self.server_testing:
             response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
-            return response
         else:
             # TODO: unsure what action to trigger in automationHAT for "Park"
             # not really doing anything with park yet
-            response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
+        return response
             return response
 
     def dapiIsUnparkComplete(self, request, context):
@@ -454,11 +442,10 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
         """
         if self.server_testing:
             response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
-            return response
         else:
             # TODO: unsure what action to trigger in automationHAT for "Park"
             # not really doing anything with park yet
-            response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
+        return response
             return response
 
     def dapiIsFindHomeComplete(self, request, context):
@@ -483,7 +470,6 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
         self.logger.info("FindHome successfully completed.")
         if self.server_testing:
             response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
-            return response
         else:
             is_dome_moving = self.dome.dome_in_motion
             # if dome is not moving and dome.at_home returns True
@@ -492,7 +478,7 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             is_complete = not is_dome_moving and not self.dome._unhomed
             response = hx2dome_pb2.IsComplete(
                 return_code=0, is_complete=is_complete)
-            return response
+        return response
 
     def dapiSync(self, request, context):
         """TheSkyX rpc to request a calibration of the dome followed by a new
@@ -516,7 +502,6 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
         self.logger.info("Sync successfully completed.")
         if self.server_testing:
             response = hx2dome_pb2.ReturnCode(return_code=0)
-            return response
         else:
             return_code = 0
             try:
@@ -529,8 +514,8 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
             self.logger.notice(
                 (f'Sending: dapiSync complete,'
                  f' return code={response.return_code}\n')
-                )
-            return response
+            )
+        return response
 
 
 def serve(home_az, logger, **kwargs):
@@ -551,7 +536,7 @@ def serve(home_az, logger, **kwargs):
         while True:
             time.sleep(_ONE_DAY_IN_SECONDS)
     except KeyboardInterrupt:
-        self.logger.critical(f'Keyboard Interrupt, closing up shop.')
+        logger.critical('Keyboard Interrupt, closing up shop.')
         server.stop(0)
 
 
@@ -559,7 +544,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description=("Remote Procedure Call server for issuing observatory "
                      "dome rotation commands.")
-        )
+    )
 
     group = parser.add_mutually_exclusive_group()
 
@@ -626,5 +611,5 @@ if __name__ == '__main__':
                            log_file_level=server_log_file_level,
                            log_stderr_level=server_log_stderr_level,
                            logo=False)
-    logger.notice(f'Serving up some dome pi.')
+    logger.notice('Serving up some dome pi.')
     serve(home_az, logger, **kwargs)
