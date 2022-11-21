@@ -1,26 +1,20 @@
 """Run dome control on a raspberry pi GPIO."""
 
 
-import math
 import os
-import sys
 import threading
 import time
 import warnings
 from contextlib import suppress
 
 import astropy.units as u
-import logbook
 import yaml
 from astropy.coordinates import Angle, Longitude
 from gpiozero import Device, DigitalInputDevice, DigitalOutputDevice
 from gpiozero.pins.mock import MockFactory
 
-from domehunter.enumerations import Direction, LED_Lights, ReturnCode
-from domehunter.logging import (get_handler, get_log_level, set_up_logger,
-                                update_handler_level)
-
-from ._astropy_init import *
+from domehunter.enumerations import Direction, LED_Lights
+from domehunter.logging import set_up_logger, update_handler_level
 
 # set up the logger with no logo to catch the import messages
 logger = set_up_logger(__name__,
@@ -196,7 +190,7 @@ class Dome(object):
         self.logger.notice(f'Dome testing: {testing} lights: {debug_lights}')
 
         if testing:
-            self.logger.info(f'Creating Dome in testing mode')
+            self.logger.info('Creating Dome in testing mode')
             # Set the default pin factory to a mock factory
             Device.pin_factory = MockFactory()
             # in case a previous instance has been initialised, tell the
@@ -226,8 +220,8 @@ class Dome(object):
         # TODO: read in default value from yaml(?)
         if degrees_per_tick is None:
             self.logger.warning(
-                (f'No value supplied for degrees_per_tick, '
-                 f'dome requires calibration.')
+                ('No value supplied for degrees_per_tick, '
+                 'dome requires calibration.')
             )
             self._degrees_per_tick = degrees_per_tick
         else:
@@ -250,10 +244,10 @@ class Dome(object):
         # the _change_led_state() method.
         if debug_lights:  # pragma: no cover
             # Make sure LED brightness is turned up
-            self.logger.info(f'Adjusting brightness for leds.')
+            self.logger.info('Adjusting brightness for leds.')
             sn3218.output([led_brightness] * 18)
             # if we are actually using the debug lights we can enable them now
-            self.logger.info(f'Setting relay LEDs to match initial state.')
+            self.logger.info('Setting relay LEDs to match initial state.')
             self._change_led_state(1,
                                    leds=[LED_Lights.RELAY_1_NC,
                                          LED_Lights.RELAY_2_NC])
@@ -297,7 +291,7 @@ class Dome(object):
         self._direction_relay = DigitalOutputDevice(
             direction_relay_pin_number, initial_value=False)
         # because we initialiase the relay in the normally closed position
-        self.logger.info(f'Setting start direction to CCW.')
+        self.logger.info('Setting start direction to CCW.')
         self.current_direction = Direction.CCW
         # need to set something for last direction now
         self.last_direction = Direction.NONE
@@ -365,7 +359,7 @@ class Dome(object):
     @property
     def movement_thread_active(self):
         """Return True if a movement thread is running"""
-        self.logger.debug(f'A dome movement thread is runnng.')
+        self.logger.debug('A dome movement thread is runnng.')
         return self._move_event.is_set()
 
     @property
@@ -413,7 +407,7 @@ class Dome(object):
         # TODO: consider another way to do this in case the relay fails/sticks
         # one way might be cut power to the automationHAT so the motor relays
         # will receive no voltage even if the relay is in the open position?
-        logger.warning(f'Aborting dome movement.')
+        self.logger.warning('Aborting dome movement.')
         # set the abort event thread flag
         self._abort_event.set()
         # wait for threads to abort
@@ -469,12 +463,12 @@ class Dome(object):
             self.logger.warning('Movement command in progress.')
             return
         # rotate the dome until we hit home, to give reference point
-        self.logger.notice(f'Finding Home.')
+        self.logger.notice('Finding Home.')
         self.find_home()
         while self.movement_thread_active:
             # wait for find_home() to finish
             time.sleep(0.1)
-        self.logger.notice(f'Found Home.')
+        self.logger.notice('Found Home.')
         # pause to let things settle/get a noticeable blink of debug_lights
         time.sleep(0.5)
 
@@ -485,8 +479,9 @@ class Dome(object):
         # now set dome to rotate num_cal_rotations times so we can determine
         # the number of ticks per revolution
         self.logger.notice(
-            (f'Starting calibration rotations.')
+            ('')
         )
+        ('Starting calibration rotations.')
         self._move_event.set()
         self._rotate_dome(Direction.CW)
         self._calibrating = True
@@ -507,7 +502,7 @@ class Dome(object):
             self.logger.warning('Movement command in progress.')
             return
         # iniate the movement and set the _move_event flag
-        self.logger.notice(f'Finding Home.')
+        self.logger.notice('Finding Home.')
         self._unhomed = True
         self._move_event.set()
         self._rotate_dome(Direction.CW)
@@ -573,7 +568,7 @@ class Dome(object):
                 calibration_success = True
                 break
             elif self._abort_event.is_set():
-                self.logger.info(f'Monitor-thread triggered by abort event.')
+                self.logger.info('Monitor-thread triggered by abort event.')
                 break
             elif wait_time > self.wait_timeout:
                 self.logger.info(
@@ -643,14 +638,14 @@ class Dome(object):
             if not self._simulated_rotation_event.is_set():
                 time.sleep(1)
                 self.logger.debug(
-                    (f'Completion of simulated rotation detected, '
-                     f'simulating next rotation.')
+                    ('Completion of simulated rotation detected, '
+                     'simulating next rotation.')
                 )
                 sim_rotation = threading.Thread(target=self._simulate_rotation)
                 if self._calibration_complete():
                     self.logger.debug(
-                        (f'Calibration rotations completed, '
-                         f'ending calibration.')
+                        ('Calibration rotations completed, '
+                         'ending calibration.')
                     )
                     break
                 sim_rotation.start()
@@ -668,7 +663,7 @@ class Dome(object):
         # add 1 to self.current_direction, to get CCW to evaluate to False
         if not self._calibrating and bool(self.current_direction + 1):
             self.logger.debug(
-                (f'Passing home clockwise, zeroing encoder counts.')
+                ('Passing home clockwise, zeroing encoder counts.')
             )
             self._encoder_count = 0
             self.logger.debug(
@@ -677,8 +672,8 @@ class Dome(object):
         # if we are calibrating, increment the rotation count
         if self._calibrating:
             self.logger.debug(
-                (f'Home triggered during calibration, '
-                 f'incrementing calibration rotation count.')
+                ('Home triggered during calibration, '
+                 'incrementing calibration rotation count.')
             )
             self._rotation_count += 1
 
@@ -686,7 +681,7 @@ class Dome(object):
         """
         Update home status to not at home and debug LEDs (if enabled).
         """
-        self.logger.notice(f'Home sensor deactivated.')
+        self.logger.notice('Home sensor deactivated.')
         self._change_led_state(0, leds=[LED_Lights.INPUT_2])
 
     def _increment_count(self):
@@ -700,7 +695,7 @@ class Dome(object):
         If the current dome direction cannot be determined, the last recorded
         direction is adopted.
         """
-        self.logger.info(f"Encoder activated _increment_count.")
+        self.logger.info("Encoder activated _increment_count.")
         self._change_led_state(1, leds=[LED_Lights.INPUT_1])
 
         self.logger.debug(
@@ -720,7 +715,7 @@ class Dome(object):
         # Set new dome azimuth
         # if dome is unhomed, _dome_az should remain as None
         if self._unhomed:
-            self.logger.warning(f'Dome is unhomed, please home dome.')
+            self.logger.warning('Dome is unhomed, please home dome.')
         else:
             self.logger.debug(
                 (f'Encoder: {self.encoder_count} Azimuth: {self.dome_az:.2f}.')
@@ -794,17 +789,17 @@ class Dome(object):
         self.current_direction = direction
         # set the direction relay switch to CW position
         if self.current_direction == Direction.CW:
-            self.logger.debug(f'Turning direction relay on (CW)')
+            self.logger.debug('Turning direction relay on (CW)')
             self._direction_relay.on()
             self._change_led_state(1, leds=[LED_Lights.RELAY_2_NO])
             self._change_led_state(0, leds=[LED_Lights.RELAY_2_NC])
         elif self.current_direction == Direction.CCW:
-            self.logger.debug(f'Turning direction relay off (CCW).')
+            self.logger.debug('Turning direction relay off (CCW).')
             self._direction_relay.off()
             self._change_led_state(0, leds=[LED_Lights.RELAY_2_NO])
             self._change_led_state(1, leds=[LED_Lights.RELAY_2_NC])
         # turn on rotation
-        self.logger.debug(f'Turning on rotation relay.')
+        self.logger.debug('Turning on rotation relay.')
         self._rotation_relay.on()
         # update the rotation relay debug LEDs
         self._change_led_state(1, leds=[LED_Lights.RELAY_1_NO])
@@ -814,7 +809,7 @@ class Dome(object):
         """
         Stop dome movement by switching the dome rotation relay off.
         """
-        self.logger.debug(f'Turning off rotation relay.')
+        self.logger.debug('Turning off rotation relay.')
         self._rotation_relay.off()
         self._move_event.clear()
         # update the debug LEDs
@@ -823,7 +818,7 @@ class Dome(object):
         # update last_direction with current_direction at time of method call
         self.logger.debug(f'Last direction set to {self.current_direction}.')
         self.last_direction = self.current_direction
-        self.logger.debug(f'Current direction set to None.')
+        self.logger.debug('Current direction set to None.')
         self.current_direction = Direction.NONE
 
     def _simulate_ticks(self, num_ticks):
@@ -867,14 +862,14 @@ class Dome(object):
         # pass a list of strings of the leds to turn on
         if not(self.debug_lights):
             return
-        if leds == []:
+        if leds is []:
             # if leds is an empty list do nothing
             return None
 
         for led in leds:
-            if desired_state is 1:
+            if desired_state == 1:
                 self.led_status |= led
-            elif desired_state is 0:
+            elif desired_state == 0:
                 self.led_status &= ~led
         # pass the new binary int to LED controller
         sn3218.enable_leds(self.led_status.value)
