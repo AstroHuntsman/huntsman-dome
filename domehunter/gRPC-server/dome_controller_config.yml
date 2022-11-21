@@ -19,6 +19,7 @@ server_log_stderr_level: 'WARNING'
 ###################
 home_azimuth: 31.5
 az_position_tolerance: 1.7
+park_azimuth: 300
 degrees_per_tick: 1.075
 encoder_pin_number: 26
 home_sensor_pin_number: 20
