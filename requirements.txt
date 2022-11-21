@@ -10,3 +10,4 @@ RPi.GPIO
 RPIO
 pigpio
 pyyaml>5.0
+logbook

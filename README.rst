@@ -36,9 +36,9 @@ correctly, this is how you would set up the dome control system.
 * Navigate to the directory containing the gRPC python server file
 * ``$ cd huntsman-dome/domehunter/gRPC-server/``
 * Use the -h flag to get information on the available command line flags
-* ``$ python hx2dome.proto_server.py -h``
+* ``$ python huntsman_dome_server.py -h``
 * To run server in simulated hardware mode run with the -s flag
-* ``$ python hx2dome.proto_server.py -s``
+* ``$ python huntsman_dome_server.py -s``
 * Now the server is running, you may start TheSkyX
 * Within TheSkyX go to the Dome Setup menu and select the Huntsman Telescope
 * Open TheSkyX log window and place by the python server window to watch for activity/status messages
@@ -142,7 +142,7 @@ Replace `LINUX` with `MAC` if installing on a MacOS system and vice versa.
 
 Once the driver is installed in TheSkyX, it can be selected from
 the dome selection menu. Before issuing any commands, start the
-``domehunter/gRPC-server/hx2dome.proto_server.py`` in a new terminal.
+``domehunter/gRPC-server/huntsman_dome_server.py`` in a new terminal.
 When you issue a command through TheSkyX, the C++ driver will send
 a remote procedure call through to the gRPC python server.
 
@@ -152,7 +152,7 @@ driver. To get help with running the server (in normal or testing mode etc),
 run the following command in terminal::
 
   $ cd domehunter/gRPC-server/
-  $ python hx2dome.proto_server.py -h
+  $ python huntsman_dome_server.py -h
 
 gRPC automatically generated files
 ----------------------------------
@@ -176,7 +176,7 @@ tools. The human written files are,
 * ``x2dome.cpp`` - the library code that serves the RPC from TSX to python server
 * ``x2dome.h`` - header for x2dome.cpp
 * ``hx2dome.proto`` - language agnostic RPC definitions used by everthing
-* ``hx2dome.proto_server.py`` - python server that receives RPC from TSX
+* ``huntsman_dome_server.py`` - python server that receives RPC from TSX
 
 The remaining cpp and python files are automatically produced
 by gRPC and shouldn't need to be looked at. If for some reason
