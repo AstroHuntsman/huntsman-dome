@@ -94,6 +94,7 @@ class Dome(object):
 
     def __init__(self,
                  home_azimuth,
+                 park_azimuth=300,
                  testing=True,
                  debug_lights=False,
                  logo=False,
@@ -228,6 +229,7 @@ class Dome(object):
             self._degrees_per_tick = Angle(degrees_per_tick * u.deg)
         self._az_position_tolerance = Angle(az_position_tolerance * u.deg)
         self.home_az = Longitude(home_azimuth * u.deg)
+        self.park_az = Longitude(park_azimuth * u.deg)
         # need something to let us know when dome is calibrating so home sensor
         # activation doesnt zero encoder counts
         self._calibrating = False
@@ -264,6 +266,8 @@ class Dome(object):
         # creating a threading move event, to indicate when a move thread
         # is active
         self._move_event = threading.Event()
+        # create a park event used to stop movement commands when dome is parked
+        self._park_event = threading.Event()
         # creating a threading simulated_rotation event, to indicate when a
         # simulated rotation thread is running for testing mode calibration
         self._simulated_rotation_event = threading.Event()
@@ -350,6 +354,16 @@ class Dome(object):
         return home_active
 
     @property
+    def is_parked(self):
+        """Return True if dome is parked."""
+        if self._park_event.is_set():
+            self.logger.info('Dome is currently parked.')
+            return True
+        else:
+            self.logger.info('Dome is currently unparked.')
+            return False
+
+    @property
     def dome_in_motion(self):
         """Send True if dome is in motion."""
         dome_motion = self._rotation_relay.is_active
@@ -415,6 +429,47 @@ class Dome(object):
             time.sleep(0.1)
         self._abort_event.clear()
 
+    def park(self):
+        """
+        Send dome to park position defined in the dome config.
+        """
+        if self.is_parked:
+            self.logger.info('Dome is already parked.')
+            return 0
+
+        self.logger.info('Parking Dome.')
+        # note goto_az requires a int/float not a Longitude
+        self.goto_az(self.park_az.value)
+        while self.movement_thread_active:
+            # wait for find_home() to finish
+            self.logger.info(
+                'Dome slewing to park position ({self.park_az}), current azimuth: {self.dome_az}')
+            time.sleep(1.0)
+        # note _goto_az_complete requires a Longitude
+        if self._goto_az_complete(self.park_az):
+            self._park_event.set()
+            time.sleep(0.2)
+
+        self.logger.info(f'Dome parking success: {self.is_parked}')
+        # TheSkyX takes 0 as success and 1 as error
+        return int(not self.is_parked)
+
+    def unpark(self):
+        """
+        Clear the park event to allow movement from the park position.
+        """
+        self.logger.info('Unparking dome.')
+        if not self.is_parked:
+            self.logger.info('Dome is already unparked.')
+            return 0
+
+        self._park_event.clear()
+        time.sleep(0.1)
+
+        self.logger.info(f'Dome unpark success: {not self.is_parked}')
+        # TheSkyX takes 0 as success and 1 as error
+        return int(self.is_parked)
+
     def goto_az(self, az):
         """
         Send Dome to a requested Azimuth position.
@@ -429,6 +484,9 @@ class Dome(object):
             return
         if self.movement_thread_active:
             self.logger.warning('Movement command in progress.')
+            return
+        if self.is_parked:
+            self.logger.warning('Dome is currently parked, please unpark to move the dome.')
             return
 
         target_az = Longitude(az * u.deg)
@@ -461,6 +519,9 @@ class Dome(object):
         """
         if self.movement_thread_active:
             self.logger.warning('Movement command in progress.')
+            return
+        if self.is_parked:
+            self.logger.warning('Dome is currently parked, please unpark to calibrate the dome.')
             return
         # rotate the dome until we hit home, to give reference point
         self.logger.notice('Finding Home.')
@@ -500,6 +561,9 @@ class Dome(object):
         """
         if self.movement_thread_active:
             self.logger.warning('Movement command in progress.')
+            return
+        if self.is_parked:
+            self.logger.warning('Dome is currently parked, please unpark to home the dome.')
             return
         # iniate the movement and set the _move_event flag
         self.logger.notice('Finding Home.')
@@ -778,6 +842,9 @@ class Dome(object):
             Command status return code (tbd).
 
         """
+        if self.is_parked:
+            self.logger.warning('Dome is currently parked, please unpark to _rotate the dome.')
+            return
         self.logger.info(f'Rotate dome direction: {direction}')
         # if testing, deactivate the home_sensor_pin to simulate leaving home
         if self.testing and self.at_home:
@@ -840,6 +907,10 @@ class Dome(object):
         """
         Method to simulate a complete dome rotation while in testing mode.
         """
+        if self.is_parked:
+            self.logger.warning(
+                'Dome is currently parked, please unpark to simulate rotating the dome.')
+            return
         self._simulated_rotation_event.set()
         self._home_sensor_pin.drive_low()
         self._simulate_ticks(ticks_per_rotation)
