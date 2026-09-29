@@ -385,7 +385,7 @@ class Dome(object):
     @property
     def degrees_per_tick(self):
         """Returns the calibrated azimuth (in degrees) per encoder tick."""
-        self.logger.debug(f'Degrees per tick: {self._degrees_per_tick:.2f}.')
+        self.logger.debug(f'Degrees per tick: {self._degrees_per_tick}.')
         return self._degrees_per_tick
 
     @property
@@ -555,19 +555,42 @@ class Dome(object):
         cal_monitor.start()
 
     def find_home(self):
-        """
-        Move Dome to home position.
+        """Move dome to home position.
 
+        If the dome is already sitting on the home sensor, moves off it first
+        (CCW for a few seconds) before rotating CW to re-detect home. This
+        avoids the monitoring thread completing immediately without any motion.
         """
         if self.movement_thread_active:
             self.logger.warning('Movement command in progress.')
             return
         if self.is_parked:
-            self.logger.warning('Dome is currently parked, please unpark to home the dome.')
+            self.logger.warning('Dome is parked, unpark first.')
             return
-        # iniate the movement and set the _move_event flag
-        self.logger.notice('Finding Home.')
+
+        self.logger.notice('Finding home.')
         self._unhomed = True
+
+        # If already on the home sensor, nudge off it first
+        if self._home_sensor.is_active:
+            self.logger.info('Already on home sensor, moving off...')
+            self._move_event.set()
+            self._rotate_dome(Direction.CCW)
+            # Wait until we clear the sensor or timeout after 15s
+            nudge_start = time.monotonic()
+            while self._home_sensor.is_active:
+                if time.monotonic() - nudge_start > 15.0:
+                    self.logger.warning('Timed out moving off home sensor.')
+                    self._stop_moving()
+                    return
+                time.sleep(0.1)
+            # Continue a bit further past the sensor edge
+            time.sleep(2.0)
+            self._stop_moving()
+            self.logger.info('Cleared home sensor.')
+            time.sleep(0.5)
+
+        # Now rotate CW until the home sensor is triggered
         self._move_event.set()
         self._rotate_dome(Direction.CW)
         time.sleep(0.1)
@@ -575,7 +598,6 @@ class Dome(object):
                                   args=(self._find_home_complete,))
         homing.start()
         if self.testing:
-            # in testing mode need to "fake" the activation of the home pin
             home_pin_high = threading.Timer(0.5,
                                             self._home_sensor_pin.drive_high)
             home_pin_high.start()

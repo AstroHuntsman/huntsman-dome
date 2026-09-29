@@ -35,6 +35,7 @@ message ReturnCode {
   // X2 Dome interface specifies plain `int`, but protocal buffers don't have a
   // corresponding type and on most platforms `int` is an alias for `int32`.
   int32 return_code = 1;
+  string error_message = 2;
 }
 
 message AzEl {

@@ -337,14 +337,14 @@ int X2Dome::dapiAbort(void)
 
 int X2Dome::dapiOpen(void)
 {
-	// leaving this for now but could set this up later to operate shutter
+	// Shutter control handled by SensorKit huntsman_dome_service
 	return SB_OK;
 }
 
 
 int X2Dome::dapiClose(void)
 {
-	// leaving this for now but could set this up later to operate shutter
+	// Shutter control handled by SensorKit huntsman_dome_service
 	return SB_OK;
 }
 
@@ -515,18 +515,18 @@ int X2Dome::dapiIsGotoComplete(bool* pbComplete)
 }
 
 
-// not implementing shutter control at the moment
+// Shutter control handled by SensorKit huntsman_dome_service
 int X2Dome::dapiIsOpenComplete(bool* pbComplete)
 {
-	(void)pbComplete;
+	*pbComplete = true;
 	return SB_OK;
 }
 
 
-// not implementing shutter control at the moment
+// Shutter control handled by SensorKit huntsman_dome_service
 int	X2Dome::dapiIsCloseComplete(bool* pbComplete)
 {
-	(void)pbComplete;
+	*pbComplete = true;
 	return SB_OK;
 }
 
@@ -704,3 +704,5 @@ int X2Dome::dapiSync(double dAz, double dEl)
 		return ERR_CMDFAILED;
 	}
 }
+
+

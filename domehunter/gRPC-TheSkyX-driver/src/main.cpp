@@ -48,7 +48,7 @@ extern "C" PlugInExport int sbPlugInFactory2(	const char* pszSelection,
 									pLoggerIn,
 									pIOMutexIn,
 									pTickCountIn,
-									grpc::CreateChannel("localhost:50051", grpc::InsecureChannelCredentials()) );
+									grpc::CreateChannel("192.168.80.97:50051", grpc::InsecureChannelCredentials()) );
 
 	*ppObjectOut = gpMyImpl;
 

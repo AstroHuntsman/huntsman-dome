@@ -17,9 +17,9 @@ RM = rm -f
 STRIP = strip
 TARGET_LIB = libHuntsmanDome.dylib
 
-SRCS = src/main.cpp src/x2dome.cpp src/hx2dome.grpc.pb.cpp src/hx2dome.pb.cpp
+SRCS = src/main.cpp src/x2dome.cpp src/hx2dome.grpc.pb.cc src/hx2dome.pb.cc
 
-OBJS = $(SRCS:.cpp=.o)
+OBJS = $(patsubst %.cc,%.o,$(SRCS:.cpp=.o))
 
 .PHONY: all
 all: ${TARGET_LIB}
@@ -28,8 +28,6 @@ $(TARGET_LIB): $(OBJS)
 	$(CXX) $^ ${LDFLAGS} -o $@
 	$(STRIP) $@ >/dev/null 2>&1  || true
 
-$(SRCS:.cpp=.d):%.d:%.cpp
-	$(CXX) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -MM $< >$@
 
 .PHONY: clean
 clean:

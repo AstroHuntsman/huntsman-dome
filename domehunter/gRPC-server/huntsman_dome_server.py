@@ -136,6 +136,8 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
         else:
             return_code = 0
             try:
+                if self.dome.is_parked:
+                    self.dome.unpark()
                 self.dome.goto_az(request.az)
             except Exception:
                 # TODO: proper error handling

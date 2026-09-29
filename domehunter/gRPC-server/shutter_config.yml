@@ -1,0 +1,11 @@
+---
+# Musca dome shutter controller configuration
+
+serial_port: '/dev/rfcomm0'
+baud_rate: 9600
+heartbeat_interval: 60.0
+shutter_timeout: 100.0
+min_battery_voltage: 12.0
+reconnect_delay: 5.0
+max_reconnect_delay: 60.0
+read_timeout: 3.0
