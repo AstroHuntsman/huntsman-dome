@@ -62,3 +62,7 @@ distribute-*.tar.gz
 \.pytest_cache/
 
 \.coverage\.subprocess
+
+# Local environment
+.venv/
+.claude/

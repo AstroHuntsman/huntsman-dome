@@ -10,25 +10,23 @@
 #include "hx2dome.pb.h"
 
 #include <functional>
-#include <grpcpp/impl/codegen/async_generic_service.h>
-#include <grpcpp/impl/codegen/async_stream.h>
-#include <grpcpp/impl/codegen/async_unary_call.h>
-#include <grpcpp/impl/codegen/client_callback.h>
-#include <grpcpp/impl/codegen/method_handler_impl.h>
+#include <grpcpp/generic/async_generic_service.h>
+#include <grpcpp/support/async_stream.h>
+#include <grpcpp/support/async_unary_call.h>
+#include <grpcpp/support/client_callback.h>
+#include <grpcpp/client_context.h>
+#include <grpcpp/completion_queue.h>
+#include <grpcpp/support/message_allocator.h>
+#include <grpcpp/support/method_handler.h>
 #include <grpcpp/impl/codegen/proto_utils.h>
-#include <grpcpp/impl/codegen/rpc_method.h>
-#include <grpcpp/impl/codegen/server_callback.h>
-#include <grpcpp/impl/codegen/service_type.h>
+#include <grpcpp/impl/rpc_method.h>
+#include <grpcpp/support/server_callback.h>
+#include <grpcpp/impl/codegen/server_callback_handlers.h>
+#include <grpcpp/server_context.h>
+#include <grpcpp/impl/service_type.h>
 #include <grpcpp/impl/codegen/status.h>
-#include <grpcpp/impl/codegen/stub_options.h>
-#include <grpcpp/impl/codegen/sync_stream.h>
-
-namespace grpc {
-class CompletionQueue;
-class Channel;
-class ServerCompletionQueue;
-class ServerContext;
-}  // namespace grpc
+#include <grpcpp/support/stub_options.h>
+#include <grpcpp/support/sync_stream.h>
 
 namespace hx2dome {
 
@@ -182,54 +180,56 @@ class HX2Dome final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hx2dome::BasicString>> PrepareAsyncdeviceInfoModel(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hx2dome::BasicString>>(PrepareAsyncdeviceInfoModelRaw(context, request, cq));
     }
-    class experimental_async_interface {
+    class async_interface {
      public:
-      virtual ~experimental_async_interface() {}
+      virtual ~async_interface() {}
       // Dome API
       virtual void dapiGetAzEl(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::AzEl* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void dapiGetAzEl(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::AzEl* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void dapiGetAzEl(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::AzEl* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       virtual void dapiGotoAzEl(::grpc::ClientContext* context, const ::hx2dome::AzEl* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void dapiGotoAzEl(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void dapiGotoAzEl(::grpc::ClientContext* context, const ::hx2dome::AzEl* request, ::hx2dome::ReturnCode* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       virtual void dapiAbort(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void dapiAbort(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void dapiAbort(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       virtual void dapiOpen(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void dapiOpen(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void dapiOpen(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       virtual void dapiClose(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void dapiClose(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void dapiClose(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       virtual void dapiPark(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void dapiPark(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void dapiPark(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       virtual void dapiUnpark(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void dapiUnpark(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void dapiUnpark(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       virtual void dapiFindHome(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void dapiFindHome(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void dapiFindHome(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       virtual void dapiIsGotoComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void dapiIsGotoComplete(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void dapiIsGotoComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       virtual void dapiIsOpenComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void dapiIsOpenComplete(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void dapiIsOpenComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       virtual void dapiIsCloseComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void dapiIsCloseComplete(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void dapiIsCloseComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       virtual void dapiIsParkComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void dapiIsParkComplete(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void dapiIsParkComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       virtual void dapiIsUnparkComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void dapiIsUnparkComplete(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void dapiIsUnparkComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       virtual void dapiIsFindHomeComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void dapiIsFindHomeComplete(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void dapiIsFindHomeComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       virtual void dapiSync(::grpc::ClientContext* context, const ::hx2dome::AzEl* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void dapiSync(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void dapiSync(::grpc::ClientContext* context, const ::hx2dome::AzEl* request, ::hx2dome::ReturnCode* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       // Hardware Info Interface
       virtual void deviceInfoNameShort(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void deviceInfoNameShort(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::BasicString* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void deviceInfoNameShort(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       virtual void deviceInfoNameLong(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void deviceInfoNameLong(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::BasicString* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void deviceInfoNameLong(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       virtual void deviceInfoDetailedDescription(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void deviceInfoDetailedDescription(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::BasicString* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void deviceInfoDetailedDescription(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       virtual void deviceInfoFirmwareVersion(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void deviceInfoFirmwareVersion(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::BasicString* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void deviceInfoFirmwareVersion(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       virtual void deviceInfoModel(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void deviceInfoModel(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::BasicString* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void deviceInfoModel(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response, ::grpc::ClientUnaryReactor* reactor) = 0;
     };
-    virtual class experimental_async_interface* experimental_async() { return nullptr; }
-  private:
+    typedef class async_interface experimental_async_interface;
+    virtual class async_interface* async() { return nullptr; }
+    class async_interface* experimental_async() { return async(); }
+   private:
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::hx2dome::AzEl>* AsyncdapiGetAzElRaw(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::hx2dome::AzEl>* PrepareAsyncdapiGetAzElRaw(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::hx2dome::ReturnCode>* AsyncdapiGotoAzElRaw(::grpc::ClientContext* context, const ::hx2dome::AzEl& request, ::grpc::CompletionQueue* cq) = 0;
@@ -273,7 +273,7 @@ class HX2Dome final {
   };
   class Stub final : public StubInterface {
    public:
-    Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel);
+    Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
     ::grpc::Status dapiGetAzEl(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::hx2dome::AzEl* response) override;
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hx2dome::AzEl>> AsyncdapiGetAzEl(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hx2dome::AzEl>>(AsyncdapiGetAzElRaw(context, request, cq));
@@ -414,60 +414,60 @@ class HX2Dome final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hx2dome::BasicString>> PrepareAsyncdeviceInfoModel(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hx2dome::BasicString>>(PrepareAsyncdeviceInfoModelRaw(context, request, cq));
     }
-    class experimental_async final :
-      public StubInterface::experimental_async_interface {
+    class async final :
+      public StubInterface::async_interface {
      public:
       void dapiGetAzEl(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::AzEl* response, std::function<void(::grpc::Status)>) override;
-      void dapiGetAzEl(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::AzEl* response, std::function<void(::grpc::Status)>) override;
+      void dapiGetAzEl(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::AzEl* response, ::grpc::ClientUnaryReactor* reactor) override;
       void dapiGotoAzEl(::grpc::ClientContext* context, const ::hx2dome::AzEl* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) override;
-      void dapiGotoAzEl(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) override;
+      void dapiGotoAzEl(::grpc::ClientContext* context, const ::hx2dome::AzEl* request, ::hx2dome::ReturnCode* response, ::grpc::ClientUnaryReactor* reactor) override;
       void dapiAbort(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) override;
-      void dapiAbort(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) override;
+      void dapiAbort(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, ::grpc::ClientUnaryReactor* reactor) override;
       void dapiOpen(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) override;
-      void dapiOpen(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) override;
+      void dapiOpen(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, ::grpc::ClientUnaryReactor* reactor) override;
       void dapiClose(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) override;
-      void dapiClose(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) override;
+      void dapiClose(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, ::grpc::ClientUnaryReactor* reactor) override;
       void dapiPark(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) override;
-      void dapiPark(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) override;
+      void dapiPark(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, ::grpc::ClientUnaryReactor* reactor) override;
       void dapiUnpark(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) override;
-      void dapiUnpark(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) override;
+      void dapiUnpark(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, ::grpc::ClientUnaryReactor* reactor) override;
       void dapiFindHome(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) override;
-      void dapiFindHome(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) override;
+      void dapiFindHome(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, ::grpc::ClientUnaryReactor* reactor) override;
       void dapiIsGotoComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)>) override;
-      void dapiIsGotoComplete(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)>) override;
+      void dapiIsGotoComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, ::grpc::ClientUnaryReactor* reactor) override;
       void dapiIsOpenComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)>) override;
-      void dapiIsOpenComplete(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)>) override;
+      void dapiIsOpenComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, ::grpc::ClientUnaryReactor* reactor) override;
       void dapiIsCloseComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)>) override;
-      void dapiIsCloseComplete(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)>) override;
+      void dapiIsCloseComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, ::grpc::ClientUnaryReactor* reactor) override;
       void dapiIsParkComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)>) override;
-      void dapiIsParkComplete(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)>) override;
+      void dapiIsParkComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, ::grpc::ClientUnaryReactor* reactor) override;
       void dapiIsUnparkComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)>) override;
-      void dapiIsUnparkComplete(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)>) override;
+      void dapiIsUnparkComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, ::grpc::ClientUnaryReactor* reactor) override;
       void dapiIsFindHomeComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)>) override;
-      void dapiIsFindHomeComplete(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::IsComplete* response, std::function<void(::grpc::Status)>) override;
+      void dapiIsFindHomeComplete(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, ::grpc::ClientUnaryReactor* reactor) override;
       void dapiSync(::grpc::ClientContext* context, const ::hx2dome::AzEl* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) override;
-      void dapiSync(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::ReturnCode* response, std::function<void(::grpc::Status)>) override;
+      void dapiSync(::grpc::ClientContext* context, const ::hx2dome::AzEl* request, ::hx2dome::ReturnCode* response, ::grpc::ClientUnaryReactor* reactor) override;
       void deviceInfoNameShort(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response, std::function<void(::grpc::Status)>) override;
-      void deviceInfoNameShort(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::BasicString* response, std::function<void(::grpc::Status)>) override;
+      void deviceInfoNameShort(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response, ::grpc::ClientUnaryReactor* reactor) override;
       void deviceInfoNameLong(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response, std::function<void(::grpc::Status)>) override;
-      void deviceInfoNameLong(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::BasicString* response, std::function<void(::grpc::Status)>) override;
+      void deviceInfoNameLong(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response, ::grpc::ClientUnaryReactor* reactor) override;
       void deviceInfoDetailedDescription(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response, std::function<void(::grpc::Status)>) override;
-      void deviceInfoDetailedDescription(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::BasicString* response, std::function<void(::grpc::Status)>) override;
+      void deviceInfoDetailedDescription(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response, ::grpc::ClientUnaryReactor* reactor) override;
       void deviceInfoFirmwareVersion(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response, std::function<void(::grpc::Status)>) override;
-      void deviceInfoFirmwareVersion(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::BasicString* response, std::function<void(::grpc::Status)>) override;
+      void deviceInfoFirmwareVersion(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response, ::grpc::ClientUnaryReactor* reactor) override;
       void deviceInfoModel(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response, std::function<void(::grpc::Status)>) override;
-      void deviceInfoModel(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hx2dome::BasicString* response, std::function<void(::grpc::Status)>) override;
+      void deviceInfoModel(::grpc::ClientContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response, ::grpc::ClientUnaryReactor* reactor) override;
      private:
       friend class Stub;
-      explicit experimental_async(Stub* stub): stub_(stub) { }
+      explicit async(Stub* stub): stub_(stub) { }
       Stub* stub() { return stub_; }
       Stub* stub_;
     };
-    class experimental_async_interface* experimental_async() override { return &async_stub_; }
+    class async* async() override { return &async_stub_; }
 
    private:
     std::shared_ptr< ::grpc::ChannelInterface> channel_;
-    class experimental_async async_stub_{this};
+    class async async_stub_{this};
     ::grpc::ClientAsyncResponseReader< ::hx2dome::AzEl>* AsyncdapiGetAzElRaw(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::hx2dome::AzEl>* PrepareAsyncdapiGetAzElRaw(::grpc::ClientContext* context, const ::hx2dome::Empty& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::hx2dome::ReturnCode>* AsyncdapiGotoAzElRaw(::grpc::ClientContext* context, const ::hx2dome::AzEl& request, ::grpc::CompletionQueue* cq) override;
@@ -561,7 +561,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithAsyncMethod_dapiGetAzEl : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_dapiGetAzEl() {
       ::grpc::Service::MarkMethodAsync(0);
@@ -570,7 +570,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiGetAzEl(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::AzEl* response) override {
+    ::grpc::Status dapiGetAzEl(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::AzEl* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -581,7 +581,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithAsyncMethod_dapiGotoAzEl : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_dapiGotoAzEl() {
       ::grpc::Service::MarkMethodAsync(1);
@@ -590,7 +590,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiGotoAzEl(::grpc::ServerContext* context, const ::hx2dome::AzEl* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiGotoAzEl(::grpc::ServerContext* /*context*/, const ::hx2dome::AzEl* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -601,7 +601,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithAsyncMethod_dapiAbort : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_dapiAbort() {
       ::grpc::Service::MarkMethodAsync(2);
@@ -610,7 +610,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiAbort(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiAbort(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -621,7 +621,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithAsyncMethod_dapiOpen : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_dapiOpen() {
       ::grpc::Service::MarkMethodAsync(3);
@@ -630,7 +630,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiOpen(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiOpen(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -641,7 +641,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithAsyncMethod_dapiClose : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_dapiClose() {
       ::grpc::Service::MarkMethodAsync(4);
@@ -650,7 +650,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiClose(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiClose(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -661,7 +661,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithAsyncMethod_dapiPark : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_dapiPark() {
       ::grpc::Service::MarkMethodAsync(5);
@@ -670,7 +670,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiPark(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiPark(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -681,7 +681,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithAsyncMethod_dapiUnpark : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_dapiUnpark() {
       ::grpc::Service::MarkMethodAsync(6);
@@ -690,7 +690,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiUnpark(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiUnpark(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -701,7 +701,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithAsyncMethod_dapiFindHome : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_dapiFindHome() {
       ::grpc::Service::MarkMethodAsync(7);
@@ -710,7 +710,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiFindHome(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiFindHome(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -721,7 +721,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithAsyncMethod_dapiIsGotoComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_dapiIsGotoComplete() {
       ::grpc::Service::MarkMethodAsync(8);
@@ -730,7 +730,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsGotoComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsGotoComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -741,7 +741,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithAsyncMethod_dapiIsOpenComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_dapiIsOpenComplete() {
       ::grpc::Service::MarkMethodAsync(9);
@@ -750,7 +750,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsOpenComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsOpenComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -761,7 +761,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithAsyncMethod_dapiIsCloseComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_dapiIsCloseComplete() {
       ::grpc::Service::MarkMethodAsync(10);
@@ -770,7 +770,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsCloseComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsCloseComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -781,7 +781,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithAsyncMethod_dapiIsParkComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_dapiIsParkComplete() {
       ::grpc::Service::MarkMethodAsync(11);
@@ -790,7 +790,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsParkComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsParkComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -801,7 +801,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithAsyncMethod_dapiIsUnparkComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_dapiIsUnparkComplete() {
       ::grpc::Service::MarkMethodAsync(12);
@@ -810,7 +810,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsUnparkComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsUnparkComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -821,7 +821,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithAsyncMethod_dapiIsFindHomeComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_dapiIsFindHomeComplete() {
       ::grpc::Service::MarkMethodAsync(13);
@@ -830,7 +830,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsFindHomeComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsFindHomeComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -841,7 +841,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithAsyncMethod_dapiSync : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_dapiSync() {
       ::grpc::Service::MarkMethodAsync(14);
@@ -850,7 +850,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiSync(::grpc::ServerContext* context, const ::hx2dome::AzEl* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiSync(::grpc::ServerContext* /*context*/, const ::hx2dome::AzEl* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -861,7 +861,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithAsyncMethod_deviceInfoNameShort : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_deviceInfoNameShort() {
       ::grpc::Service::MarkMethodAsync(15);
@@ -870,7 +870,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status deviceInfoNameShort(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoNameShort(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -881,7 +881,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithAsyncMethod_deviceInfoNameLong : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_deviceInfoNameLong() {
       ::grpc::Service::MarkMethodAsync(16);
@@ -890,7 +890,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status deviceInfoNameLong(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoNameLong(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -901,7 +901,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithAsyncMethod_deviceInfoDetailedDescription : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_deviceInfoDetailedDescription() {
       ::grpc::Service::MarkMethodAsync(17);
@@ -910,7 +910,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status deviceInfoDetailedDescription(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoDetailedDescription(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -921,7 +921,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithAsyncMethod_deviceInfoFirmwareVersion : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_deviceInfoFirmwareVersion() {
       ::grpc::Service::MarkMethodAsync(18);
@@ -930,7 +930,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status deviceInfoFirmwareVersion(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoFirmwareVersion(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -941,7 +941,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithAsyncMethod_deviceInfoModel : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_deviceInfoModel() {
       ::grpc::Service::MarkMethodAsync(19);
@@ -950,7 +950,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status deviceInfoModel(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoModel(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -960,510 +960,551 @@ class HX2Dome final {
   };
   typedef WithAsyncMethod_dapiGetAzEl<WithAsyncMethod_dapiGotoAzEl<WithAsyncMethod_dapiAbort<WithAsyncMethod_dapiOpen<WithAsyncMethod_dapiClose<WithAsyncMethod_dapiPark<WithAsyncMethod_dapiUnpark<WithAsyncMethod_dapiFindHome<WithAsyncMethod_dapiIsGotoComplete<WithAsyncMethod_dapiIsOpenComplete<WithAsyncMethod_dapiIsCloseComplete<WithAsyncMethod_dapiIsParkComplete<WithAsyncMethod_dapiIsUnparkComplete<WithAsyncMethod_dapiIsFindHomeComplete<WithAsyncMethod_dapiSync<WithAsyncMethod_deviceInfoNameShort<WithAsyncMethod_deviceInfoNameLong<WithAsyncMethod_deviceInfoDetailedDescription<WithAsyncMethod_deviceInfoFirmwareVersion<WithAsyncMethod_deviceInfoModel<Service > > > > > > > > > > > > > > > > > > > > AsyncService;
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_dapiGetAzEl : public BaseClass {
+  class WithCallbackMethod_dapiGetAzEl : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_dapiGetAzEl() {
-      ::grpc::Service::experimental().MarkMethodCallback(0,
-        new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::AzEl>(
-          [this](::grpc::ServerContext* context,
-                 const ::hx2dome::Empty* request,
-                 ::hx2dome::AzEl* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   return this->dapiGetAzEl(context, request, response, controller);
-                 }));
+    WithCallbackMethod_dapiGetAzEl() {
+      ::grpc::Service::MarkMethodCallback(0,
+          new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::AzEl>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::AzEl* response) { return this->dapiGetAzEl(context, request, response); }));}
+    void SetMessageAllocatorFor_dapiGetAzEl(
+        ::grpc::MessageAllocator< ::hx2dome::Empty, ::hx2dome::AzEl>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(0);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::AzEl>*>(handler)
+              ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_dapiGetAzEl() override {
+    ~WithCallbackMethod_dapiGetAzEl() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiGetAzEl(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::AzEl* response) override {
+    ::grpc::Status dapiGetAzEl(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::AzEl* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiGetAzEl(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::AzEl* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiGetAzEl(
+      ::grpc::CallbackServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::AzEl* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_dapiGotoAzEl : public BaseClass {
+  class WithCallbackMethod_dapiGotoAzEl : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_dapiGotoAzEl() {
-      ::grpc::Service::experimental().MarkMethodCallback(1,
-        new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::AzEl, ::hx2dome::ReturnCode>(
-          [this](::grpc::ServerContext* context,
-                 const ::hx2dome::AzEl* request,
-                 ::hx2dome::ReturnCode* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   return this->dapiGotoAzEl(context, request, response, controller);
-                 }));
+    WithCallbackMethod_dapiGotoAzEl() {
+      ::grpc::Service::MarkMethodCallback(1,
+          new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::AzEl, ::hx2dome::ReturnCode>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::hx2dome::AzEl* request, ::hx2dome::ReturnCode* response) { return this->dapiGotoAzEl(context, request, response); }));}
+    void SetMessageAllocatorFor_dapiGotoAzEl(
+        ::grpc::MessageAllocator< ::hx2dome::AzEl, ::hx2dome::ReturnCode>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(1);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hx2dome::AzEl, ::hx2dome::ReturnCode>*>(handler)
+              ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_dapiGotoAzEl() override {
+    ~WithCallbackMethod_dapiGotoAzEl() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiGotoAzEl(::grpc::ServerContext* context, const ::hx2dome::AzEl* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiGotoAzEl(::grpc::ServerContext* /*context*/, const ::hx2dome::AzEl* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiGotoAzEl(::grpc::ServerContext* context, const ::hx2dome::AzEl* request, ::hx2dome::ReturnCode* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiGotoAzEl(
+      ::grpc::CallbackServerContext* /*context*/, const ::hx2dome::AzEl* /*request*/, ::hx2dome::ReturnCode* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_dapiAbort : public BaseClass {
+  class WithCallbackMethod_dapiAbort : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_dapiAbort() {
-      ::grpc::Service::experimental().MarkMethodCallback(2,
-        new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::ReturnCode>(
-          [this](::grpc::ServerContext* context,
-                 const ::hx2dome::Empty* request,
-                 ::hx2dome::ReturnCode* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   return this->dapiAbort(context, request, response, controller);
-                 }));
+    WithCallbackMethod_dapiAbort() {
+      ::grpc::Service::MarkMethodCallback(2,
+          new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::ReturnCode>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) { return this->dapiAbort(context, request, response); }));}
+    void SetMessageAllocatorFor_dapiAbort(
+        ::grpc::MessageAllocator< ::hx2dome::Empty, ::hx2dome::ReturnCode>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(2);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::ReturnCode>*>(handler)
+              ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_dapiAbort() override {
+    ~WithCallbackMethod_dapiAbort() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiAbort(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiAbort(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiAbort(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiAbort(
+      ::grpc::CallbackServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_dapiOpen : public BaseClass {
+  class WithCallbackMethod_dapiOpen : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_dapiOpen() {
-      ::grpc::Service::experimental().MarkMethodCallback(3,
-        new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::ReturnCode>(
-          [this](::grpc::ServerContext* context,
-                 const ::hx2dome::Empty* request,
-                 ::hx2dome::ReturnCode* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   return this->dapiOpen(context, request, response, controller);
-                 }));
+    WithCallbackMethod_dapiOpen() {
+      ::grpc::Service::MarkMethodCallback(3,
+          new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::ReturnCode>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) { return this->dapiOpen(context, request, response); }));}
+    void SetMessageAllocatorFor_dapiOpen(
+        ::grpc::MessageAllocator< ::hx2dome::Empty, ::hx2dome::ReturnCode>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(3);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::ReturnCode>*>(handler)
+              ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_dapiOpen() override {
+    ~WithCallbackMethod_dapiOpen() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiOpen(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiOpen(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiOpen(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiOpen(
+      ::grpc::CallbackServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_dapiClose : public BaseClass {
+  class WithCallbackMethod_dapiClose : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_dapiClose() {
-      ::grpc::Service::experimental().MarkMethodCallback(4,
-        new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::ReturnCode>(
-          [this](::grpc::ServerContext* context,
-                 const ::hx2dome::Empty* request,
-                 ::hx2dome::ReturnCode* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   return this->dapiClose(context, request, response, controller);
-                 }));
+    WithCallbackMethod_dapiClose() {
+      ::grpc::Service::MarkMethodCallback(4,
+          new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::ReturnCode>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) { return this->dapiClose(context, request, response); }));}
+    void SetMessageAllocatorFor_dapiClose(
+        ::grpc::MessageAllocator< ::hx2dome::Empty, ::hx2dome::ReturnCode>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(4);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::ReturnCode>*>(handler)
+              ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_dapiClose() override {
+    ~WithCallbackMethod_dapiClose() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiClose(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiClose(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiClose(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiClose(
+      ::grpc::CallbackServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_dapiPark : public BaseClass {
+  class WithCallbackMethod_dapiPark : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_dapiPark() {
-      ::grpc::Service::experimental().MarkMethodCallback(5,
-        new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::ReturnCode>(
-          [this](::grpc::ServerContext* context,
-                 const ::hx2dome::Empty* request,
-                 ::hx2dome::ReturnCode* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   return this->dapiPark(context, request, response, controller);
-                 }));
+    WithCallbackMethod_dapiPark() {
+      ::grpc::Service::MarkMethodCallback(5,
+          new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::ReturnCode>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) { return this->dapiPark(context, request, response); }));}
+    void SetMessageAllocatorFor_dapiPark(
+        ::grpc::MessageAllocator< ::hx2dome::Empty, ::hx2dome::ReturnCode>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(5);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::ReturnCode>*>(handler)
+              ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_dapiPark() override {
+    ~WithCallbackMethod_dapiPark() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiPark(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiPark(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiPark(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiPark(
+      ::grpc::CallbackServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_dapiUnpark : public BaseClass {
+  class WithCallbackMethod_dapiUnpark : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_dapiUnpark() {
-      ::grpc::Service::experimental().MarkMethodCallback(6,
-        new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::ReturnCode>(
-          [this](::grpc::ServerContext* context,
-                 const ::hx2dome::Empty* request,
-                 ::hx2dome::ReturnCode* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   return this->dapiUnpark(context, request, response, controller);
-                 }));
+    WithCallbackMethod_dapiUnpark() {
+      ::grpc::Service::MarkMethodCallback(6,
+          new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::ReturnCode>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) { return this->dapiUnpark(context, request, response); }));}
+    void SetMessageAllocatorFor_dapiUnpark(
+        ::grpc::MessageAllocator< ::hx2dome::Empty, ::hx2dome::ReturnCode>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(6);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::ReturnCode>*>(handler)
+              ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_dapiUnpark() override {
+    ~WithCallbackMethod_dapiUnpark() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiUnpark(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiUnpark(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiUnpark(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiUnpark(
+      ::grpc::CallbackServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_dapiFindHome : public BaseClass {
+  class WithCallbackMethod_dapiFindHome : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_dapiFindHome() {
-      ::grpc::Service::experimental().MarkMethodCallback(7,
-        new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::ReturnCode>(
-          [this](::grpc::ServerContext* context,
-                 const ::hx2dome::Empty* request,
-                 ::hx2dome::ReturnCode* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   return this->dapiFindHome(context, request, response, controller);
-                 }));
+    WithCallbackMethod_dapiFindHome() {
+      ::grpc::Service::MarkMethodCallback(7,
+          new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::ReturnCode>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) { return this->dapiFindHome(context, request, response); }));}
+    void SetMessageAllocatorFor_dapiFindHome(
+        ::grpc::MessageAllocator< ::hx2dome::Empty, ::hx2dome::ReturnCode>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(7);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::ReturnCode>*>(handler)
+              ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_dapiFindHome() override {
+    ~WithCallbackMethod_dapiFindHome() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiFindHome(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiFindHome(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiFindHome(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiFindHome(
+      ::grpc::CallbackServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_dapiIsGotoComplete : public BaseClass {
+  class WithCallbackMethod_dapiIsGotoComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_dapiIsGotoComplete() {
-      ::grpc::Service::experimental().MarkMethodCallback(8,
-        new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::IsComplete>(
-          [this](::grpc::ServerContext* context,
-                 const ::hx2dome::Empty* request,
-                 ::hx2dome::IsComplete* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   return this->dapiIsGotoComplete(context, request, response, controller);
-                 }));
+    WithCallbackMethod_dapiIsGotoComplete() {
+      ::grpc::Service::MarkMethodCallback(8,
+          new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::IsComplete>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) { return this->dapiIsGotoComplete(context, request, response); }));}
+    void SetMessageAllocatorFor_dapiIsGotoComplete(
+        ::grpc::MessageAllocator< ::hx2dome::Empty, ::hx2dome::IsComplete>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(8);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::IsComplete>*>(handler)
+              ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_dapiIsGotoComplete() override {
+    ~WithCallbackMethod_dapiIsGotoComplete() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsGotoComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsGotoComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiIsGotoComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiIsGotoComplete(
+      ::grpc::CallbackServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_dapiIsOpenComplete : public BaseClass {
+  class WithCallbackMethod_dapiIsOpenComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_dapiIsOpenComplete() {
-      ::grpc::Service::experimental().MarkMethodCallback(9,
-        new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::IsComplete>(
-          [this](::grpc::ServerContext* context,
-                 const ::hx2dome::Empty* request,
-                 ::hx2dome::IsComplete* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   return this->dapiIsOpenComplete(context, request, response, controller);
-                 }));
+    WithCallbackMethod_dapiIsOpenComplete() {
+      ::grpc::Service::MarkMethodCallback(9,
+          new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::IsComplete>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) { return this->dapiIsOpenComplete(context, request, response); }));}
+    void SetMessageAllocatorFor_dapiIsOpenComplete(
+        ::grpc::MessageAllocator< ::hx2dome::Empty, ::hx2dome::IsComplete>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(9);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::IsComplete>*>(handler)
+              ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_dapiIsOpenComplete() override {
+    ~WithCallbackMethod_dapiIsOpenComplete() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsOpenComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsOpenComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiIsOpenComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiIsOpenComplete(
+      ::grpc::CallbackServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_dapiIsCloseComplete : public BaseClass {
+  class WithCallbackMethod_dapiIsCloseComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_dapiIsCloseComplete() {
-      ::grpc::Service::experimental().MarkMethodCallback(10,
-        new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::IsComplete>(
-          [this](::grpc::ServerContext* context,
-                 const ::hx2dome::Empty* request,
-                 ::hx2dome::IsComplete* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   return this->dapiIsCloseComplete(context, request, response, controller);
-                 }));
+    WithCallbackMethod_dapiIsCloseComplete() {
+      ::grpc::Service::MarkMethodCallback(10,
+          new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::IsComplete>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) { return this->dapiIsCloseComplete(context, request, response); }));}
+    void SetMessageAllocatorFor_dapiIsCloseComplete(
+        ::grpc::MessageAllocator< ::hx2dome::Empty, ::hx2dome::IsComplete>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(10);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::IsComplete>*>(handler)
+              ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_dapiIsCloseComplete() override {
+    ~WithCallbackMethod_dapiIsCloseComplete() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsCloseComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsCloseComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiIsCloseComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiIsCloseComplete(
+      ::grpc::CallbackServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_dapiIsParkComplete : public BaseClass {
+  class WithCallbackMethod_dapiIsParkComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_dapiIsParkComplete() {
-      ::grpc::Service::experimental().MarkMethodCallback(11,
-        new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::IsComplete>(
-          [this](::grpc::ServerContext* context,
-                 const ::hx2dome::Empty* request,
-                 ::hx2dome::IsComplete* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   return this->dapiIsParkComplete(context, request, response, controller);
-                 }));
+    WithCallbackMethod_dapiIsParkComplete() {
+      ::grpc::Service::MarkMethodCallback(11,
+          new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::IsComplete>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) { return this->dapiIsParkComplete(context, request, response); }));}
+    void SetMessageAllocatorFor_dapiIsParkComplete(
+        ::grpc::MessageAllocator< ::hx2dome::Empty, ::hx2dome::IsComplete>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(11);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::IsComplete>*>(handler)
+              ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_dapiIsParkComplete() override {
+    ~WithCallbackMethod_dapiIsParkComplete() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsParkComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsParkComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiIsParkComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiIsParkComplete(
+      ::grpc::CallbackServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_dapiIsUnparkComplete : public BaseClass {
+  class WithCallbackMethod_dapiIsUnparkComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_dapiIsUnparkComplete() {
-      ::grpc::Service::experimental().MarkMethodCallback(12,
-        new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::IsComplete>(
-          [this](::grpc::ServerContext* context,
-                 const ::hx2dome::Empty* request,
-                 ::hx2dome::IsComplete* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   return this->dapiIsUnparkComplete(context, request, response, controller);
-                 }));
+    WithCallbackMethod_dapiIsUnparkComplete() {
+      ::grpc::Service::MarkMethodCallback(12,
+          new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::IsComplete>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) { return this->dapiIsUnparkComplete(context, request, response); }));}
+    void SetMessageAllocatorFor_dapiIsUnparkComplete(
+        ::grpc::MessageAllocator< ::hx2dome::Empty, ::hx2dome::IsComplete>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(12);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::IsComplete>*>(handler)
+              ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_dapiIsUnparkComplete() override {
+    ~WithCallbackMethod_dapiIsUnparkComplete() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsUnparkComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsUnparkComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiIsUnparkComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiIsUnparkComplete(
+      ::grpc::CallbackServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_dapiIsFindHomeComplete : public BaseClass {
+  class WithCallbackMethod_dapiIsFindHomeComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_dapiIsFindHomeComplete() {
-      ::grpc::Service::experimental().MarkMethodCallback(13,
-        new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::IsComplete>(
-          [this](::grpc::ServerContext* context,
-                 const ::hx2dome::Empty* request,
-                 ::hx2dome::IsComplete* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   return this->dapiIsFindHomeComplete(context, request, response, controller);
-                 }));
+    WithCallbackMethod_dapiIsFindHomeComplete() {
+      ::grpc::Service::MarkMethodCallback(13,
+          new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::IsComplete>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) { return this->dapiIsFindHomeComplete(context, request, response); }));}
+    void SetMessageAllocatorFor_dapiIsFindHomeComplete(
+        ::grpc::MessageAllocator< ::hx2dome::Empty, ::hx2dome::IsComplete>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(13);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::IsComplete>*>(handler)
+              ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_dapiIsFindHomeComplete() override {
+    ~WithCallbackMethod_dapiIsFindHomeComplete() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsFindHomeComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsFindHomeComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiIsFindHomeComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiIsFindHomeComplete(
+      ::grpc::CallbackServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_dapiSync : public BaseClass {
+  class WithCallbackMethod_dapiSync : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_dapiSync() {
-      ::grpc::Service::experimental().MarkMethodCallback(14,
-        new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::AzEl, ::hx2dome::ReturnCode>(
-          [this](::grpc::ServerContext* context,
-                 const ::hx2dome::AzEl* request,
-                 ::hx2dome::ReturnCode* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   return this->dapiSync(context, request, response, controller);
-                 }));
+    WithCallbackMethod_dapiSync() {
+      ::grpc::Service::MarkMethodCallback(14,
+          new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::AzEl, ::hx2dome::ReturnCode>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::hx2dome::AzEl* request, ::hx2dome::ReturnCode* response) { return this->dapiSync(context, request, response); }));}
+    void SetMessageAllocatorFor_dapiSync(
+        ::grpc::MessageAllocator< ::hx2dome::AzEl, ::hx2dome::ReturnCode>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(14);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hx2dome::AzEl, ::hx2dome::ReturnCode>*>(handler)
+              ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_dapiSync() override {
+    ~WithCallbackMethod_dapiSync() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiSync(::grpc::ServerContext* context, const ::hx2dome::AzEl* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiSync(::grpc::ServerContext* /*context*/, const ::hx2dome::AzEl* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiSync(::grpc::ServerContext* context, const ::hx2dome::AzEl* request, ::hx2dome::ReturnCode* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiSync(
+      ::grpc::CallbackServerContext* /*context*/, const ::hx2dome::AzEl* /*request*/, ::hx2dome::ReturnCode* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_deviceInfoNameShort : public BaseClass {
+  class WithCallbackMethod_deviceInfoNameShort : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_deviceInfoNameShort() {
-      ::grpc::Service::experimental().MarkMethodCallback(15,
-        new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::BasicString>(
-          [this](::grpc::ServerContext* context,
-                 const ::hx2dome::Empty* request,
-                 ::hx2dome::BasicString* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   return this->deviceInfoNameShort(context, request, response, controller);
-                 }));
+    WithCallbackMethod_deviceInfoNameShort() {
+      ::grpc::Service::MarkMethodCallback(15,
+          new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::BasicString>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) { return this->deviceInfoNameShort(context, request, response); }));}
+    void SetMessageAllocatorFor_deviceInfoNameShort(
+        ::grpc::MessageAllocator< ::hx2dome::Empty, ::hx2dome::BasicString>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(15);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::BasicString>*>(handler)
+              ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_deviceInfoNameShort() override {
+    ~WithCallbackMethod_deviceInfoNameShort() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status deviceInfoNameShort(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoNameShort(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void deviceInfoNameShort(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* deviceInfoNameShort(
+      ::grpc::CallbackServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_deviceInfoNameLong : public BaseClass {
+  class WithCallbackMethod_deviceInfoNameLong : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_deviceInfoNameLong() {
-      ::grpc::Service::experimental().MarkMethodCallback(16,
-        new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::BasicString>(
-          [this](::grpc::ServerContext* context,
-                 const ::hx2dome::Empty* request,
-                 ::hx2dome::BasicString* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   return this->deviceInfoNameLong(context, request, response, controller);
-                 }));
+    WithCallbackMethod_deviceInfoNameLong() {
+      ::grpc::Service::MarkMethodCallback(16,
+          new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::BasicString>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) { return this->deviceInfoNameLong(context, request, response); }));}
+    void SetMessageAllocatorFor_deviceInfoNameLong(
+        ::grpc::MessageAllocator< ::hx2dome::Empty, ::hx2dome::BasicString>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(16);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::BasicString>*>(handler)
+              ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_deviceInfoNameLong() override {
+    ~WithCallbackMethod_deviceInfoNameLong() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status deviceInfoNameLong(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoNameLong(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void deviceInfoNameLong(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* deviceInfoNameLong(
+      ::grpc::CallbackServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_deviceInfoDetailedDescription : public BaseClass {
+  class WithCallbackMethod_deviceInfoDetailedDescription : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_deviceInfoDetailedDescription() {
-      ::grpc::Service::experimental().MarkMethodCallback(17,
-        new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::BasicString>(
-          [this](::grpc::ServerContext* context,
-                 const ::hx2dome::Empty* request,
-                 ::hx2dome::BasicString* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   return this->deviceInfoDetailedDescription(context, request, response, controller);
-                 }));
+    WithCallbackMethod_deviceInfoDetailedDescription() {
+      ::grpc::Service::MarkMethodCallback(17,
+          new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::BasicString>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) { return this->deviceInfoDetailedDescription(context, request, response); }));}
+    void SetMessageAllocatorFor_deviceInfoDetailedDescription(
+        ::grpc::MessageAllocator< ::hx2dome::Empty, ::hx2dome::BasicString>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(17);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::BasicString>*>(handler)
+              ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_deviceInfoDetailedDescription() override {
+    ~WithCallbackMethod_deviceInfoDetailedDescription() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status deviceInfoDetailedDescription(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoDetailedDescription(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void deviceInfoDetailedDescription(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* deviceInfoDetailedDescription(
+      ::grpc::CallbackServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_deviceInfoFirmwareVersion : public BaseClass {
+  class WithCallbackMethod_deviceInfoFirmwareVersion : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_deviceInfoFirmwareVersion() {
-      ::grpc::Service::experimental().MarkMethodCallback(18,
-        new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::BasicString>(
-          [this](::grpc::ServerContext* context,
-                 const ::hx2dome::Empty* request,
-                 ::hx2dome::BasicString* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   return this->deviceInfoFirmwareVersion(context, request, response, controller);
-                 }));
+    WithCallbackMethod_deviceInfoFirmwareVersion() {
+      ::grpc::Service::MarkMethodCallback(18,
+          new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::BasicString>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) { return this->deviceInfoFirmwareVersion(context, request, response); }));}
+    void SetMessageAllocatorFor_deviceInfoFirmwareVersion(
+        ::grpc::MessageAllocator< ::hx2dome::Empty, ::hx2dome::BasicString>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(18);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::BasicString>*>(handler)
+              ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_deviceInfoFirmwareVersion() override {
+    ~WithCallbackMethod_deviceInfoFirmwareVersion() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status deviceInfoFirmwareVersion(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoFirmwareVersion(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void deviceInfoFirmwareVersion(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* deviceInfoFirmwareVersion(
+      ::grpc::CallbackServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_deviceInfoModel : public BaseClass {
+  class WithCallbackMethod_deviceInfoModel : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_deviceInfoModel() {
-      ::grpc::Service::experimental().MarkMethodCallback(19,
-        new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::BasicString>(
-          [this](::grpc::ServerContext* context,
-                 const ::hx2dome::Empty* request,
-                 ::hx2dome::BasicString* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   return this->deviceInfoModel(context, request, response, controller);
-                 }));
+    WithCallbackMethod_deviceInfoModel() {
+      ::grpc::Service::MarkMethodCallback(19,
+          new ::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::BasicString>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) { return this->deviceInfoModel(context, request, response); }));}
+    void SetMessageAllocatorFor_deviceInfoModel(
+        ::grpc::MessageAllocator< ::hx2dome::Empty, ::hx2dome::BasicString>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(19);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hx2dome::Empty, ::hx2dome::BasicString>*>(handler)
+              ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_deviceInfoModel() override {
+    ~WithCallbackMethod_deviceInfoModel() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status deviceInfoModel(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoModel(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void deviceInfoModel(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* deviceInfoModel(
+      ::grpc::CallbackServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/)  { return nullptr; }
   };
-  typedef ExperimentalWithCallbackMethod_dapiGetAzEl<ExperimentalWithCallbackMethod_dapiGotoAzEl<ExperimentalWithCallbackMethod_dapiAbort<ExperimentalWithCallbackMethod_dapiOpen<ExperimentalWithCallbackMethod_dapiClose<ExperimentalWithCallbackMethod_dapiPark<ExperimentalWithCallbackMethod_dapiUnpark<ExperimentalWithCallbackMethod_dapiFindHome<ExperimentalWithCallbackMethod_dapiIsGotoComplete<ExperimentalWithCallbackMethod_dapiIsOpenComplete<ExperimentalWithCallbackMethod_dapiIsCloseComplete<ExperimentalWithCallbackMethod_dapiIsParkComplete<ExperimentalWithCallbackMethod_dapiIsUnparkComplete<ExperimentalWithCallbackMethod_dapiIsFindHomeComplete<ExperimentalWithCallbackMethod_dapiSync<ExperimentalWithCallbackMethod_deviceInfoNameShort<ExperimentalWithCallbackMethod_deviceInfoNameLong<ExperimentalWithCallbackMethod_deviceInfoDetailedDescription<ExperimentalWithCallbackMethod_deviceInfoFirmwareVersion<ExperimentalWithCallbackMethod_deviceInfoModel<Service > > > > > > > > > > > > > > > > > > > > ExperimentalCallbackService;
+  typedef WithCallbackMethod_dapiGetAzEl<WithCallbackMethod_dapiGotoAzEl<WithCallbackMethod_dapiAbort<WithCallbackMethod_dapiOpen<WithCallbackMethod_dapiClose<WithCallbackMethod_dapiPark<WithCallbackMethod_dapiUnpark<WithCallbackMethod_dapiFindHome<WithCallbackMethod_dapiIsGotoComplete<WithCallbackMethod_dapiIsOpenComplete<WithCallbackMethod_dapiIsCloseComplete<WithCallbackMethod_dapiIsParkComplete<WithCallbackMethod_dapiIsUnparkComplete<WithCallbackMethod_dapiIsFindHomeComplete<WithCallbackMethod_dapiSync<WithCallbackMethod_deviceInfoNameShort<WithCallbackMethod_deviceInfoNameLong<WithCallbackMethod_deviceInfoDetailedDescription<WithCallbackMethod_deviceInfoFirmwareVersion<WithCallbackMethod_deviceInfoModel<Service > > > > > > > > > > > > > > > > > > > > CallbackService;
+  typedef CallbackService ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_dapiGetAzEl : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_dapiGetAzEl() {
       ::grpc::Service::MarkMethodGeneric(0);
@@ -1472,7 +1513,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiGetAzEl(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::AzEl* response) override {
+    ::grpc::Status dapiGetAzEl(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::AzEl* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1480,7 +1521,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithGenericMethod_dapiGotoAzEl : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_dapiGotoAzEl() {
       ::grpc::Service::MarkMethodGeneric(1);
@@ -1489,7 +1530,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiGotoAzEl(::grpc::ServerContext* context, const ::hx2dome::AzEl* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiGotoAzEl(::grpc::ServerContext* /*context*/, const ::hx2dome::AzEl* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1497,7 +1538,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithGenericMethod_dapiAbort : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_dapiAbort() {
       ::grpc::Service::MarkMethodGeneric(2);
@@ -1506,7 +1547,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiAbort(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiAbort(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1514,7 +1555,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithGenericMethod_dapiOpen : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_dapiOpen() {
       ::grpc::Service::MarkMethodGeneric(3);
@@ -1523,7 +1564,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiOpen(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiOpen(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1531,7 +1572,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithGenericMethod_dapiClose : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_dapiClose() {
       ::grpc::Service::MarkMethodGeneric(4);
@@ -1540,7 +1581,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiClose(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiClose(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1548,7 +1589,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithGenericMethod_dapiPark : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_dapiPark() {
       ::grpc::Service::MarkMethodGeneric(5);
@@ -1557,7 +1598,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiPark(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiPark(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1565,7 +1606,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithGenericMethod_dapiUnpark : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_dapiUnpark() {
       ::grpc::Service::MarkMethodGeneric(6);
@@ -1574,7 +1615,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiUnpark(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiUnpark(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1582,7 +1623,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithGenericMethod_dapiFindHome : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_dapiFindHome() {
       ::grpc::Service::MarkMethodGeneric(7);
@@ -1591,7 +1632,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiFindHome(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiFindHome(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1599,7 +1640,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithGenericMethod_dapiIsGotoComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_dapiIsGotoComplete() {
       ::grpc::Service::MarkMethodGeneric(8);
@@ -1608,7 +1649,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsGotoComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsGotoComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1616,7 +1657,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithGenericMethod_dapiIsOpenComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_dapiIsOpenComplete() {
       ::grpc::Service::MarkMethodGeneric(9);
@@ -1625,7 +1666,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsOpenComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsOpenComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1633,7 +1674,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithGenericMethod_dapiIsCloseComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_dapiIsCloseComplete() {
       ::grpc::Service::MarkMethodGeneric(10);
@@ -1642,7 +1683,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsCloseComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsCloseComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1650,7 +1691,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithGenericMethod_dapiIsParkComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_dapiIsParkComplete() {
       ::grpc::Service::MarkMethodGeneric(11);
@@ -1659,7 +1700,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsParkComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsParkComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1667,7 +1708,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithGenericMethod_dapiIsUnparkComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_dapiIsUnparkComplete() {
       ::grpc::Service::MarkMethodGeneric(12);
@@ -1676,7 +1717,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsUnparkComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsUnparkComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1684,7 +1725,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithGenericMethod_dapiIsFindHomeComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_dapiIsFindHomeComplete() {
       ::grpc::Service::MarkMethodGeneric(13);
@@ -1693,7 +1734,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsFindHomeComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsFindHomeComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1701,7 +1742,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithGenericMethod_dapiSync : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_dapiSync() {
       ::grpc::Service::MarkMethodGeneric(14);
@@ -1710,7 +1751,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiSync(::grpc::ServerContext* context, const ::hx2dome::AzEl* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiSync(::grpc::ServerContext* /*context*/, const ::hx2dome::AzEl* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1718,7 +1759,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithGenericMethod_deviceInfoNameShort : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_deviceInfoNameShort() {
       ::grpc::Service::MarkMethodGeneric(15);
@@ -1727,7 +1768,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status deviceInfoNameShort(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoNameShort(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1735,7 +1776,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithGenericMethod_deviceInfoNameLong : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_deviceInfoNameLong() {
       ::grpc::Service::MarkMethodGeneric(16);
@@ -1744,7 +1785,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status deviceInfoNameLong(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoNameLong(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1752,7 +1793,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithGenericMethod_deviceInfoDetailedDescription : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_deviceInfoDetailedDescription() {
       ::grpc::Service::MarkMethodGeneric(17);
@@ -1761,7 +1802,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status deviceInfoDetailedDescription(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoDetailedDescription(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1769,7 +1810,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithGenericMethod_deviceInfoFirmwareVersion : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_deviceInfoFirmwareVersion() {
       ::grpc::Service::MarkMethodGeneric(18);
@@ -1778,7 +1819,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status deviceInfoFirmwareVersion(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoFirmwareVersion(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1786,7 +1827,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithGenericMethod_deviceInfoModel : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_deviceInfoModel() {
       ::grpc::Service::MarkMethodGeneric(19);
@@ -1795,7 +1836,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status deviceInfoModel(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoModel(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1803,7 +1844,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithRawMethod_dapiGetAzEl : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_dapiGetAzEl() {
       ::grpc::Service::MarkMethodRaw(0);
@@ -1812,7 +1853,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiGetAzEl(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::AzEl* response) override {
+    ::grpc::Status dapiGetAzEl(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::AzEl* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1823,7 +1864,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithRawMethod_dapiGotoAzEl : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_dapiGotoAzEl() {
       ::grpc::Service::MarkMethodRaw(1);
@@ -1832,7 +1873,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiGotoAzEl(::grpc::ServerContext* context, const ::hx2dome::AzEl* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiGotoAzEl(::grpc::ServerContext* /*context*/, const ::hx2dome::AzEl* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1843,7 +1884,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithRawMethod_dapiAbort : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_dapiAbort() {
       ::grpc::Service::MarkMethodRaw(2);
@@ -1852,7 +1893,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiAbort(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiAbort(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1863,7 +1904,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithRawMethod_dapiOpen : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_dapiOpen() {
       ::grpc::Service::MarkMethodRaw(3);
@@ -1872,7 +1913,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiOpen(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiOpen(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1883,7 +1924,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithRawMethod_dapiClose : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_dapiClose() {
       ::grpc::Service::MarkMethodRaw(4);
@@ -1892,7 +1933,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiClose(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiClose(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1903,7 +1944,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithRawMethod_dapiPark : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_dapiPark() {
       ::grpc::Service::MarkMethodRaw(5);
@@ -1912,7 +1953,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiPark(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiPark(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1923,7 +1964,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithRawMethod_dapiUnpark : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_dapiUnpark() {
       ::grpc::Service::MarkMethodRaw(6);
@@ -1932,7 +1973,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiUnpark(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiUnpark(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1943,7 +1984,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithRawMethod_dapiFindHome : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_dapiFindHome() {
       ::grpc::Service::MarkMethodRaw(7);
@@ -1952,7 +1993,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiFindHome(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiFindHome(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1963,7 +2004,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithRawMethod_dapiIsGotoComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_dapiIsGotoComplete() {
       ::grpc::Service::MarkMethodRaw(8);
@@ -1972,7 +2013,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsGotoComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsGotoComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1983,7 +2024,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithRawMethod_dapiIsOpenComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_dapiIsOpenComplete() {
       ::grpc::Service::MarkMethodRaw(9);
@@ -1992,7 +2033,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsOpenComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsOpenComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -2003,7 +2044,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithRawMethod_dapiIsCloseComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_dapiIsCloseComplete() {
       ::grpc::Service::MarkMethodRaw(10);
@@ -2012,7 +2053,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsCloseComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsCloseComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -2023,7 +2064,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithRawMethod_dapiIsParkComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_dapiIsParkComplete() {
       ::grpc::Service::MarkMethodRaw(11);
@@ -2032,7 +2073,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsParkComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsParkComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -2043,7 +2084,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithRawMethod_dapiIsUnparkComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_dapiIsUnparkComplete() {
       ::grpc::Service::MarkMethodRaw(12);
@@ -2052,7 +2093,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsUnparkComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsUnparkComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -2063,7 +2104,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithRawMethod_dapiIsFindHomeComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_dapiIsFindHomeComplete() {
       ::grpc::Service::MarkMethodRaw(13);
@@ -2072,7 +2113,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsFindHomeComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsFindHomeComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -2083,7 +2124,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithRawMethod_dapiSync : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_dapiSync() {
       ::grpc::Service::MarkMethodRaw(14);
@@ -2092,7 +2133,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiSync(::grpc::ServerContext* context, const ::hx2dome::AzEl* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiSync(::grpc::ServerContext* /*context*/, const ::hx2dome::AzEl* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -2103,7 +2144,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithRawMethod_deviceInfoNameShort : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_deviceInfoNameShort() {
       ::grpc::Service::MarkMethodRaw(15);
@@ -2112,7 +2153,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status deviceInfoNameShort(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoNameShort(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -2123,7 +2164,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithRawMethod_deviceInfoNameLong : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_deviceInfoNameLong() {
       ::grpc::Service::MarkMethodRaw(16);
@@ -2132,7 +2173,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status deviceInfoNameLong(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoNameLong(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -2143,7 +2184,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithRawMethod_deviceInfoDetailedDescription : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_deviceInfoDetailedDescription() {
       ::grpc::Service::MarkMethodRaw(17);
@@ -2152,7 +2193,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status deviceInfoDetailedDescription(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoDetailedDescription(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -2163,7 +2204,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithRawMethod_deviceInfoFirmwareVersion : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_deviceInfoFirmwareVersion() {
       ::grpc::Service::MarkMethodRaw(18);
@@ -2172,7 +2213,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status deviceInfoFirmwareVersion(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoFirmwareVersion(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -2183,7 +2224,7 @@ class HX2Dome final {
   template <class BaseClass>
   class WithRawMethod_deviceInfoModel : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_deviceInfoModel() {
       ::grpc::Service::MarkMethodRaw(19);
@@ -2192,7 +2233,7 @@ class HX2Dome final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status deviceInfoModel(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoModel(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -2201,519 +2242,466 @@ class HX2Dome final {
     }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_dapiGetAzEl : public BaseClass {
+  class WithRawCallbackMethod_dapiGetAzEl : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_dapiGetAzEl() {
-      ::grpc::Service::experimental().MarkMethodRawCallback(0,
-        new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-          [this](::grpc::ServerContext* context,
-                 const ::grpc::ByteBuffer* request,
-                 ::grpc::ByteBuffer* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   this->dapiGetAzEl(context, request, response, controller);
-                 }));
+    WithRawCallbackMethod_dapiGetAzEl() {
+      ::grpc::Service::MarkMethodRawCallback(0,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->dapiGetAzEl(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_dapiGetAzEl() override {
+    ~WithRawCallbackMethod_dapiGetAzEl() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiGetAzEl(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::AzEl* response) override {
+    ::grpc::Status dapiGetAzEl(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::AzEl* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiGetAzEl(::grpc::ServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiGetAzEl(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_dapiGotoAzEl : public BaseClass {
+  class WithRawCallbackMethod_dapiGotoAzEl : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_dapiGotoAzEl() {
-      ::grpc::Service::experimental().MarkMethodRawCallback(1,
-        new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-          [this](::grpc::ServerContext* context,
-                 const ::grpc::ByteBuffer* request,
-                 ::grpc::ByteBuffer* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   this->dapiGotoAzEl(context, request, response, controller);
-                 }));
+    WithRawCallbackMethod_dapiGotoAzEl() {
+      ::grpc::Service::MarkMethodRawCallback(1,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->dapiGotoAzEl(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_dapiGotoAzEl() override {
+    ~WithRawCallbackMethod_dapiGotoAzEl() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiGotoAzEl(::grpc::ServerContext* context, const ::hx2dome::AzEl* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiGotoAzEl(::grpc::ServerContext* /*context*/, const ::hx2dome::AzEl* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiGotoAzEl(::grpc::ServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiGotoAzEl(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_dapiAbort : public BaseClass {
+  class WithRawCallbackMethod_dapiAbort : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_dapiAbort() {
-      ::grpc::Service::experimental().MarkMethodRawCallback(2,
-        new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-          [this](::grpc::ServerContext* context,
-                 const ::grpc::ByteBuffer* request,
-                 ::grpc::ByteBuffer* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   this->dapiAbort(context, request, response, controller);
-                 }));
+    WithRawCallbackMethod_dapiAbort() {
+      ::grpc::Service::MarkMethodRawCallback(2,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->dapiAbort(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_dapiAbort() override {
+    ~WithRawCallbackMethod_dapiAbort() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiAbort(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiAbort(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiAbort(::grpc::ServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiAbort(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_dapiOpen : public BaseClass {
+  class WithRawCallbackMethod_dapiOpen : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_dapiOpen() {
-      ::grpc::Service::experimental().MarkMethodRawCallback(3,
-        new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-          [this](::grpc::ServerContext* context,
-                 const ::grpc::ByteBuffer* request,
-                 ::grpc::ByteBuffer* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   this->dapiOpen(context, request, response, controller);
-                 }));
+    WithRawCallbackMethod_dapiOpen() {
+      ::grpc::Service::MarkMethodRawCallback(3,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->dapiOpen(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_dapiOpen() override {
+    ~WithRawCallbackMethod_dapiOpen() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiOpen(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiOpen(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiOpen(::grpc::ServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiOpen(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_dapiClose : public BaseClass {
+  class WithRawCallbackMethod_dapiClose : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_dapiClose() {
-      ::grpc::Service::experimental().MarkMethodRawCallback(4,
-        new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-          [this](::grpc::ServerContext* context,
-                 const ::grpc::ByteBuffer* request,
-                 ::grpc::ByteBuffer* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   this->dapiClose(context, request, response, controller);
-                 }));
+    WithRawCallbackMethod_dapiClose() {
+      ::grpc::Service::MarkMethodRawCallback(4,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->dapiClose(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_dapiClose() override {
+    ~WithRawCallbackMethod_dapiClose() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiClose(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiClose(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiClose(::grpc::ServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiClose(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_dapiPark : public BaseClass {
+  class WithRawCallbackMethod_dapiPark : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_dapiPark() {
-      ::grpc::Service::experimental().MarkMethodRawCallback(5,
-        new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-          [this](::grpc::ServerContext* context,
-                 const ::grpc::ByteBuffer* request,
-                 ::grpc::ByteBuffer* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   this->dapiPark(context, request, response, controller);
-                 }));
+    WithRawCallbackMethod_dapiPark() {
+      ::grpc::Service::MarkMethodRawCallback(5,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->dapiPark(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_dapiPark() override {
+    ~WithRawCallbackMethod_dapiPark() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiPark(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiPark(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiPark(::grpc::ServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiPark(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_dapiUnpark : public BaseClass {
+  class WithRawCallbackMethod_dapiUnpark : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_dapiUnpark() {
-      ::grpc::Service::experimental().MarkMethodRawCallback(6,
-        new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-          [this](::grpc::ServerContext* context,
-                 const ::grpc::ByteBuffer* request,
-                 ::grpc::ByteBuffer* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   this->dapiUnpark(context, request, response, controller);
-                 }));
+    WithRawCallbackMethod_dapiUnpark() {
+      ::grpc::Service::MarkMethodRawCallback(6,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->dapiUnpark(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_dapiUnpark() override {
+    ~WithRawCallbackMethod_dapiUnpark() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiUnpark(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiUnpark(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiUnpark(::grpc::ServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiUnpark(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_dapiFindHome : public BaseClass {
+  class WithRawCallbackMethod_dapiFindHome : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_dapiFindHome() {
-      ::grpc::Service::experimental().MarkMethodRawCallback(7,
-        new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-          [this](::grpc::ServerContext* context,
-                 const ::grpc::ByteBuffer* request,
-                 ::grpc::ByteBuffer* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   this->dapiFindHome(context, request, response, controller);
-                 }));
+    WithRawCallbackMethod_dapiFindHome() {
+      ::grpc::Service::MarkMethodRawCallback(7,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->dapiFindHome(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_dapiFindHome() override {
+    ~WithRawCallbackMethod_dapiFindHome() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiFindHome(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiFindHome(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiFindHome(::grpc::ServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiFindHome(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_dapiIsGotoComplete : public BaseClass {
+  class WithRawCallbackMethod_dapiIsGotoComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_dapiIsGotoComplete() {
-      ::grpc::Service::experimental().MarkMethodRawCallback(8,
-        new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-          [this](::grpc::ServerContext* context,
-                 const ::grpc::ByteBuffer* request,
-                 ::grpc::ByteBuffer* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   this->dapiIsGotoComplete(context, request, response, controller);
-                 }));
+    WithRawCallbackMethod_dapiIsGotoComplete() {
+      ::grpc::Service::MarkMethodRawCallback(8,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->dapiIsGotoComplete(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_dapiIsGotoComplete() override {
+    ~WithRawCallbackMethod_dapiIsGotoComplete() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsGotoComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsGotoComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiIsGotoComplete(::grpc::ServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiIsGotoComplete(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_dapiIsOpenComplete : public BaseClass {
+  class WithRawCallbackMethod_dapiIsOpenComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_dapiIsOpenComplete() {
-      ::grpc::Service::experimental().MarkMethodRawCallback(9,
-        new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-          [this](::grpc::ServerContext* context,
-                 const ::grpc::ByteBuffer* request,
-                 ::grpc::ByteBuffer* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   this->dapiIsOpenComplete(context, request, response, controller);
-                 }));
+    WithRawCallbackMethod_dapiIsOpenComplete() {
+      ::grpc::Service::MarkMethodRawCallback(9,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->dapiIsOpenComplete(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_dapiIsOpenComplete() override {
+    ~WithRawCallbackMethod_dapiIsOpenComplete() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsOpenComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsOpenComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiIsOpenComplete(::grpc::ServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiIsOpenComplete(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_dapiIsCloseComplete : public BaseClass {
+  class WithRawCallbackMethod_dapiIsCloseComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_dapiIsCloseComplete() {
-      ::grpc::Service::experimental().MarkMethodRawCallback(10,
-        new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-          [this](::grpc::ServerContext* context,
-                 const ::grpc::ByteBuffer* request,
-                 ::grpc::ByteBuffer* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   this->dapiIsCloseComplete(context, request, response, controller);
-                 }));
+    WithRawCallbackMethod_dapiIsCloseComplete() {
+      ::grpc::Service::MarkMethodRawCallback(10,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->dapiIsCloseComplete(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_dapiIsCloseComplete() override {
+    ~WithRawCallbackMethod_dapiIsCloseComplete() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsCloseComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsCloseComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiIsCloseComplete(::grpc::ServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiIsCloseComplete(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_dapiIsParkComplete : public BaseClass {
+  class WithRawCallbackMethod_dapiIsParkComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_dapiIsParkComplete() {
-      ::grpc::Service::experimental().MarkMethodRawCallback(11,
-        new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-          [this](::grpc::ServerContext* context,
-                 const ::grpc::ByteBuffer* request,
-                 ::grpc::ByteBuffer* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   this->dapiIsParkComplete(context, request, response, controller);
-                 }));
+    WithRawCallbackMethod_dapiIsParkComplete() {
+      ::grpc::Service::MarkMethodRawCallback(11,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->dapiIsParkComplete(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_dapiIsParkComplete() override {
+    ~WithRawCallbackMethod_dapiIsParkComplete() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsParkComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsParkComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiIsParkComplete(::grpc::ServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiIsParkComplete(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_dapiIsUnparkComplete : public BaseClass {
+  class WithRawCallbackMethod_dapiIsUnparkComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_dapiIsUnparkComplete() {
-      ::grpc::Service::experimental().MarkMethodRawCallback(12,
-        new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-          [this](::grpc::ServerContext* context,
-                 const ::grpc::ByteBuffer* request,
-                 ::grpc::ByteBuffer* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   this->dapiIsUnparkComplete(context, request, response, controller);
-                 }));
+    WithRawCallbackMethod_dapiIsUnparkComplete() {
+      ::grpc::Service::MarkMethodRawCallback(12,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->dapiIsUnparkComplete(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_dapiIsUnparkComplete() override {
+    ~WithRawCallbackMethod_dapiIsUnparkComplete() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsUnparkComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsUnparkComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiIsUnparkComplete(::grpc::ServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiIsUnparkComplete(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_dapiIsFindHomeComplete : public BaseClass {
+  class WithRawCallbackMethod_dapiIsFindHomeComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_dapiIsFindHomeComplete() {
-      ::grpc::Service::experimental().MarkMethodRawCallback(13,
-        new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-          [this](::grpc::ServerContext* context,
-                 const ::grpc::ByteBuffer* request,
-                 ::grpc::ByteBuffer* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   this->dapiIsFindHomeComplete(context, request, response, controller);
-                 }));
+    WithRawCallbackMethod_dapiIsFindHomeComplete() {
+      ::grpc::Service::MarkMethodRawCallback(13,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->dapiIsFindHomeComplete(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_dapiIsFindHomeComplete() override {
+    ~WithRawCallbackMethod_dapiIsFindHomeComplete() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiIsFindHomeComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsFindHomeComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiIsFindHomeComplete(::grpc::ServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiIsFindHomeComplete(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_dapiSync : public BaseClass {
+  class WithRawCallbackMethod_dapiSync : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_dapiSync() {
-      ::grpc::Service::experimental().MarkMethodRawCallback(14,
-        new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-          [this](::grpc::ServerContext* context,
-                 const ::grpc::ByteBuffer* request,
-                 ::grpc::ByteBuffer* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   this->dapiSync(context, request, response, controller);
-                 }));
+    WithRawCallbackMethod_dapiSync() {
+      ::grpc::Service::MarkMethodRawCallback(14,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->dapiSync(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_dapiSync() override {
+    ~WithRawCallbackMethod_dapiSync() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status dapiSync(::grpc::ServerContext* context, const ::hx2dome::AzEl* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiSync(::grpc::ServerContext* /*context*/, const ::hx2dome::AzEl* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void dapiSync(::grpc::ServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* dapiSync(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_deviceInfoNameShort : public BaseClass {
+  class WithRawCallbackMethod_deviceInfoNameShort : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_deviceInfoNameShort() {
-      ::grpc::Service::experimental().MarkMethodRawCallback(15,
-        new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-          [this](::grpc::ServerContext* context,
-                 const ::grpc::ByteBuffer* request,
-                 ::grpc::ByteBuffer* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   this->deviceInfoNameShort(context, request, response, controller);
-                 }));
+    WithRawCallbackMethod_deviceInfoNameShort() {
+      ::grpc::Service::MarkMethodRawCallback(15,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->deviceInfoNameShort(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_deviceInfoNameShort() override {
+    ~WithRawCallbackMethod_deviceInfoNameShort() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status deviceInfoNameShort(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoNameShort(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void deviceInfoNameShort(::grpc::ServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* deviceInfoNameShort(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_deviceInfoNameLong : public BaseClass {
+  class WithRawCallbackMethod_deviceInfoNameLong : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_deviceInfoNameLong() {
-      ::grpc::Service::experimental().MarkMethodRawCallback(16,
-        new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-          [this](::grpc::ServerContext* context,
-                 const ::grpc::ByteBuffer* request,
-                 ::grpc::ByteBuffer* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   this->deviceInfoNameLong(context, request, response, controller);
-                 }));
+    WithRawCallbackMethod_deviceInfoNameLong() {
+      ::grpc::Service::MarkMethodRawCallback(16,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->deviceInfoNameLong(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_deviceInfoNameLong() override {
+    ~WithRawCallbackMethod_deviceInfoNameLong() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status deviceInfoNameLong(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoNameLong(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void deviceInfoNameLong(::grpc::ServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* deviceInfoNameLong(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_deviceInfoDetailedDescription : public BaseClass {
+  class WithRawCallbackMethod_deviceInfoDetailedDescription : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_deviceInfoDetailedDescription() {
-      ::grpc::Service::experimental().MarkMethodRawCallback(17,
-        new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-          [this](::grpc::ServerContext* context,
-                 const ::grpc::ByteBuffer* request,
-                 ::grpc::ByteBuffer* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   this->deviceInfoDetailedDescription(context, request, response, controller);
-                 }));
+    WithRawCallbackMethod_deviceInfoDetailedDescription() {
+      ::grpc::Service::MarkMethodRawCallback(17,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->deviceInfoDetailedDescription(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_deviceInfoDetailedDescription() override {
+    ~WithRawCallbackMethod_deviceInfoDetailedDescription() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status deviceInfoDetailedDescription(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoDetailedDescription(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void deviceInfoDetailedDescription(::grpc::ServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* deviceInfoDetailedDescription(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_deviceInfoFirmwareVersion : public BaseClass {
+  class WithRawCallbackMethod_deviceInfoFirmwareVersion : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_deviceInfoFirmwareVersion() {
-      ::grpc::Service::experimental().MarkMethodRawCallback(18,
-        new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-          [this](::grpc::ServerContext* context,
-                 const ::grpc::ByteBuffer* request,
-                 ::grpc::ByteBuffer* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   this->deviceInfoFirmwareVersion(context, request, response, controller);
-                 }));
+    WithRawCallbackMethod_deviceInfoFirmwareVersion() {
+      ::grpc::Service::MarkMethodRawCallback(18,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->deviceInfoFirmwareVersion(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_deviceInfoFirmwareVersion() override {
+    ~WithRawCallbackMethod_deviceInfoFirmwareVersion() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status deviceInfoFirmwareVersion(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoFirmwareVersion(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void deviceInfoFirmwareVersion(::grpc::ServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* deviceInfoFirmwareVersion(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_deviceInfoModel : public BaseClass {
+  class WithRawCallbackMethod_deviceInfoModel : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_deviceInfoModel() {
-      ::grpc::Service::experimental().MarkMethodRawCallback(19,
-        new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-          [this](::grpc::ServerContext* context,
-                 const ::grpc::ByteBuffer* request,
-                 ::grpc::ByteBuffer* response,
-                 ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   this->deviceInfoModel(context, request, response, controller);
-                 }));
+    WithRawCallbackMethod_deviceInfoModel() {
+      ::grpc::Service::MarkMethodRawCallback(19,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->deviceInfoModel(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_deviceInfoModel() override {
+    ~WithRawCallbackMethod_deviceInfoModel() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status deviceInfoModel(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoModel(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void deviceInfoModel(::grpc::ServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual ::grpc::ServerUnaryReactor* deviceInfoModel(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
   class WithStreamedUnaryMethod_dapiGetAzEl : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_dapiGetAzEl() {
       ::grpc::Service::MarkMethodStreamed(0,
-        new ::grpc::internal::StreamedUnaryHandler< ::hx2dome::Empty, ::hx2dome::AzEl>(std::bind(&WithStreamedUnaryMethod_dapiGetAzEl<BaseClass>::StreameddapiGetAzEl, this, std::placeholders::_1, std::placeholders::_2)));
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::hx2dome::Empty, ::hx2dome::AzEl>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::hx2dome::Empty, ::hx2dome::AzEl>* streamer) {
+                       return this->StreameddapiGetAzEl(context,
+                         streamer);
+                  }));
     }
     ~WithStreamedUnaryMethod_dapiGetAzEl() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status dapiGetAzEl(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::AzEl* response) override {
+    ::grpc::Status dapiGetAzEl(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::AzEl* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -2723,17 +2711,24 @@ class HX2Dome final {
   template <class BaseClass>
   class WithStreamedUnaryMethod_dapiGotoAzEl : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_dapiGotoAzEl() {
       ::grpc::Service::MarkMethodStreamed(1,
-        new ::grpc::internal::StreamedUnaryHandler< ::hx2dome::AzEl, ::hx2dome::ReturnCode>(std::bind(&WithStreamedUnaryMethod_dapiGotoAzEl<BaseClass>::StreameddapiGotoAzEl, this, std::placeholders::_1, std::placeholders::_2)));
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::hx2dome::AzEl, ::hx2dome::ReturnCode>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::hx2dome::AzEl, ::hx2dome::ReturnCode>* streamer) {
+                       return this->StreameddapiGotoAzEl(context,
+                         streamer);
+                  }));
     }
     ~WithStreamedUnaryMethod_dapiGotoAzEl() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status dapiGotoAzEl(::grpc::ServerContext* context, const ::hx2dome::AzEl* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiGotoAzEl(::grpc::ServerContext* /*context*/, const ::hx2dome::AzEl* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -2743,17 +2738,24 @@ class HX2Dome final {
   template <class BaseClass>
   class WithStreamedUnaryMethod_dapiAbort : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_dapiAbort() {
       ::grpc::Service::MarkMethodStreamed(2,
-        new ::grpc::internal::StreamedUnaryHandler< ::hx2dome::Empty, ::hx2dome::ReturnCode>(std::bind(&WithStreamedUnaryMethod_dapiAbort<BaseClass>::StreameddapiAbort, this, std::placeholders::_1, std::placeholders::_2)));
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::hx2dome::Empty, ::hx2dome::ReturnCode>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::hx2dome::Empty, ::hx2dome::ReturnCode>* streamer) {
+                       return this->StreameddapiAbort(context,
+                         streamer);
+                  }));
     }
     ~WithStreamedUnaryMethod_dapiAbort() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status dapiAbort(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiAbort(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -2763,17 +2765,24 @@ class HX2Dome final {
   template <class BaseClass>
   class WithStreamedUnaryMethod_dapiOpen : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_dapiOpen() {
       ::grpc::Service::MarkMethodStreamed(3,
-        new ::grpc::internal::StreamedUnaryHandler< ::hx2dome::Empty, ::hx2dome::ReturnCode>(std::bind(&WithStreamedUnaryMethod_dapiOpen<BaseClass>::StreameddapiOpen, this, std::placeholders::_1, std::placeholders::_2)));
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::hx2dome::Empty, ::hx2dome::ReturnCode>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::hx2dome::Empty, ::hx2dome::ReturnCode>* streamer) {
+                       return this->StreameddapiOpen(context,
+                         streamer);
+                  }));
     }
     ~WithStreamedUnaryMethod_dapiOpen() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status dapiOpen(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiOpen(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -2783,17 +2792,24 @@ class HX2Dome final {
   template <class BaseClass>
   class WithStreamedUnaryMethod_dapiClose : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_dapiClose() {
       ::grpc::Service::MarkMethodStreamed(4,
-        new ::grpc::internal::StreamedUnaryHandler< ::hx2dome::Empty, ::hx2dome::ReturnCode>(std::bind(&WithStreamedUnaryMethod_dapiClose<BaseClass>::StreameddapiClose, this, std::placeholders::_1, std::placeholders::_2)));
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::hx2dome::Empty, ::hx2dome::ReturnCode>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::hx2dome::Empty, ::hx2dome::ReturnCode>* streamer) {
+                       return this->StreameddapiClose(context,
+                         streamer);
+                  }));
     }
     ~WithStreamedUnaryMethod_dapiClose() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status dapiClose(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiClose(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -2803,17 +2819,24 @@ class HX2Dome final {
   template <class BaseClass>
   class WithStreamedUnaryMethod_dapiPark : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_dapiPark() {
       ::grpc::Service::MarkMethodStreamed(5,
-        new ::grpc::internal::StreamedUnaryHandler< ::hx2dome::Empty, ::hx2dome::ReturnCode>(std::bind(&WithStreamedUnaryMethod_dapiPark<BaseClass>::StreameddapiPark, this, std::placeholders::_1, std::placeholders::_2)));
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::hx2dome::Empty, ::hx2dome::ReturnCode>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::hx2dome::Empty, ::hx2dome::ReturnCode>* streamer) {
+                       return this->StreameddapiPark(context,
+                         streamer);
+                  }));
     }
     ~WithStreamedUnaryMethod_dapiPark() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status dapiPark(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiPark(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -2823,17 +2846,24 @@ class HX2Dome final {
   template <class BaseClass>
   class WithStreamedUnaryMethod_dapiUnpark : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_dapiUnpark() {
       ::grpc::Service::MarkMethodStreamed(6,
-        new ::grpc::internal::StreamedUnaryHandler< ::hx2dome::Empty, ::hx2dome::ReturnCode>(std::bind(&WithStreamedUnaryMethod_dapiUnpark<BaseClass>::StreameddapiUnpark, this, std::placeholders::_1, std::placeholders::_2)));
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::hx2dome::Empty, ::hx2dome::ReturnCode>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::hx2dome::Empty, ::hx2dome::ReturnCode>* streamer) {
+                       return this->StreameddapiUnpark(context,
+                         streamer);
+                  }));
     }
     ~WithStreamedUnaryMethod_dapiUnpark() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status dapiUnpark(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiUnpark(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -2843,17 +2873,24 @@ class HX2Dome final {
   template <class BaseClass>
   class WithStreamedUnaryMethod_dapiFindHome : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_dapiFindHome() {
       ::grpc::Service::MarkMethodStreamed(7,
-        new ::grpc::internal::StreamedUnaryHandler< ::hx2dome::Empty, ::hx2dome::ReturnCode>(std::bind(&WithStreamedUnaryMethod_dapiFindHome<BaseClass>::StreameddapiFindHome, this, std::placeholders::_1, std::placeholders::_2)));
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::hx2dome::Empty, ::hx2dome::ReturnCode>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::hx2dome::Empty, ::hx2dome::ReturnCode>* streamer) {
+                       return this->StreameddapiFindHome(context,
+                         streamer);
+                  }));
     }
     ~WithStreamedUnaryMethod_dapiFindHome() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status dapiFindHome(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiFindHome(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -2863,17 +2900,24 @@ class HX2Dome final {
   template <class BaseClass>
   class WithStreamedUnaryMethod_dapiIsGotoComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_dapiIsGotoComplete() {
       ::grpc::Service::MarkMethodStreamed(8,
-        new ::grpc::internal::StreamedUnaryHandler< ::hx2dome::Empty, ::hx2dome::IsComplete>(std::bind(&WithStreamedUnaryMethod_dapiIsGotoComplete<BaseClass>::StreameddapiIsGotoComplete, this, std::placeholders::_1, std::placeholders::_2)));
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::hx2dome::Empty, ::hx2dome::IsComplete>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::hx2dome::Empty, ::hx2dome::IsComplete>* streamer) {
+                       return this->StreameddapiIsGotoComplete(context,
+                         streamer);
+                  }));
     }
     ~WithStreamedUnaryMethod_dapiIsGotoComplete() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status dapiIsGotoComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsGotoComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -2883,17 +2927,24 @@ class HX2Dome final {
   template <class BaseClass>
   class WithStreamedUnaryMethod_dapiIsOpenComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_dapiIsOpenComplete() {
       ::grpc::Service::MarkMethodStreamed(9,
-        new ::grpc::internal::StreamedUnaryHandler< ::hx2dome::Empty, ::hx2dome::IsComplete>(std::bind(&WithStreamedUnaryMethod_dapiIsOpenComplete<BaseClass>::StreameddapiIsOpenComplete, this, std::placeholders::_1, std::placeholders::_2)));
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::hx2dome::Empty, ::hx2dome::IsComplete>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::hx2dome::Empty, ::hx2dome::IsComplete>* streamer) {
+                       return this->StreameddapiIsOpenComplete(context,
+                         streamer);
+                  }));
     }
     ~WithStreamedUnaryMethod_dapiIsOpenComplete() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status dapiIsOpenComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsOpenComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -2903,17 +2954,24 @@ class HX2Dome final {
   template <class BaseClass>
   class WithStreamedUnaryMethod_dapiIsCloseComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_dapiIsCloseComplete() {
       ::grpc::Service::MarkMethodStreamed(10,
-        new ::grpc::internal::StreamedUnaryHandler< ::hx2dome::Empty, ::hx2dome::IsComplete>(std::bind(&WithStreamedUnaryMethod_dapiIsCloseComplete<BaseClass>::StreameddapiIsCloseComplete, this, std::placeholders::_1, std::placeholders::_2)));
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::hx2dome::Empty, ::hx2dome::IsComplete>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::hx2dome::Empty, ::hx2dome::IsComplete>* streamer) {
+                       return this->StreameddapiIsCloseComplete(context,
+                         streamer);
+                  }));
     }
     ~WithStreamedUnaryMethod_dapiIsCloseComplete() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status dapiIsCloseComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsCloseComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -2923,17 +2981,24 @@ class HX2Dome final {
   template <class BaseClass>
   class WithStreamedUnaryMethod_dapiIsParkComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_dapiIsParkComplete() {
       ::grpc::Service::MarkMethodStreamed(11,
-        new ::grpc::internal::StreamedUnaryHandler< ::hx2dome::Empty, ::hx2dome::IsComplete>(std::bind(&WithStreamedUnaryMethod_dapiIsParkComplete<BaseClass>::StreameddapiIsParkComplete, this, std::placeholders::_1, std::placeholders::_2)));
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::hx2dome::Empty, ::hx2dome::IsComplete>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::hx2dome::Empty, ::hx2dome::IsComplete>* streamer) {
+                       return this->StreameddapiIsParkComplete(context,
+                         streamer);
+                  }));
     }
     ~WithStreamedUnaryMethod_dapiIsParkComplete() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status dapiIsParkComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsParkComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -2943,17 +3008,24 @@ class HX2Dome final {
   template <class BaseClass>
   class WithStreamedUnaryMethod_dapiIsUnparkComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_dapiIsUnparkComplete() {
       ::grpc::Service::MarkMethodStreamed(12,
-        new ::grpc::internal::StreamedUnaryHandler< ::hx2dome::Empty, ::hx2dome::IsComplete>(std::bind(&WithStreamedUnaryMethod_dapiIsUnparkComplete<BaseClass>::StreameddapiIsUnparkComplete, this, std::placeholders::_1, std::placeholders::_2)));
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::hx2dome::Empty, ::hx2dome::IsComplete>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::hx2dome::Empty, ::hx2dome::IsComplete>* streamer) {
+                       return this->StreameddapiIsUnparkComplete(context,
+                         streamer);
+                  }));
     }
     ~WithStreamedUnaryMethod_dapiIsUnparkComplete() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status dapiIsUnparkComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsUnparkComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -2963,17 +3035,24 @@ class HX2Dome final {
   template <class BaseClass>
   class WithStreamedUnaryMethod_dapiIsFindHomeComplete : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_dapiIsFindHomeComplete() {
       ::grpc::Service::MarkMethodStreamed(13,
-        new ::grpc::internal::StreamedUnaryHandler< ::hx2dome::Empty, ::hx2dome::IsComplete>(std::bind(&WithStreamedUnaryMethod_dapiIsFindHomeComplete<BaseClass>::StreameddapiIsFindHomeComplete, this, std::placeholders::_1, std::placeholders::_2)));
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::hx2dome::Empty, ::hx2dome::IsComplete>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::hx2dome::Empty, ::hx2dome::IsComplete>* streamer) {
+                       return this->StreameddapiIsFindHomeComplete(context,
+                         streamer);
+                  }));
     }
     ~WithStreamedUnaryMethod_dapiIsFindHomeComplete() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status dapiIsFindHomeComplete(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::IsComplete* response) override {
+    ::grpc::Status dapiIsFindHomeComplete(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::IsComplete* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -2983,17 +3062,24 @@ class HX2Dome final {
   template <class BaseClass>
   class WithStreamedUnaryMethod_dapiSync : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_dapiSync() {
       ::grpc::Service::MarkMethodStreamed(14,
-        new ::grpc::internal::StreamedUnaryHandler< ::hx2dome::AzEl, ::hx2dome::ReturnCode>(std::bind(&WithStreamedUnaryMethod_dapiSync<BaseClass>::StreameddapiSync, this, std::placeholders::_1, std::placeholders::_2)));
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::hx2dome::AzEl, ::hx2dome::ReturnCode>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::hx2dome::AzEl, ::hx2dome::ReturnCode>* streamer) {
+                       return this->StreameddapiSync(context,
+                         streamer);
+                  }));
     }
     ~WithStreamedUnaryMethod_dapiSync() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status dapiSync(::grpc::ServerContext* context, const ::hx2dome::AzEl* request, ::hx2dome::ReturnCode* response) override {
+    ::grpc::Status dapiSync(::grpc::ServerContext* /*context*/, const ::hx2dome::AzEl* /*request*/, ::hx2dome::ReturnCode* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -3003,17 +3089,24 @@ class HX2Dome final {
   template <class BaseClass>
   class WithStreamedUnaryMethod_deviceInfoNameShort : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_deviceInfoNameShort() {
       ::grpc::Service::MarkMethodStreamed(15,
-        new ::grpc::internal::StreamedUnaryHandler< ::hx2dome::Empty, ::hx2dome::BasicString>(std::bind(&WithStreamedUnaryMethod_deviceInfoNameShort<BaseClass>::StreameddeviceInfoNameShort, this, std::placeholders::_1, std::placeholders::_2)));
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::hx2dome::Empty, ::hx2dome::BasicString>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::hx2dome::Empty, ::hx2dome::BasicString>* streamer) {
+                       return this->StreameddeviceInfoNameShort(context,
+                         streamer);
+                  }));
     }
     ~WithStreamedUnaryMethod_deviceInfoNameShort() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status deviceInfoNameShort(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoNameShort(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -3023,17 +3116,24 @@ class HX2Dome final {
   template <class BaseClass>
   class WithStreamedUnaryMethod_deviceInfoNameLong : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_deviceInfoNameLong() {
       ::grpc::Service::MarkMethodStreamed(16,
-        new ::grpc::internal::StreamedUnaryHandler< ::hx2dome::Empty, ::hx2dome::BasicString>(std::bind(&WithStreamedUnaryMethod_deviceInfoNameLong<BaseClass>::StreameddeviceInfoNameLong, this, std::placeholders::_1, std::placeholders::_2)));
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::hx2dome::Empty, ::hx2dome::BasicString>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::hx2dome::Empty, ::hx2dome::BasicString>* streamer) {
+                       return this->StreameddeviceInfoNameLong(context,
+                         streamer);
+                  }));
     }
     ~WithStreamedUnaryMethod_deviceInfoNameLong() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status deviceInfoNameLong(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoNameLong(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -3043,17 +3143,24 @@ class HX2Dome final {
   template <class BaseClass>
   class WithStreamedUnaryMethod_deviceInfoDetailedDescription : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_deviceInfoDetailedDescription() {
       ::grpc::Service::MarkMethodStreamed(17,
-        new ::grpc::internal::StreamedUnaryHandler< ::hx2dome::Empty, ::hx2dome::BasicString>(std::bind(&WithStreamedUnaryMethod_deviceInfoDetailedDescription<BaseClass>::StreameddeviceInfoDetailedDescription, this, std::placeholders::_1, std::placeholders::_2)));
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::hx2dome::Empty, ::hx2dome::BasicString>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::hx2dome::Empty, ::hx2dome::BasicString>* streamer) {
+                       return this->StreameddeviceInfoDetailedDescription(context,
+                         streamer);
+                  }));
     }
     ~WithStreamedUnaryMethod_deviceInfoDetailedDescription() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status deviceInfoDetailedDescription(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoDetailedDescription(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -3063,17 +3170,24 @@ class HX2Dome final {
   template <class BaseClass>
   class WithStreamedUnaryMethod_deviceInfoFirmwareVersion : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_deviceInfoFirmwareVersion() {
       ::grpc::Service::MarkMethodStreamed(18,
-        new ::grpc::internal::StreamedUnaryHandler< ::hx2dome::Empty, ::hx2dome::BasicString>(std::bind(&WithStreamedUnaryMethod_deviceInfoFirmwareVersion<BaseClass>::StreameddeviceInfoFirmwareVersion, this, std::placeholders::_1, std::placeholders::_2)));
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::hx2dome::Empty, ::hx2dome::BasicString>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::hx2dome::Empty, ::hx2dome::BasicString>* streamer) {
+                       return this->StreameddeviceInfoFirmwareVersion(context,
+                         streamer);
+                  }));
     }
     ~WithStreamedUnaryMethod_deviceInfoFirmwareVersion() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status deviceInfoFirmwareVersion(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoFirmwareVersion(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -3083,17 +3197,24 @@ class HX2Dome final {
   template <class BaseClass>
   class WithStreamedUnaryMethod_deviceInfoModel : public BaseClass {
    private:
-    void BaseClassMustBeDerivedFromService(const Service *service) {}
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_deviceInfoModel() {
       ::grpc::Service::MarkMethodStreamed(19,
-        new ::grpc::internal::StreamedUnaryHandler< ::hx2dome::Empty, ::hx2dome::BasicString>(std::bind(&WithStreamedUnaryMethod_deviceInfoModel<BaseClass>::StreameddeviceInfoModel, this, std::placeholders::_1, std::placeholders::_2)));
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::hx2dome::Empty, ::hx2dome::BasicString>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::hx2dome::Empty, ::hx2dome::BasicString>* streamer) {
+                       return this->StreameddeviceInfoModel(context,
+                         streamer);
+                  }));
     }
     ~WithStreamedUnaryMethod_deviceInfoModel() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status deviceInfoModel(::grpc::ServerContext* context, const ::hx2dome::Empty* request, ::hx2dome::BasicString* response) override {
+    ::grpc::Status deviceInfoModel(::grpc::ServerContext* /*context*/, const ::hx2dome::Empty* /*request*/, ::hx2dome::BasicString* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }

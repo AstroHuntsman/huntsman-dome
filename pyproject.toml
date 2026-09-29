@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "domehunter"
+version = "0.1.dev0"
+description = "Huntsman Telescope dome control"
+readme = "README.rst"
+license = "BSD-3-Clause"
+requires-python = ">=3.9"
+authors = [
+    {name = "Huntsman Team", email = "lee.spitler@mq.edu.au"},
+]
+
+dependencies = [
+    "astropy",
+    "grpcio",
+    "grpcio-tools",
+    "pyyaml>=5.0",
+    "logbook",
+    "gpiozero",
+    "pyserial",
+]
+
+[project.optional-dependencies]
+rpi = [
+    "RPi.GPIO",
+    "pigpio",
+    "smbus",
+    "sn3218",
+]
+test = [
+    "pytest",
+    "pytest-astropy",
+]
+docs = [
+    "sphinx",
+    "sphinx-astropy",
+]
+
+[project.urls]
+Homepage = "https://huntsman.space"
+Repository = "https://github.com/AstroHuntsman/huntsman-dome"
+
+[tool.setuptools.packages.find]
+include = ["domehunter*"]
+
+[tool.setuptools.package-data]
+domehunter = ["data/*", "gRPC-server/*.yml", "gRPC-server/*.proto"]
+
+[tool.pytest.ini_options]
+minversion = "3.0"
+norecursedirs = ["build", "docs/_build"]
+addopts = "-p no:warnings"

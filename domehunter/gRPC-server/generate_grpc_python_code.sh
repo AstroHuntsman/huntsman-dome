@@ -1,21 +1,14 @@
 #!/bin/bash
+# Regenerate the gRPC Python stubs (hx2dome_pb2*.py) from the shared
+# ../gRPC-TheSkyX-driver/hx2dome.proto. Requires grpcio-tools.
+set -e
+cd "$(dirname "$0")"
 
 if [ "$1" == "clean" ]; then
-	rm src/*pb2_grpc.py
-	rm src/*pb2.py
+	rm -f hx2dome_pb2.py hx2dome_pb2_grpc.py
 else
-	HDOME_PATH="$HOME/Documents/REPOS"
-	PROTOS_PATH="$HDOME_PATH/huntsman-dome/domehunter/gRPC-TheSkyX-driver/"
-	PROTO_FILE="$HDOME_PATH/huntsman-dome/domehunter/gRPC-TheSkyX-driver/hx2dome.proto"
-
-	echo -e "\nGenerating GRPC Python code\n"
-
-	echo -e "python -m grpc_tools.protoc -I=$PROTOS_PATH --python_out=. --grpc_python_out=. $PROTO_FILE\n"
-
-	python -m grpc_tools.protoc -I=$PROTOS_PATH --python_out=. --grpc_python_out=. $PROTO_FILE
-
-	#echo -e "Moving generated GRPC Python code to src/\n"
-	#mv *pb2* src/
-
-	echo -e "Done.\n"
+	echo "Generating gRPC Python code"
+	python -m grpc_tools.protoc -I../gRPC-TheSkyX-driver --python_out=. \
+		--grpc_python_out=. ../gRPC-TheSkyX-driver/hx2dome.proto
+	echo "Done."
 fi
