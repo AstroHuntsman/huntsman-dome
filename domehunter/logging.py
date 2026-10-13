@@ -8,7 +8,8 @@ def set_up_logger(name,
                   logfilename,
                   log_file_level='NOTICE',
                   log_stderr_level='NOTICE',
-                  logo=False):
+                  logo=False,
+                  retention_days=15):
     """Set up a logger with a log to file handler and log to stderr handler.
 
     Parameters
@@ -26,6 +27,9 @@ def set_up_logger(name,
         possible levels.
     logo : bool
         Toggle printing a huntsman logo in stderr upon initialising the logger.
+    retention_days : int
+        Number of daily log files to keep, including the current day's. Older
+        files are deleted at the daily rollover.
 
     Returns
     -------
@@ -55,7 +59,7 @@ def set_up_logger(name,
                                 mode='a+',
                                 date_format='%Y-%m-%d',
                                 bubble=True,
-                                backup_count=100,
+                                backup_count=retention_days,
                                 format_string=fmt_str))
 
     logger.handlers.append(StdH(level=log_stderr_level,
