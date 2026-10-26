@@ -346,7 +346,9 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
         if self.server_testing:
             response = hx2dome_pb2.IsComplete(return_code=0, is_complete=True)
         else:
-            is_dome_moving = self.dome.dome_in_motion
+            # a held long-way goto (CW-only mode) is not complete either
+            is_dome_moving = (self.dome.dome_in_motion
+                              or self.dome.long_way_pending)
             # if dome is not moving lets just consider the command complete
             # TODO: better method of determine command completion
             is_complete = not is_dome_moving
@@ -530,6 +532,68 @@ class HX2DomeServer(hx2dome_pb2_grpc.HX2DomeServicer):
                  f' return code={response.return_code}\n')
             )
         return response
+
+    def dapiSetRotationPolicy(self, request, context):
+        """RPC to set which way the dome may rotate (not part of the X2 API).
+
+        Called by the observatory automation, not by TheSkyX. The policy is
+        held in memory only: a server restart reverts to the config file.
+
+        Parameters
+        ----------
+        request : RotationPolicy
+            Incoming rpc request with the policy to apply.
+        context : Dunno
+            GRPC magic thingy.
+
+        Returns
+        -------
+        ReturnCode
+            return_code 0 when applied, 1 if the dome is moving (retry
+            later), 2 if the policy is invalid (see error_message).
+
+        """
+        self.logger.notice(
+            (f'Receiving: SetRotationPolicy '
+             f'direction={request.allowed_direction}, '
+             f'max_reverse={request.max_reverse_degrees:.1f}, '
+             f'settle={request.long_way_settle_seconds:.0f}s, '
+             f'tolerance={request.long_way_settle_tolerance:.1f}')
+        )
+        if self.server_testing:
+            return hx2dome_pb2.ReturnCode(return_code=0)
+        try:
+            return_code = self.dome.set_rotation_policy(
+                request.allowed_direction,
+                request.max_reverse_degrees,
+                request.long_way_settle_seconds,
+                request.long_way_settle_tolerance)
+            response = hx2dome_pb2.ReturnCode(return_code=return_code)
+        except ValueError as e:
+            response = hx2dome_pb2.ReturnCode(return_code=2, error_message=str(e))
+        self.logger.notice(
+            f'Sending: SetRotationPolicy complete, return code={response.return_code}')
+        return response
+
+    def dapiGetRotationPolicy(self, request, context):
+        """RPC to read the rotation policy in effect (not part of the X2 API).
+
+        Parameters
+        ----------
+        request : Empty
+            Incoming rpc request, a message of type 'Empty'.
+        context : Dunno
+            GRPC magic thingy.
+
+        Returns
+        -------
+        RotationPolicy
+            The policy in effect, with return_code 0.
+
+        """
+        if self.server_testing:
+            return hx2dome_pb2.RotationPolicy(return_code=0, allowed_direction='both')
+        return hx2dome_pb2.RotationPolicy(return_code=0, **self.dome.rotation_policy)
 
 
 def serve(home_az, logger, **kwargs):

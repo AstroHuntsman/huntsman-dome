@@ -109,6 +109,16 @@ class HX2DomeStub(object):
                 request_serializer=hx2dome__pb2.AzEl.SerializeToString,
                 response_deserializer=hx2dome__pb2.ReturnCode.FromString,
                 _registered_method=True)
+        self.dapiSetRotationPolicy = channel.unary_unary(
+                '/hx2dome.HX2Dome/dapiSetRotationPolicy',
+                request_serializer=hx2dome__pb2.RotationPolicy.SerializeToString,
+                response_deserializer=hx2dome__pb2.ReturnCode.FromString,
+                _registered_method=True)
+        self.dapiGetRotationPolicy = channel.unary_unary(
+                '/hx2dome.HX2Dome/dapiGetRotationPolicy',
+                request_serializer=hx2dome__pb2.Empty.SerializeToString,
+                response_deserializer=hx2dome__pb2.RotationPolicy.FromString,
+                _registered_method=True)
         self.deviceInfoNameShort = channel.unary_unary(
                 '/hx2dome.HX2Dome/deviceInfoNameShort',
                 request_serializer=hx2dome__pb2.Empty.SerializeToString,
@@ -230,6 +240,20 @@ class HX2DomeServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def dapiSetRotationPolicy(self, request, context):
+        """Rotation direction policy (not part of the X2 interface; set by the
+        observatory automation, never called by the TheSkyX driver)
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def dapiGetRotationPolicy(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def deviceInfoNameShort(self, request, context):
         """Hardware Info Interface
         """
@@ -338,6 +362,16 @@ def add_HX2DomeServicer_to_server(servicer, server):
                     servicer.dapiSync,
                     request_deserializer=hx2dome__pb2.AzEl.FromString,
                     response_serializer=hx2dome__pb2.ReturnCode.SerializeToString,
+            ),
+            'dapiSetRotationPolicy': grpc.unary_unary_rpc_method_handler(
+                    servicer.dapiSetRotationPolicy,
+                    request_deserializer=hx2dome__pb2.RotationPolicy.FromString,
+                    response_serializer=hx2dome__pb2.ReturnCode.SerializeToString,
+            ),
+            'dapiGetRotationPolicy': grpc.unary_unary_rpc_method_handler(
+                    servicer.dapiGetRotationPolicy,
+                    request_deserializer=hx2dome__pb2.Empty.FromString,
+                    response_serializer=hx2dome__pb2.RotationPolicy.SerializeToString,
             ),
             'deviceInfoNameShort': grpc.unary_unary_rpc_method_handler(
                     servicer.deviceInfoNameShort,
@@ -770,6 +804,60 @@ class HX2Dome(object):
             '/hx2dome.HX2Dome/dapiSync',
             hx2dome__pb2.AzEl.SerializeToString,
             hx2dome__pb2.ReturnCode.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def dapiSetRotationPolicy(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hx2dome.HX2Dome/dapiSetRotationPolicy',
+            hx2dome__pb2.RotationPolicy.SerializeToString,
+            hx2dome__pb2.ReturnCode.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def dapiGetRotationPolicy(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hx2dome.HX2Dome/dapiGetRotationPolicy',
+            hx2dome__pb2.Empty.SerializeToString,
+            hx2dome__pb2.RotationPolicy.FromString,
             options,
             channel_credentials,
             insecure,

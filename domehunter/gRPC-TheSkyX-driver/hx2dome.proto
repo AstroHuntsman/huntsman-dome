@@ -23,6 +23,10 @@ service HX2Dome {
   rpc dapiIsUnparkComplete (Empty) returns (IsComplete) {};
   rpc dapiIsFindHomeComplete (Empty) returns (IsComplete) {};
   rpc dapiSync (AzEl) returns (ReturnCode) {};
+  // Rotation direction policy (not part of the X2 interface; set by the
+  // observatory automation, never called by the TheSkyX driver)
+  rpc dapiSetRotationPolicy (RotationPolicy) returns (ReturnCode) {};
+  rpc dapiGetRotationPolicy (Empty) returns (RotationPolicy) {};
   // Hardware Info Interface
   rpc deviceInfoNameShort (Empty) returns (BasicString) {};
   rpc deviceInfoNameLong (Empty) returns (BasicString) {};
@@ -55,6 +59,16 @@ message IsComplete {
 message BasicString {
   // X2 had a class specifically for string output, BasicStringInferface
   string basic_string = 1;
+}
+
+message RotationPolicy {
+  // Which way the dome may rotate to reach a goto azimuth. return_code is
+  // only set by the server, in dapiGetRotationPolicy replies.
+  int32 return_code = 1;
+  string allowed_direction = 2;      // "both" or "CW"
+  double max_reverse_degrees = 3;    // CW only: largest CCW move still allowed
+  double long_way_settle_seconds = 4;
+  double long_way_settle_tolerance = 5;
 }
 
 message Empty {
