@@ -252,3 +252,20 @@ def test_config_file_defaults_to_cw():
     policy = dome.rotation_policy
     assert policy['allowed_direction'] == 'CW'
     assert all(type(v) is float for k, v in policy.items() if k != 'allowed_direction')
+
+
+def test_config_allows_slaving_sized_reverse():
+    """With the shipped config, a slaving correction like 320 -> 305 goes CCW directly.
+
+    Seen on 2026-10-27: with max_reverse 5, this -15 deg request became a
+    345 deg clockwise lap.
+    """
+    from domehunter.dome_control import load_dome_config
+
+    config = load_dome_config(os.path.join(SERVER_DIR, 'dome_controller_config.yml'))
+    assert config['max_reverse_degrees'] == 25.0
+    dome = make_dome(allowed_direction='CW', max_reverse_degrees=config['max_reverse_degrees'])
+    dome._degrees_per_tick = Angle(0.1 * u.deg)
+    set_az(dome, 320)
+    assert dome._plan_move(Longitude(305 * u.deg))[:1] == (Direction.CCW,)
+    assert dome._plan_move(Longitude(290 * u.deg))[2] is True   # -30: still the long way

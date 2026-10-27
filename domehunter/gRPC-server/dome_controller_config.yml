@@ -38,12 +38,14 @@ led_brightness: 0x01
 # allowed_direction: 'both' takes the shortest route. 'CW' only rotates
 # clockwise seen from above (azimuth increasing: moving right as seen from
 # inside the dome, left from outside; checked on the dome webcam 2026-10-27),
-# apart from CCW moves up to max_reverse_degrees. Larger CCW requests go the
+# apart from CCW moves up to max_reverse_degrees (25: TheSkyX's slaving makes
+# CCW corrections of 10-20 deg during mount slews, e.g. 320 -> 305, which a
+# smaller allowance turns into near-full laps). Larger CCW requests go the
 # long way round, CW, after being held for long_way_settle_seconds (dropped if
 # a later request no longer needs it). A full rotation takes ~165 s at ~2.2 deg/s.
 # SensorKit can override this at run time (huntsman_dome.rotation_policy in the
 # site YAML, via dapiSetRotationPolicy); a restart comes back to this file.
 allowed_direction: 'CW'
-max_reverse_degrees: 5.0
+max_reverse_degrees: 25.0
 long_way_settle_seconds: 60
 long_way_settle_tolerance: 5.0
