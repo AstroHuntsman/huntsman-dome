@@ -108,6 +108,10 @@ class Dome(object):
                  direction_relay_pin_number=19,
                  bounce_time=0.001,
                  led_brightness=0x10,
+                 allowed_direction='both',
+                 max_reverse_degrees=0.0,
+                 long_way_settle_seconds=0.0,
+                 long_way_settle_tolerance=5.0,
                  *args,
                  **kwargs):
         """
@@ -181,6 +185,23 @@ class Dome(object):
         bounce_time : float
             A buffer period (in seconds) where home/encoder input will ignore
             additional (de)activation.
+        allowed_direction : str
+            'both' (default) takes the shortest route on every goto. 'CW'
+            restricts rotation to clockwise (azimuth increasing, seen from
+            above), apart from reverse moves of up to `max_reverse_degrees`.
+        max_reverse_degrees : float
+            With allowed_direction='CW', the largest CCW move permitted. Any
+            larger CCW request goes the long way round, clockwise.
+        long_way_settle_seconds : float
+            With allowed_direction='CW', a goto that would have to go the long
+            way round is held for this many seconds before it starts, and
+            dropped if a later request no longer needs the long way. This
+            keeps transient requests, e.g. while TheSkyX slaves the dome
+            through a meridian flip, from triggering near-full rotations.
+            The goto reports incomplete while held. 0 executes immediately.
+        long_way_settle_tolerance : float
+            A new long-way request further than this (degrees) from the held
+            one restarts the hold.
 
         """
         self.logger = set_up_logger(__name__,
@@ -230,6 +251,15 @@ class Dome(object):
         self._az_position_tolerance = Angle(az_position_tolerance * u.deg)
         self.home_az = Longitude(home_azimuth * u.deg)
         self.park_az = Longitude(park_azimuth * u.deg)
+        # [target azimuth, monotonic time hold started] of a held long-way
+        # goto, or None; guarded by _pending_lock
+        self._pending_long_way = None
+        self._pending_lock = threading.Lock()
+        # rotation direction restriction, see goto_az(); can be changed later
+        # over gRPC with set_rotation_policy()
+        self.set_rotation_policy(allowed_direction, max_reverse_degrees,
+                                 long_way_settle_seconds,
+                                 long_way_settle_tolerance, force=True)
         # need something to let us know when dome is calibrating so home sensor
         # activation doesnt zero encoder counts
         self._calibrating = False
@@ -371,6 +401,11 @@ class Dome(object):
         return dome_motion
 
     @property
+    def long_way_pending(self):
+        """Return True if a long-way goto is being held, see goto_az()."""
+        return self._pending_long_way is not None
+
+    @property
     def movement_thread_active(self):
         """Return True if a movement thread is running"""
         self.logger.debug('A dome movement thread is runnng.')
@@ -422,6 +457,7 @@ class Dome(object):
         # one way might be cut power to the automationHAT so the motor relays
         # will receive no voltage even if the relay is in the open position?
         self.logger.warning('Aborting dome movement.')
+        self._clear_pending_long_way()
         # set the abort event thread flag
         self._abort_event.set()
         # wait for threads to abort
@@ -439,7 +475,7 @@ class Dome(object):
 
         self.logger.info('Parking Dome.')
         # note goto_az requires a int/float not a Longitude
-        self.goto_az(self.park_az.value)
+        self.goto_az(self.park_az.value, settle=False)
         while self.movement_thread_active:
             # wait for find_home() to finish
             self.logger.info(
@@ -470,7 +506,72 @@ class Dome(object):
         # TheSkyX takes 0 as success and 1 as error
         return int(self.is_parked)
 
-    def goto_az(self, az):
+    @property
+    def rotation_policy(self):
+        """Return the rotation policy in effect, as a dict of plain values."""
+        return {
+            'allowed_direction': 'CW' if self.cw_only else 'both',
+            'max_reverse_degrees': float(self.max_reverse.degree),
+            'long_way_settle_seconds': float(self.long_way_settle_seconds),
+            'long_way_settle_tolerance': float(self.long_way_settle_tolerance.degree),
+        }
+
+    def set_rotation_policy(self, allowed_direction='both',
+                            max_reverse_degrees=0.0,
+                            long_way_settle_seconds=0.0,
+                            long_way_settle_tolerance=5.0, force=False):
+        """
+        Set which way the dome may rotate, see goto_az().
+
+        Parameters
+        ----------
+        allowed_direction : str
+            'both' takes the shortest route; 'CW' rotates clockwise only, apart
+            from CCW moves up to max_reverse_degrees.
+        max_reverse_degrees, long_way_settle_seconds, long_way_settle_tolerance
+            As for __init__.
+        force : bool
+            Apply even if the dome is moving. Only used at initialisation.
+
+        Returns
+        -------
+        int
+            0 on success, 1 if the dome is moving or holding a long-way move
+            (the policy is left unchanged; try again later).
+
+        Raises
+        ------
+        ValueError
+            If a value is invalid.
+
+        """
+        direction = str(allowed_direction).lower()
+        if direction not in ('both', 'cw'):
+            raise ValueError(
+                f"allowed_direction must be 'both' or 'CW', got {allowed_direction!r}")
+        for name, value in (('max_reverse_degrees', max_reverse_degrees),
+                            ('long_way_settle_seconds', long_way_settle_seconds),
+                            ('long_way_settle_tolerance', long_way_settle_tolerance)):
+            if value < 0:
+                raise ValueError(f'{name} must not be negative, got {value}')
+        if max_reverse_degrees >= 180:
+            raise ValueError(
+                f'max_reverse_degrees must be under 180, got {max_reverse_degrees}')
+        if not force and (self.movement_thread_active or self.long_way_pending):
+            self.logger.warning('Rotation policy not changed: dome is moving.')
+            return 1
+
+        self.cw_only = direction == 'cw'
+        self.max_reverse = Angle(max_reverse_degrees * u.deg)
+        self.long_way_settle_seconds = long_way_settle_seconds
+        self.long_way_settle_tolerance = Angle(long_way_settle_tolerance * u.deg)
+        self.logger.notice(
+            (f'Rotation: allowed_direction={allowed_direction}, '
+             f'max_reverse={self.max_reverse:.2f}, '
+             f'long_way_settle={long_way_settle_seconds}s'))
+        return 0
+
+    def goto_az(self, az, settle=True):
         """
         Send Dome to a requested Azimuth position.
 
@@ -478,6 +579,9 @@ class Dome(object):
         ----------
         az : float
             Desired dome azimuth position in degrees.
+        settle : bool
+            If False, never defer a long-way move (see
+            `long_way_settle_seconds`). Used for explicit commands like park.
 
         """
         if self.dome_az is None:
@@ -492,15 +596,20 @@ class Dome(object):
         target_az = Longitude(az * u.deg)
         self.logger.notice(f'Go to target azimuth [{target_az:.2f}].')
 
-        # calculate delta_az, wrapping at 180 to ensure we take shortest route
-        delta_az = (target_az - self.dome_az).wrap_at(180 * u.degree)
-        self.logger.info(f'Delta azimuth [{delta_az:.2f}].')
+        direction, distance, long_way = self._plan_move(target_az)
+        self.logger.info(
+            f'Planned move [{direction.name} {distance:.2f}], long way: {long_way}.')
+        if direction == Direction.NONE:
+            self.logger.info('Already within tolerance of target azimuth.')
+            self._clear_pending_long_way()
+            return
+        if long_way and settle and self.long_way_settle_seconds > 0:
+            self._hold_long_way(target_az)
+            return
+        self._clear_pending_long_way()
 
         self._move_event.set()
-        if delta_az > 0:
-            self._rotate_dome(Direction.CW)
-        else:
-            self._rotate_dome(Direction.CCW)
+        self._rotate_dome(direction)
         # wait until encoder count matches desired delta az
         goingto_az = threading.Thread(target=self._thread_condition,
                                       args=(self._goto_az_complete,
@@ -571,11 +680,12 @@ class Dome(object):
         self.logger.notice('Finding home.')
         self._unhomed = True
 
-        # If already on the home sensor, nudge off it first
+        # If already on the home sensor, nudge off it first. CW-only domes
+        # nudge clockwise, which makes the CW homing below a full rotation.
         if self._home_sensor.is_active:
             self.logger.info('Already on home sensor, moving off...')
             self._move_event.set()
-            self._rotate_dome(Direction.CCW)
+            self._rotate_dome(Direction.CW if self.cw_only else Direction.CCW)
             # Wait until we clear the sensor or timeout after 15s
             nudge_start = time.monotonic()
             while self._home_sensor.is_active:
@@ -683,19 +793,100 @@ class Dome(object):
     def _goto_az_complete(self, target_az):
         """Determines if current azimuth is within tolerance of target azimuth.
 
+        While moving, the distance left is measured in the direction of
+        travel, so moves longer than 180 degrees (long way round) complete
+        correctly, as does overshooting the target by up to the tolerance.
+
         Returns
         -------
         bool
             Returns True if self.dome_az is within tolerance of target azimuth.
 
         """
-        raw_delta_az = (target_az - self.dome_az).wrap_at('180d')
-        delta_az = self.current_direction * raw_delta_az
+        tolerance = self.az_position_tolerance
+        if self.current_direction == Direction.NONE:
+            # not moving, e.g. park checking where the dome stopped; allow
+            # for coasting past the target
+            delta_az = abs((target_az - self.dome_az).wrap_at('180d'))
+            return delta_az <= 2 * tolerance
+        remaining = self._remaining_az(target_az, self.current_direction)
         self.logger.debug(
-            (f'Delta_az is {delta_az:.2f}, '
-             f'tolerance window is {self.az_position_tolerance:.2f}.')
+            (f'Remaining {self.current_direction.name} is {remaining:.2f}, '
+             f'tolerance window is {tolerance:.2f}.')
         )
-        return delta_az <= self.az_position_tolerance
+        return remaining <= tolerance or remaining >= Angle(360 * u.deg) - tolerance
+
+    def _remaining_az(self, target_az, direction):
+        """Angle [0, 360) still to travel to target_az, rotating in direction."""
+        if direction == Direction.CW:
+            return Angle((target_az - self.dome_az).wrap_at('360d'))
+        return Angle((self.dome_az - target_az).wrap_at('360d'))
+
+    def _plan_move(self, target_az):
+        """Choose rotation direction and distance for a goto.
+
+        Returns
+        -------
+        tuple
+            (Direction, distance Angle, long_way bool). Direction.NONE means
+            the dome is already within tolerance. long_way is True when the
+            CW-only restriction forces a move longer than the shortest route.
+
+        """
+        shortest = Angle((target_az - self.dome_az).wrap_at('180d'))
+        if abs(shortest) <= self.az_position_tolerance:
+            return Direction.NONE, abs(shortest), False
+        if shortest > 0:
+            return Direction.CW, shortest, False
+        if not self.cw_only or -shortest <= self.max_reverse:
+            return Direction.CCW, -shortest, False
+        return Direction.CW, self._remaining_az(target_az, Direction.CW), True
+
+    def _hold_long_way(self, target_az):
+        """Hold a long-way goto for `long_way_settle_seconds` before moving.
+
+        A new request close to the held target updates it without restarting
+        the hold; one further than `long_way_settle_tolerance` restarts it.
+        A watcher thread starts the move when the hold expires.
+        """
+        now = time.monotonic()
+        with self._pending_lock:
+            pending = self._pending_long_way
+            if pending is None:
+                self._pending_long_way = [target_az, now]
+                threading.Thread(target=self._long_way_watcher, daemon=True).start()
+                self.logger.notice(
+                    (f'Long-way move to [{target_az:.2f}] held for '
+                     f'{self.long_way_settle_seconds}s.'))
+            elif (abs((target_az - pending[0]).wrap_at('180d'))
+                    > self.long_way_settle_tolerance):
+                self._pending_long_way = [target_az, now]
+                self.logger.notice(
+                    f'Long-way target moved to [{target_az:.2f}], restarting hold.')
+            else:
+                pending[0] = target_az
+
+    def _long_way_watcher(self):
+        """Start the held long-way goto once its hold has expired."""
+        while True:
+            time.sleep(0.2)
+            with self._pending_lock:
+                pending = self._pending_long_way
+                if pending is None:
+                    return
+                if time.monotonic() - pending[1] < self.long_way_settle_seconds:
+                    continue
+                target_az = pending[0]
+            self.logger.notice(
+                f'Hold expired, going the long way round to [{target_az:.2f}].')
+            self.goto_az(target_az.degree, settle=False)
+            return
+
+    def _clear_pending_long_way(self):
+        with self._pending_lock:
+            if self._pending_long_way is not None:
+                self.logger.notice('Held long-way move cancelled.')
+            self._pending_long_way = None
 
     def _find_home_complete(self):
         """Return True if the dome is at home."""

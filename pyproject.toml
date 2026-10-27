@@ -47,7 +47,7 @@ Repository = "https://github.com/AstroHuntsman/huntsman-dome"
 include = ["domehunter*"]
 
 [tool.setuptools.package-data]
-domehunter = ["data/*", "gRPC-server/*.yml", "gRPC-server/*.proto"]
+domehunter = ["data/*", "gRPC-server/*.yml", "gRPC-server/*.proto", "gRPC-server/hx2dome_pb2*.py"]
 
 [tool.pytest.ini_options]
 minversion = "3.0"
