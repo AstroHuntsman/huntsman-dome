@@ -229,3 +229,12 @@ def test_rpc_existing_calls_unaffected(rpc):
     pb, stub, _ = rpc
     assert stub.dapiGetAzEl(pb.Empty(), timeout=5).return_code in (0, 1)
     assert stub.dapiIsGotoComplete(pb.Empty(), timeout=5).is_complete
+
+
+def test_stubs_importable_from_package():
+    """Installed domehunter exposes the generated stubs (for SensorKit's client)."""
+    from domehunter.hx2dome import pb2, pb2_grpc
+
+    policy = pb2.RotationPolicy(allowed_direction='CW', max_reverse_degrees=5)
+    assert pb2.RotationPolicy.FromString(policy.SerializeToString()) == policy
+    assert hasattr(pb2_grpc, 'HX2DomeStub')
