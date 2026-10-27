@@ -238,3 +238,17 @@ def test_stubs_importable_from_package():
     policy = pb2.RotationPolicy(allowed_direction='CW', max_reverse_degrees=5)
     assert pb2.RotationPolicy.FromString(policy.SerializeToString()) == policy
     assert hasattr(pb2_grpc, 'HX2DomeStub')
+
+
+def test_config_file_defaults_to_cw():
+    """The shipped config makes clockwise-only the default (CCW damages the dome)."""
+    from domehunter.dome_control import load_dome_config
+
+    config = load_dome_config(os.path.join(SERVER_DIR, 'dome_controller_config.yml'))
+    assert config['allowed_direction'] == 'CW'
+    dome = make_dome(**{k: config[k] for k in (
+        'allowed_direction', 'max_reverse_degrees',
+        'long_way_settle_seconds', 'long_way_settle_tolerance')})
+    policy = dome.rotation_policy
+    assert policy['allowed_direction'] == 'CW'
+    assert all(type(v) is float for k, v in policy.items() if k != 'allowed_direction')

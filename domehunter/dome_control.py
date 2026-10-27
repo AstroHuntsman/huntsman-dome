@@ -511,9 +511,9 @@ class Dome(object):
         """Return the rotation policy in effect, as a dict of plain values."""
         return {
             'allowed_direction': 'CW' if self.cw_only else 'both',
-            'max_reverse_degrees': self.max_reverse.degree,
+            'max_reverse_degrees': float(self.max_reverse.degree),
             'long_way_settle_seconds': float(self.long_way_settle_seconds),
-            'long_way_settle_tolerance': self.long_way_settle_tolerance.degree,
+            'long_way_settle_tolerance': float(self.long_way_settle_tolerance.degree),
         }
 
     def set_rotation_policy(self, allowed_direction='both',
